@@ -1,0 +1,31 @@
+```scss
+/* Terminal retro style */
+body {
+  background-color: #002b36; /* Solarized dark */
+  color: #839496;            /* Base text */
+  font-family: "JetBrains Mono", "Courier New", monospace;
+  max-width: 80ch;
+  margin: 0 auto;
+  padding: 2rem;
+  line-height: 1.4;
+}
+
+pre, code, kbd {
+  font-family: "JetBrains Mono", "Courier New", monospace;
+  background: transparent;
+  color: #2aa198; /* cyan/green terminal */
+  white-space: pre-wrap;
+}
+
+pre .bash {
+  color: #b58900; /* amber for commands */
+}
+
+a {
+  color: #859900; /* green links */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
