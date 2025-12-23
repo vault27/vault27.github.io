@@ -1,0 +1,9 @@
+title: Vault 27
+description: Secure Network Engineering Notes
+theme: jekyll-theme-console
+
+baseurl: ""
+url: "https://vault27.github.io"
+
+style: dark
+listen_for_clients_preferred_style: false
