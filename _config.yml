@@ -1,6 +1,8 @@
 title: Vault 27
 description: Secure Network Engineering Notes
-theme: jekyll-theme-console
+remote_theme: b2a3e8/jekyll-theme-console
+plugins:
+  - jekyll-remote-theme
 
 baseurl: ""
 url: "https://vault27.github.io"
