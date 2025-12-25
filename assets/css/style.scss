@@ -1,40 +1,46 @@
 ---
 ---
-
-@import "{{ site.theme }}";
 /* Vault 27 – terminal overrides */
 
+/* Force terminal background everywhere */
+html,
 body {
-  background-color: #002b36; /* Solarized dark */
-  color: #839496;
-  font-family: "JetBrains Mono", "Courier New", monospace;
+  background-color: #002b36 !important; /* Solarized dark */
+  color: #839496 !important;
+  font-family: "JetBrains Mono", "Courier New", monospace !important;
   line-height: 1.4;
 }
 
-/* Force 80-column terminal width */
-.container {
-  max-width: 80ch;
+/* Theme content wrapper (this is the key selector) */
+.container,
+.content {
+  max-width: 80ch !important;
+  margin: 0 auto;
 }
 
-/* Code blocks */
-pre, code, kbd {
-  font-family: "JetBrains Mono", "Courier New", monospace;
-  background: transparent;
-  color: #2aa198; /* cyan/green */
+/* Code blocks – Cisco/Junos terminal feel */
+pre,
+code,
+kbd {
+  font-family: "JetBrains Mono", "Courier New", monospace !important;
+  background-color: transparent !important;
+  color: #2aa198 !important; /* cyan/green */
 }
 
 /* Amber commands */
 .language-bash,
-.language-shell {
-  color: #b58900;
+.language-shell,
+.language-console {
+  color: #b58900 !important;
 }
 
 /* Links */
 a {
-  color: #859900;
+  color: #859900 !important;
   text-decoration: none;
 }
 
 a:hover {
   text-decoration: underline;
 }
+
