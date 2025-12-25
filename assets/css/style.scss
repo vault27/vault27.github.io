@@ -1,0 +1,39 @@
+---
+---
+
+/* Vault 27 – terminal overrides */
+
+body {
+  background-color: #002b36; /* Solarized dark */
+  color: #839496;
+  font-family: "JetBrains Mono", "Courier New", monospace;
+  line-height: 1.4;
+}
+
+/* Force 80-column terminal width */
+.container {
+  max-width: 80ch;
+}
+
+/* Code blocks */
+pre, code, kbd {
+  font-family: "JetBrains Mono", "Courier New", monospace;
+  background: transparent;
+  color: #2aa198; /* cyan/green */
+}
+
+/* Amber commands */
+.language-bash,
+.language-shell {
+  color: #b58900;
+}
+
+/* Links */
+a {
+  color: #859900;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
