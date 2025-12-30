@@ -11,3 +11,12 @@ body {
   line-height: 1.6;
   font-size: 16px;
 }
+
+h1, h2, h3 {
+  font-weight: 500;
+}
+
+code, pre {
+  font-family: inherit;
+  background: #f6f8fa;
+}
