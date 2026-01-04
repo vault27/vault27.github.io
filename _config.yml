@@ -1,3 +1,12 @@
 title: [The title of your site]
 description: [A short description of your site's purpose]
 show_downloads: false
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    block:
+      line_numbers: false
