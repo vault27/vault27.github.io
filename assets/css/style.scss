@@ -5,6 +5,6 @@ $code-font-family: "IBM Plex Mono", monospace;
 @import "{{ site.theme }}";
 
 // Optional: Force override if the variable doesn't catch everything
-body {
+.markdown-body {
   font-family: $base-font-family !important;
 }
