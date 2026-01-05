@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 
-What is it?
+**What is it?**
 
 - IPsec is not a single protocol, but a framework for securing IP traffic
 - It is primarily designed to protect unicast traffic in point-to-point VPNs
@@ -18,7 +18,7 @@ What is it?
     - AH(obsolete) - data plane
     - IKE v1 or v2 - control plane
 
-Why it was invented?
+**Why it was invented?**
 
 - To add security to IP networking itself
 - Original Internet had no built-in security
@@ -27,13 +27,13 @@ Why it was invented?
 - Security at higher layers was not enough: Every application had to implement its own security, traffic like routing, management, or custom protocols remained exposed
 - IPsec enabled: Site-to-site VPNs, Remote-access VPNs, Secure inter-datacenter links
 
-Who and when invented it?
+**Who and when invented it?**
 
 - Internet Engineering Task Force (IETF) in 1995
 - 1996–1998 - BSD Linux Implementations
 - Late 1990s – early 2000s: Cisco, Checkpoint, Juniper
 
-IPSec goals
+**IPSec goals**
 
 - Mutual authentication of peers
 - Secure key establishment
@@ -46,11 +46,13 @@ IPSec goals
 - Traffic protection policy enforcement - Define which traffic is protected and how
 - Secure transport over untrusted networks
 
+**Terms**  
+  
 IPSec has several new terms, which are used everywhere in protocol descriptions. These terms are:
 
 - SPI
 - Transform set
-- SA - Security Assosiation
+- SA
 
 Below is their meaning and description
 
@@ -67,7 +69,7 @@ Below is their meaning and description
 - `Outbound SPI` - The SPI my router inserts into ESP/AH/IKE  I send
 - `Inbound SPI` - The SPI my router expects to see in ESP/IKE/AH packets I receive
 
-Phase 1 and Phase 2 SPIs
+**Phase 1 and Phase 2 SPIs**
 
 - Phase 1 tunnel SA is uniquely identified by 2 SPIs in router's logical object: local SPI and remote SPI
 - Phase 2 tunnel SA is uniquely identified by `1 SPI`, but at the same time there are `2 SAs` in routers memory for each Phase 2 tunnel: `Inbound SA and Outbound SA`
@@ -96,18 +98,20 @@ Phase 1 and Phase 2 SPIs
 - The `set of transforms` inside one proposal defines the full Phase 1 policy - `transform set`
 - Example on how SA looks like on the wire during phase 1 IKE v1::
 
-```
-Logical structure:
+**Logical structure**
 
+```
 SA payload
  └── Proposal
      ├── Transform 1: ENCR  → AES-CBC
      ├── Transform 2: HASH  → SHA1
      ├── Transform 3: AUTH  → PSK
      └── Transform 4: GROUP → MODP-1024
+```
 
-Packet capture:
+**Packet capture**
 
+```
 Internet Security Association and Key Management Protocol (ISAKMP)
     Initiator SPI:  a1b2c3d4e5f60708
     Responder SPI:  0000000000000000
@@ -184,7 +188,10 @@ IKE SA
         - Peer authenticated successfully (yes/no)
         - Identity matched PSK or certificate
     - Relationship to Phase 2
-- Example of SA phase 1 IKEv1 as a logical object on router via Cisco command `show crypto isakmp sa detail` - It displays IKEv1 Phase 1 Security Associations currently known to the router
+
+**Example of SA phase 1 IKEv1 as a logical object**  
+
+On router via Cisco command `show crypto isakmp sa detail` - It displays IKEv1 Phase 1 Security Associations currently known to the router
 
 ```
 IPv4 Crypto ISAKMP SA
@@ -210,7 +217,9 @@ dst             src             state          conn-id status
        Remote ID: IPv4 address 192.0.2.2
 ```
 
-- For IKEv2 command is a little bit different: `show crypto ikev2 sa detail`
+**IKEv1 Example**  
+
+For IKEv2 command is a little bit different: `show crypto ikev2 sa detail`
 
 ```
 IKEv2 SAs:
@@ -257,7 +266,7 @@ Session-id: 3, Status: UP-ACTIVE
 - `Each SA has its own SPI` - Inbound SA has a SPI of remote peer, what it expects to see in an incoming packet - Outbound SPI has an SPI of local router and is used when sending packets to remote router
 - Any time direction, keying material, protocol, or traffic selectors differ → a separate SA is required
 
-Phase 2 — `two SA objects` 
+**Phase 2 — two SA objects** 
 
 ```
 IPsec SA (outbound)
@@ -316,7 +325,8 @@ IPsec SA (inbound)
 - It is not used very often now, because mostly route based IPSec is uased instead of Policy based
 - They are sent separatly outside the SA
 - Their goal is to specify which traffic should be sent to the IPSec tunnel in Policy based IPSec implementations
-- Example of logic:
+
+**Example of logic**
 
 ```
 Node A sends 192.168.1.0/255.255.255.0 TCP Any port > 192.168.2.2/255.255.255.255 TCP 443 port
@@ -327,7 +337,7 @@ This configuration allows traffic from 192.168.1.0/24 to 192.168.2.2 port 443
 - Some vendors allow “any-to-any” traffic without strict traffic selectors, meaning the SA could match all traffic between the peers’ IPs
 - For route based VPN TS are set to 0.0.0.0 - which means "any traffic is allowed"
 
-Example of traffic selectors in IPSec SA for Cisco Router
+**Example of traffic selectors in IPSec SA for Cisco Router**
 
 ```
 Router# show crypto ipsec sa
@@ -413,7 +423,7 @@ interface: GigabitEthernet0/0
 
 ### 6.2 Phase 1
 
-Concepts
+**Concepts**
 
 - During traffic capture you cannot see Phase 2 negotiation, only Phase 1 as ISAKMP protocol, everything else is encrypted
 - Phase 1 SA is called ISAKMP SA or IKE SA
@@ -425,7 +435,7 @@ Concepts
 - These SPIs identify the IKE SA
 - IKE SA is bidirectional
 
-Negotiations - The following crypto parametres are negotiated during Phase 1
+**Negotiations - The following crypto parametres are negotiated during Phase 1**
 
 - Hashing - md5 or sha - used inside HMAC for authentication and integrity of every IKE packet
 - Authentication - Preshared Keys or certificates
@@ -435,7 +445,7 @@ Negotiations - The following crypto parametres are negotiated during Phase 1
    
 To easy remember this we can use first letters of these parametres: `HAGEL`
 
-IKE Phase 1 can be established via 
+**IKE Phase 1 can be established via**
 
 - main mode(6 messages)  
 - aggressive mode(3 messages) 
@@ -473,19 +483,20 @@ forces a new Diffie-Hellman exchange when the tunnel starts and whenever the Pha
 a new key to be generated each time. This exchange ensures that the keys created in Phase 2 are unrelated to
 the Phase 1 keys or any other keys generated automatically in Phase 2
 - PFS does not mean “ephemeral DH” in the modern TLS sense
-- Cisco IOS example:
+
+**Cisco IOS example**
 
 ```
 crypto map VPN 10 ipsec-isakmp
  set pfs group14
 ```
 
-- Phase 2 (Quick Mode) packets are sent inside that encrypted IKE SA
+- Phase 2 (Quick Mode) packets are sent inside the encrypted IKE SA
 - In your packet capture you will still see UDP 500 (or UDP 4500 if NAT-T) packets
 - But their payloads are encrypted — they look like random binary blobs
 - You can no longer see SA proposals, proxy-IDs, algorithms, etc
 
-Phase 2 has 3 packets only:
+**Phase 2 has 3 packets only**
 
 ```
 Initiator → Responder : SA, Nonce, traffic selectors, SPI, key exchange - optional
@@ -496,7 +507,7 @@ Initiator → Responder : HASH (ack)
 - No authentication happens during Phase 2
 - Responder does not send Traffic Selectors, it just agrees or declines Traffic Selectors from initiator
 
-Example of first packet
+**Example of first packet**
 
 ```
 ISAKMP Header (HDR*)
@@ -556,7 +567,7 @@ Encrypted Payloads (inside IKE SA):
  └─ Vendor ID (if implementation-specific)
 ```
 
-Negotiated options list - what is negotiated during Phase 2
+**Negotiated options list - what is negotiated during Phase 2**
 
 - Protocol: ESP or AH
 - Mode: Tunnel or Transport
@@ -568,7 +579,7 @@ Negotiated options list - what is negotiated during Phase 2
 - Responder SPI (e.g. 0x3f2a1b4c) and Initiator SPI (e.g. 0x9a7e6c2d) — assigned by peers
 - ESN: enabled (if negotiated / supported) - ESN = Extended Sequence Numbers - ESN extends the ESP sequence number from 32 bits to 64 bits
 
-To confirm Phase 2 happened, look for:
+**To confirm Phase 2 happened, look for**
 
 - Three small encrypted IKEv1 packets right after Phase 1
 - ESP traffic starting immediately after them
