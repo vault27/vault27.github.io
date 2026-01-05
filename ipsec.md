@@ -2,10 +2,10 @@
 
 ## Table of contents
 
-- [1. Introduction](#1. Introduction)
-- [2. SPI](#2. SPI)
-- [3. SA](#3 SA)
-    - [3.1 Phase 1 - IKE SA](#3.1 Phase 1 - IKE SA)
+- [1. Introduction](#1.-Introduction)
+- [2. SPI](#2.-SPI)
+- [3. SA](#3-SA)
+    - [3.1 Phase 1 - IKE SA](#3.1-Phase-1---IKE-SA)
 
 ## 1. Introduction
 
