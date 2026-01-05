@@ -2,10 +2,11 @@
 
 ## Table of contents
 
-- [1. Introduction](#1.-itroduction)
+- [1. Introduction](#1-introduction)
 - [2. SPI](#2-spi)
-- [3. SA](#3.-spi)
-    - [3.1 Phase 1 - IKE SA](#3.1-phase-1---ike-sa)
+- [3. SA](#3-sa)
+    - [3.1 Phase 1 - IKE SA](#31-phase-1--ike-sa)
+    - [3.2 Phase 2 - IPSec SA](#32-phase-2--ipsec-sa)
 
 ## 1. Introduction
 
