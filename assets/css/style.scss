@@ -1,10 +1,9 @@
-// Define the new font variable before importing the theme
-$base-font-family: "IBM Plex Mono", monospace;
-$code-font-family: "IBM Plex Mono", monospace;
+---
+---
 
 @import "{{ site.theme }}";
-
-// Optional: Force override if the variable doesn't catch everything
 .markdown-body {
-  font-family: $base-font-family !important;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.95rem;
+  line-height: 1.7;
 }
