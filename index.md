@@ -1,4 +1,2 @@
-# Network Engineering Notes
-
 - [About](/about.md)
-- [IPSec complete guide](/ipsec.html)
+- [IPSec Complete Guide](/ipsec.html)
