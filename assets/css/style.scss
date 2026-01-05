@@ -17,28 +17,32 @@ code.language-plaintext {
     font-weight: bold;                     /* optional, makes it pop */
     box-shadow: 0 0 2px rgba(0,0,0,0.3);  /* small shadow for contrast */
 }
-/* Code block container */
-.language-plaintext.highlighter-rouge .highlight pre,
-.language-plaintext.highlighter-rouge .highlight pre code {
-    font-family: "Fira Code", "Source Code Pro", monospace; /* nice terminal font */
-    background-color: #002b36;    /* Solarized Dark base */
-    color: #839496;               /* Solarized Light text */
+/* Full code block styling */
+.language-plaintext.highlighter-rouge .highlight pre {
+    font-family: "Fira Code", "Source Code Pro", monospace;
+    background-color: #002b36;   /* Solarized Dark */
+    color: #839496;
     padding: 14px 18px;
     border-radius: 6px;
     font-size: 0.95em;
     line-height: 1.5;
-    overflow-x: auto;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    overflow-x: auto;           /* horizontal scroll for long lines */
+    overflow-y: visible;        /* ensure vertical lines show */
+    white-space: pre;           /* preserve all spaces and indentation */
+    tab-size: 4;                /* optional: tabs width */
+    display: block;
 }
 
-/* Optional: subtle border for separation */
-.language-plaintext.highlighter-rouge .highlight pre {
-    border: 1px solid #073642;  /* slightly darker than background */
+/* Ensure <code> inside <pre> does not clip text */
+.language-plaintext.highlighter-rouge .highlight pre code {
+    display: inline-block;
+    min-width: 100%;  /* prevents clipping of lines */
+    background: none; /* remove background so outer <pre> shows */
 }
 
-/* Syntax highlighting for Rouge spans using Solarized colors */
-.language-plaintext.highlighter-rouge .highlight .k { color: #268bd2; }   /* keywords, blue */
-.language-plaintext.highlighter-rouge .highlight .c { color: #586e75; }   /* comments, gray */
-.language-plaintext.highlighter-rouge .highlight .s { color: #2aa198; }   /* strings, cyan */
-.language-plaintext.highlighter-rouge .highlight .n { color: #b58900; }   /* numbers, yellow */
-.language-plaintext.highlighter-rouge .highlight .o { color: #cb4b16; }   /* operators, orange */
+/* Optional: syntax highlighting inside code block */
+.language-plaintext.highlighter-rouge .highlight .k { color: #268bd2; }
+.language-plaintext.highlighter-rouge .highlight .c { color: #586e75; }
+.language-plaintext.highlighter-rouge .highlight .s { color: #2aa198; }
+.language-plaintext.highlighter-rouge .highlight .n { color: #b58900; }
+.language-plaintext.highlighter-rouge .highlight .o { color: #cb4b16; }
