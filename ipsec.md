@@ -61,6 +61,7 @@ IPSec has several new terms, which are used everywhere in protocol descriptions.
 - SPI
 - Transform set
 - SA
+- Traffic Selectors/Proxy IDs
 
 Below is their meaning and description
 
