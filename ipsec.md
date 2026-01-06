@@ -54,6 +54,46 @@
 - Traffic protection policy enforcement - Define which traffic is protected and how
 - Secure transport over untrusted networks
 
+High level diagram
+
+```
+IPsec Framework
+──────────────────────────────────────────────
+IKE  → Key Management
+│
+│── Components
+│   ├── Oakley       (Key exchange)
+│   ├── ISAKMP       (SA management)
+│   └── SKEME        (Key derivation)
+│
+│── Phases
+│   ├── Phase 1       (Establish IKE SA, secure channel)
+│   └── Phase 2       (Negotiate IPsec SAs for ESP/AH)
+│
+│── Transport
+│   ├── UDP 500       (IKE / ISAKMP)
+│   └── UDP 4500      (IKE NAT-T)
+│
+ESP  → Data Protection
+│
+│── Transport
+│   ├── IP Protocol 50
+│   └── UDP 4500      (ESP NAT-T)
+│
+│── Modes
+│   ├── Tunnel Mode    (Encrypts entire IP packet)
+│   └── Transport Mode (Encrypts payload only)
+│
+AH  → Integrity / Authentication
+│
+│── Transport
+│   └── IP Protocol 51
+│
+│── Modes
+│   ├── Tunnel Mode    (Authenticates entire IP packet)
+│   └── Transport Mode (Authenticates payload + headers)
+```
+
 **Terms**  
   
 IPSec has several new terms, which are used everywhere in protocol descriptions. These terms are:
