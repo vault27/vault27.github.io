@@ -94,6 +94,50 @@ AH  → Integrity / Authentication
 │   └── Transport Mode (Authenticates payload + headers)
 ```
 
+```
+flowchart TB
+    IPSEC["IPsec Framework"]
+
+    %% IKE
+    IPSEC --> IKE["IKE<br/>Key Management / Control Plane"]
+
+    IKE --> IKEV1["IKEv1"]
+    IKE --> IKEV2["IKEv2"]
+
+    IKEV1 --> IKEV1_P1["Phase 1<br/>IKE SA"]
+    IKEV1_P1 --> MM["Main Mode"]
+    IKEV1_P1 --> AM["Aggressive Mode"]
+
+    IKEV1 --> IKEV1_P2["Phase 2<br/>IPsec SAs"]
+    IKEV1_P2 --> QM["Quick Mode"]
+
+    IKEV2 --> IKEV2_IKESA["IKE SA<br/>Control Channel"]
+    IKEV2 --> IKEV2_CHILD["CHILD SA<br/>Data Channel"]
+
+    IKE --> AUTH["Authentication<br/>PSK / Certificates / EAP"]
+    IKE --> IKE_TRANSPORT["Transport<br/>UDP 500 / UDP 4500"]
+
+    %% ESP
+    IPSEC --> ESP["ESP<br/>Data Protection"]
+
+    ESP --> ESP_FUNC["Encryption<br/>Integrity<br/>Anti-replay"]
+    ESP --> ESP_TRANSPORT["IP Protocol 50<br/>UDP 4500 (NAT-T)"]
+
+    ESP --> ESP_MODES["Modes"]
+    ESP_MODES --> ESP_TUNNEL["Tunnel Mode"]
+    ESP_MODES --> ESP_TRANSPORT_MODE["Transport Mode"]
+
+    %% AH
+    IPSEC --> AH["AH<br/>Integrity / Authentication"]
+
+    AH --> AH_FUNC["Integrity + Authentication"]
+    AH --> AH_TRANSPORT["IP Protocol 51"]
+
+    AH --> AH_MODES["Modes"]
+    AH_MODES --> AH_TUNNEL["Tunnel Mode"]
+    AH_MODES --> AH_TRANSPORT_MODE["Transport Mode"]
+```
+
 **Terms**  
   
 IPSec has several new terms, which are used everywhere in protocol descriptions. These terms are:
