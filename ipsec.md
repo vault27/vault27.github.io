@@ -94,7 +94,7 @@ AH  → Integrity / Authentication
 │   └── Transport Mode (Authenticates payload + headers)
 ```
 
-```
+```mermaid`
 flowchart TB
     IPSEC["IPsec Framework"]
 
