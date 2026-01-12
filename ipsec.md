@@ -54,88 +54,73 @@
 - Traffic protection policy enforcement - Define which traffic is protected and how
 - Secure transport over untrusted networks
 
-High level diagram
+**High level diagram**
 
 ```
 IPsec Framework
 ──────────────────────────────────────────────
-IKE  → Key Management
+
+IKE  → Key Management / Control Plane
 │
-│── Components
-│   ├── Oakley       (Key exchange)
-│   ├── ISAKMP       (SA management)
-│   └── SKEME        (Key derivation)
+│── Versions
+│   ├── IKEv1
+│   │   ├── Based on: ISAKMP + Oakley + SKEME
+│   │   │
+│   │   ├── Phase 1  → Establish IKE SA
+│   │   │   ├── Main Mode
+│   │   │   └── Aggressive Mode
+│   │   │
+│   │   └── Phase 2  → Establish IPsec SAs
+│   │       └── Quick Mode
+│   │
+│   └── IKEv2
+│       ├── Unified protocol
+│       ├── IKE SA    → Control channel
+│       └── CHILD SA → Data channel
 │
-│── Phases
-│   ├── Phase 1       (Establish IKE SA, secure channel)
-│   └── Phase 2       (Negotiate IPsec SAs for ESP/AH)
+│── Authentication
+│   ├── Pre-Shared Key (PSK)
+│   ├── Digital Certificates
+│   ├── Xauth (IKEv1)
+│   └── EAP (IKEv2)
 │
 │── Transport
-│   ├── UDP 500       (IKE / ISAKMP)
+│   ├── UDP 500       (IKE)
 │   └── UDP 4500      (IKE NAT-T)
 │
+──────────────────────────────────────────────
+
 ESP  → Data Protection
+│
+│── Functions
+│   ├── Encryption
+│   ├── Integrity
+│   └── Anti-replay
 │
 │── Transport
 │   ├── IP Protocol 50
 │   └── UDP 4500      (ESP NAT-T)
 │
 │── Modes
-│   ├── Tunnel Mode    (Encrypts entire IP packet)
-│   └── Transport Mode (Encrypts payload only)
+│   ├── Tunnel Mode
+│   │   └── Encrypts entire IP packet
+│   │
+│   └── Transport Mode
+│       └── Encrypts payload only
 │
+──────────────────────────────────────────────
+
 AH  → Integrity / Authentication
+│
+│── Functions
+│   └── Integrity + Authentication only
 │
 │── Transport
 │   └── IP Protocol 51
 │
 │── Modes
-│   ├── Tunnel Mode    (Authenticates entire IP packet)
-│   └── Transport Mode (Authenticates payload + headers)
-```
-
-```mermaid
-flowchart TB
-    IPSEC["IPsec Framework"]
-
-    %% IKE
-    IPSEC --> IKE["IKE<br/>Key Management / Control Plane"]
-
-    IKE --> IKEV1["IKEv1"]
-    IKE --> IKEV2["IKEv2"]
-
-    IKEV1 --> IKEV1_P1["Phase 1<br/>IKE SA"]
-    IKEV1_P1 --> MM["Main Mode"]
-    IKEV1_P1 --> AM["Aggressive Mode"]
-
-    IKEV1 --> IKEV1_P2["Phase 2<br/>IPsec SAs"]
-    IKEV1_P2 --> QM["Quick Mode"]
-
-    IKEV2 --> IKEV2_IKESA["IKE SA<br/>Control Channel"]
-    IKEV2 --> IKEV2_CHILD["CHILD SA<br/>Data Channel"]
-
-    IKE --> AUTH["Authentication<br/>PSK / Certificates / EAP"]
-    IKE --> IKE_TRANSPORT["Transport<br/>UDP 500 / UDP 4500"]
-
-    %% ESP
-    IPSEC --> ESP["ESP<br/>Data Protection"]
-
-    ESP --> ESP_FUNC["Encryption<br/>Integrity<br/>Anti-replay"]
-    ESP --> ESP_TRANSPORT["IP Protocol 50<br/>UDP 4500 (NAT-T)"]
-
-    ESP --> ESP_MODES["Modes"]
-    ESP_MODES --> ESP_TUNNEL["Tunnel Mode"]
-    ESP_MODES --> ESP_TRANSPORT_MODE["Transport Mode"]
-
-    %% AH
-    IPSEC --> AH["AH<br/>Integrity / Authentication"]
-
-    AH --> AH_FUNC["Integrity + Authentication"]
-    AH --> AH_TRANSPORT["IP Protocol 51"]
-
-    AH --> AH_MODES["Modes"]
-    AH_MODES --> AH_TUNNEL["Tunnel Mode"]
-    AH_MODES --> AH_TRANSPORT_MODE["Transport Mode"]
+│   ├── Tunnel Mode
+│   └── Transport Mode
 ```
 
 **Terms**  
