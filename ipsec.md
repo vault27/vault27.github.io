@@ -362,17 +362,18 @@ IPsec SA (inbound)
     - Pseudo-Random Function (PRF) - In IKEv1, PRF is not a separate transform — it’s implicit in Phase 1 - PRF-HMAC-SHA1, PRF-HMAC-SHA256
     - Integrity / Authentication Algorithm (INTEG) - HMAC-SHA1, HMAC-SHA256, AES-XCBC
     - Diffie-Hellman Group (D-H Group) - Defines key exchange strength (PFS in Phase 2) - MODP-2048 (Group 14), ECP-256 (Group 19)
-- ESP transform set includes encryption + integrity
-- AH - integrity only  
+- IKE (Phase 1) transform set includes enctyption, integrity, authentication method, Diffie Hellman Group, IKE SA lifetime
+- ESP(Phase 2) transform set includes encryption + integrity transforms
+- AH (Phase 2) - integrity only  
 
 ## 5. Traffic Selectors/Proxy IDs
 
 - These are parametres, used during negotiations during Phase 2
 - In Palo Alto terms it is called Proxy ID
 - Traffic selector consist of local network, remote network, protocol, port - they should match on both sides
-- They are configured manually on aech node
-- It is not used very often now, because mostly route based IPSec is uased instead of Policy based
-- They are sent separatly outside the SA
+- They are configured manually on each node
+- It is not used very often now, because mostly route based IPSec is used instead of Policy based
+- They are sent separately outside the SA
 - Their goal is to specify which traffic should be sent to the IPSec tunnel in Policy based IPSec implementations
 
 **Example of logic**
@@ -428,17 +429,17 @@ interface: GigabitEthernet0/0
     - Authenticate peers
     - Negotiate cryptographic parameters
     - Establish shared secret keys
-    - Create and manage IPsec Security Associations (SAs)
+    - Create and manage IPsec Security Associations (SAs) + IKE SA
     - Provide Perfect Forward Secrecy (PFS)
     - Detect peer liveness
     - Provides identity protection (in main mode)
 - IKE v1 uses UDP port 500 or UDP port 4500 in case of NAT-T technology
-- IKEv1 uses two phases to authenticate peers once and securely negotiate traffic protection many times
+- IKEv1 uses two phases to authenticate peers `once` and securely negotiate traffic protection many times
 - Phase 1 — Build a secure control channel
-- Phase 2 - negotiate parametres for Data traffic encryption via secure Control Channel
+- Phase 2 - Negotiate parametres for Data traffic encryption via secure Control Channel
 - Phase 1 can work in 2 modes: main and aggressive
-- 9 messages in total if main mode is used in Phase 1
-- 6 messages in total if aggressive mode is used in Phase 1
+    - 9 messages in total if main mode is used in Phase 1
+    - 6 messages in total if aggressive mode is used in Phase 1
 - IKEv1 was developed, combining ideas from three earlier protocols:
     - ISAKMP – framework for messages and SA management, how packets are formatted (headers, payload types), a generic state machine for SA negotiation, but not how keys are exchanged
     - Oakley – Diffie-Hellman key exchange and math, key derivation techniques, DH groups
@@ -467,7 +468,7 @@ interface: GigabitEthernet0/0
     - Exchange traffic selectors (Proxy-ID) - should be the same
     - `Outbound SPI` - The SPI my router inserts into ESP packets I send
     - `Inbound SPI` - The SPI my router expects to see in ESP packets I receive
-    - Transform sets - negotiate crypto paramtres
+    - Transform sets - negotiate crypto parametres
 - ESP/AH encapsulation — Actual data traffic encryption/authentication using the negotiated keys - IP/50(ESP) or UDP/4500 or IP/51(AH) - Destination SPI is in header
 
 ### 6.2 Phase 1
@@ -527,6 +528,7 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 ### 6.3 Phase 2
 
 - There is only one mode - `quick` in Phase 2, `3 packets`
+- It’s called Quick Mode because IKEv1 Phase 2 is deliberately short, lightweight, and fast compared to Phase 1 — both in message count and in cryptographic work: no identity, no DH exchange, only 3 messages
 - By default, Phase 2 keys are derived from the session key created in Phase 1. Perfect Forward Secrecy (PFS)
 forces a new Diffie-Hellman exchange when the tunnel starts and whenever the Phase 2 keylife expires, causing
 a new key to be generated each time. This exchange ensures that the keys created in Phase 2 are unrelated to
@@ -622,7 +624,7 @@ Encrypted Payloads (inside IKE SA):
 - Mode: Tunnel or Transport
 - Encryption transform: AES-CBC-256 - If AEAD (e.g., AES-GCM) was chosen in the encryption transform, separate integrity transform is not needed
 - Integrity transform: HMAC-SHA1-96
-- Lifetime: 3600 seconds and 4608000 kilobytes
+- Lifetime transform: 3600 seconds and 4608000 kilobytes
 - PFS: group 14 (if requested)
 - Traffic Selectors(Proxy ID): 10.0.0.0/24 <-> 192.168.0.0/24 (proto any)
 - Responder SPI (e.g. 0x3f2a1b4c) and Initiator SPI (e.g. 0x9a7e6c2d) — assigned by peers
@@ -634,10 +636,10 @@ Encrypted Payloads (inside IKE SA):
 - ESP traffic starting immediately after them
 - UDP/500 or 4500
 
-### Xauth - Extended Authentication - replaced by IKEv2
+### 6.4 Xauth
 
 - XAuth (Extended Authentication) is an optional extra authentication step used only with IKEv1, mainly to authenticate individual users (not just devices)
-- XAuth is an extension to IKEv1 Phase 1, and it happens after Phase 1 but before Phase 2
+- XAuth is an extension to IKEv1 Phase 1, and it happens `after Phase 1 but before Phase 2`
 - Standard IKEv1 Phase 1 authenticates devices or gateways (via PSK or certificates)
 - XAuth adds a user-level authentication step — typically username and password
 - Peers complete Phase 1 (Main Mode) → a secure channel (IKE SA) is established
@@ -645,16 +647,16 @@ Encrypted Payloads (inside IKE SA):
 - The initiator (client) provides username and password
 - The gateway validates them (e.g., against local DB, RADIUS, LDAP, etc.)
 - If successful → proceed to Phase 2 (Quick Mode) to negotiate IPsec SAs
-- IKEv2 replaced XAuth with EAP (Extensible Authentication Protocol) for user-level auth
+- `IKEv2 replaced XAuth with EAP` (Extensible Authentication Protocol) for user-level auth
 
-### Mode-Config Phase
+### 6.5 Mode-Config Phase
 
 - Assign IP, DNS, WINS, Split tunnel
-- Happens after XAuth
+- `Happens after XAuth`
 - Not used in IKEv2
 - In IKEv2 it is called Configuration Payloads (CP) inside the IKE_AUTH exchange
 
-## NAT-T
+## 7. NAT-T
 
 ```
 +----------------+-----------+-------------+------------+------------------------+---------+-------------+----------+
@@ -694,10 +696,43 @@ If only ONE peer supports NAT-T
 - Traffic stays UDP/500 + ESP
 - Tunnel will fail if a real NAT is present
 
-## IKEv2
+## 8. IKEv2
 
-- Supports EAP
-- Anti-DDOS
+**EAP**
+
+- Supports EAP - allows IKEv2 to authenticate users dynamically (per-user), using external identity systems, without changing the IKEv2 protocol itself
+- EAP allows IKEv2 to integrate cleanly with: RADIUS, Active Directory, LDAP, MFA systems
+
+**Anti-DDoS**
+
+- Has built-in anti-DDoS protections designed to stop an attacker from exhausting CPU or state on a VPN gateway before authentication even happens
+- It uses pricipe: Don’t do expensive work, and don’t allocate state, until the peer proves it’s real
+- IKEv2 mitigates DDoS attacks by using `stateless cookies, delaying expensive cryptography, and refusing to allocate resources` until the peer proves reachability
+- The Problem: An attacker can flood the gateway with fake IKE_SA_INIT requests, which triggers: Diffie–Hellman, 
+State allocation, Result: CPU and memory exhaustion
+- When a gateway `detects load` or suspicious traffic, it refuses to proceed normally and responds with a COOKIE notification
+- How it detects? 
+    - The primary signal is the number of incomplete IKE_SAs: IKE_SA_INIT received BUT DH / auth not completed yet - Memory-consuming - CPU-expensive
+    - CPU Utilization
+    - Rate of IKE_SA_INIT Requests - Packets per second (PPS) of IKE_SA_INIT
+    - Retransmission / Failure Ratios
+- The cookie is Cryptographically generated, Bound to source IP + SPI, The gateway does not store the cookie, Can verify it statelessly, Spoofed source IPs fail, because they never see the cookie
+
+```
+1. Attacker → IKE_SA_INIT
+2. Gateway → IKE_SA_INIT + COOKIE
+   (no state created)
+
+3. Client → IKE_SA_INIT + COOKIE
+4. Gateway → normal processing
+```
+
+- Management of "Half-Open" SAs - The server starts a timer for every new request. If the full authentication isn't completed within a short window, the session is cleared to free up memory - Thresholds: Administrators can set limits on the maximum number of half-open sessions allowed at once. Once this threshold is hit, the server can either drop new requests or trigger the Cookie Challenge
+- Decryption Failure Detection: If a peer sends multiple packets that fail decryption (often a sign of a junk flood), the server automatically tears down the session
+- Certificate Size Limits: To prevent memory exhaustion from massive, fake certificates, administrators can set a maximum allowed size for certificates received during authentication
+
+
+
 - Fewer messages to establish IKE and IPSEC SAs: 4, instead of 6 or 9 in IKEv1
 - IKEv2 removed ISAKMP entirely and defined its own message format
 - Consist of request/response  pairs, called exchages: IKE_SA_INIT, IKE_AUTH, 
@@ -716,9 +751,9 @@ If only ONE peer supports NAT-T
 - IKEv2 replaced XAuth with EAP (Extensible Authentication Protocol) for user-level auth - carried inside IKE_AUTH
 - In IKEv2 Mode-Config phase is called Configuration Payloads (CP) inside the IKE_AUTH exchange
 - Next generation encryption support: AES-GCM, ECDH, etc...
-- Assymetric authentication: one cert and other password
+- Assymetric authentication support: one peer uses cert and other one uses password
 
-In a Nutshell - 4 mandatory messages only
+**In a Nutshell - 4 mandatory messages only**
 
 ```
 Initiator > IKE_SA_INIT > Responder
@@ -730,7 +765,7 @@ Initiator > CREATE_CHILD_SA > Responder - Optional
 Responder > CREATE_CHILD_SA > Initiator - Optional
 ```
 
-- Initiator sends IKE_SA_INIT packet: it contains Security assosiations wuth proposals: Encryption, Integrity, DH group + Key Exchange + Nonce + Initiator SPI
+**Initiator sends IKE_SA_INIT packet: it contains Security assosiations wuth proposals: Encryption, Integrity, DH group + Key Exchange + Nonce + Initiator SPI**
 
 ```
 Internet Key Exchange Version 2
@@ -752,7 +787,7 @@ Internet Key Exchange Version 2
     Ni: <random 32 bytes>
 ```
 
-- Responder sends  IKE_SA_INIT packet as well: chosen proposal, DH public part, Nonce, Cookie if AntiDDoS is used + Initiator, Responder SPI
+**Responder sends  IKE_SA_INIT packet as well: chosen proposal, DH public part, Nonce, Cookie if AntiDDoS is used + Initiator, Responder SPI**
 
 ```
 Internet Key Exchange Version 2
@@ -777,7 +812,7 @@ Internet Key Exchange Version 2
   Payload: Cookie (if DoS-protection active)
 ```
 
-- Initiator sends IKE_AUTH - Encrypted! - ID, SPIs, Auth type, ESP proposal(to create IPSEC SA, the same what is done in Phase 2 in IKEv1), traffic selectors
+**Initiator sends IKE_AUTH - Encrypted! - ID, SPIs, Auth type, ESP proposal(to create IPSEC SA, the same what is done in Phase 2 in IKEv1), traffic selectors**
 
 ```
 Internet Key Exchange Version 2
@@ -796,7 +831,7 @@ Internet Key Exchange Version 2
     TSr             → 10.10.10.0/24
 ```
 
-- Responder sends sends IKE_AUTH - Encrypted! - SPIs, ID, Auth, ESP proposal accepted, traffic selectors
+**Responder sends sends IKE_AUTH - Encrypted! - SPIs, ID, Auth, ESP proposal accepted, traffic selectors**
 
 ## ESP
 
