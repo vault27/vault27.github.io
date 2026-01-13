@@ -547,7 +547,7 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 
 **Aggressive mode**
 
-- In aggressive mode, the initiator and recipient accomplish the same objectives as with main mode, but in only two exchanges, with a total of three messages:
+- In aggressive mode, the initiator and recipient accomplish the same objectives as with main mode, but in only two exchanges, with a total of `three messages`
 - First message — The initiator proposes the security association (SA), initiates a DH exchange, and sends a pseudorandom number and its IKE identity. When configuring aggressive mode with multiple proposals for Phase 1 negotiations, use the same DH group in all proposals because the DH group cannot be negotiated. Up to four proposals can be configured. Message one contains everything that was in messages 1,3,5 in Main mode.
 - Second message — The recipient accepts the SA; authenticates the initiator; and sends a pseudorandom number, its IKE identity, and, if using certificates, the recipient's certificate. It contains the same as messages 2,4,6 in Main mode
 - Third message — The initiator authenticates the recipient, confirms the exchange, and, if using certificates, sends the initiator's certificate
@@ -671,6 +671,7 @@ Encrypted Payloads (inside IKE SA):
 - XAuth is an extension to IKEv1 Phase 1, and it happens `after Phase 1 but before Phase 2`
 - Standard IKEv1 Phase 1 authenticates devices or gateways (via PSK or certificates)
 - XAuth adds a user-level authentication step — typically username and password
+- XAuth does not substitute Phase 1 Authentication (PSK or Certificates) - it is still required
 - Peers complete Phase 1 (Main Mode) → a secure channel (IKE SA) is established
 - The responder (gateway) requests XAuth credentials from the initiator
 - The initiator (client) provides username and password
@@ -731,6 +732,7 @@ If only ONE peer supports NAT-T
 
 - Supports EAP - allows IKEv2 to authenticate users dynamically (per-user), using external identity systems, without changing the IKEv2 protocol itself
 - EAP allows IKEv2 to integrate cleanly with: RADIUS, Active Directory, LDAP, MFA systems
+- EAP may subsitute PSK or certificates, so you need only username and password, no additional PSK or cert, like in IKEv1
 
 **Anti-DDoS**
 
@@ -861,6 +863,19 @@ Internet Key Exchange Version 2
 ```
 
 **Responder sends sends IKE_AUTH - Encrypted! - SPIs, ID, Auth, ESP proposal accepted, traffic selectors**
+
+## IKE scan
+
+**Test Phase 1**
+
+```
+ike-scan -M -A --id=0000 1.1.1.1
+
+-M - multiline, for comfortable reading
+-A - aggressive
+--id - IKE identity
+- P - show PSK hash
+```
 
 ## ESP
 
