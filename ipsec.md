@@ -545,14 +545,229 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - `Third exchange` (messages 5 and 6) — `Sends and verifies the identities of the initiator and recipient - authentication is here via PSK` - `Each side now proves knowledge of the PSK without sending it` - Both nodes computes a hash based on PSK and many other parametres
 - The information transmitted in the third exchange of messages is protected by the encryption algorithm established in the first two exchanges. Thus, the participants’ identities are encrypted and therefore not transmitted “in the clear.”
 
-**Aggressive mode**
+#### Aggressive mode
 
-- In aggressive mode, the initiator and recipient accomplish the same objectives as with main mode, but in only two exchanges, with a total of `three messages`
-- First message — The initiator proposes the security association (SA), initiates a DH exchange, and sends a pseudorandom number and its IKE identity. When configuring aggressive mode with multiple proposals for Phase 1 negotiations, use the same DH group in all proposals because the DH group cannot be negotiated. Up to four proposals can be configured. Message one contains everything that was in messages 1,3,5 in Main mode.
-- Second message — The recipient accepts the SA; authenticates the initiator; and sends a pseudorandom number, its IKE identity, and, if using certificates, the recipient's certificate. It contains the same as messages 2,4,6 in Main mode
-- Third message — The initiator authenticates the recipient, confirms the exchange, and, if using certificates, sends the initiator's certificate
+- Aggressive Mode compresses Phase 1 into three messages by sending identities and authentication data before a secure channel exists
+- Thus `IKE Identities of both sides and authentication data (hashes based on PSK)` are sent in clear text
+- This provides security risks via `oflline brute force of PSK`
+
+**Message 1: Initiator > Responder**
+
+- Initiator Cookie
+- Security Assosiation Proposals
+- Key Exchange Diffie-Hellman group + Key Exchange Data
+- Nonce - A cryptographically random bit string - 16-32 bits - adds randomness to a HASH generated for PSK 
+    - Even with the same PSK, every exchange gets new keys
+    - Replay attacks are prevented
+    - Keys are bound to this specific exchange
+- IKE Identity
+- Vendor IDs
+
+```
+Internet Key Exchange
+  Exchange Type: Aggressive Mode (4)
+  Initiator Cookie: 0x9f3a7c1e2b4d8a91
+  Responder Cookie: 0x0000000000000000
+  Flags: Initiator
+  Message ID: 0x00000000
+
+  Payload: Security Association
+    DOI: IPSEC (1)
+    Situation: Identity Only
+    Proposal: 1
+      Proposal Number: 1
+      Protocol ID: ISAKMP
+      SPI Size: 0
+      Number of Transforms: 1
+      Transform: 1
+        Transform Number: 1
+        Transform ID: KEY_IKE
+        Encryption Algorithm: AES-CBC (7)
+        Hash Algorithm: SHA1 (2)
+        Authentication Method: Pre-Shared Key (1)
+        Group Description: MODP 1024 (2)
+        Life Type: Seconds (1)
+        Life Duration: 86400
+
+  Payload: Key Exchange
+    Diffie-Hellman Group: MODP 1024 (2)
+    Key Exchange Data: 0x7c9a4f8d3a1b...
+
+  Payload: Nonce
+    Nonce Data: 0x1f9c33ab4e6d...
+
+  Payload: Identification - Initiator
+    ID Type: IPv4 Address (1)
+    Protocol ID: Unused (0)
+    Port: 0
+    Identification Data: 192.0.2.10
+
+  Payload: Vendor ID
+    Vendor ID: RFC 3947 - NAT Traversal
+
+  Payload: Vendor ID
+    Vendor ID: Cisco-Unity
+
+  Payload: Vendor ID
+    Vendor ID: XAUTH
+```
+
+First message — The initiator proposes the security association (SA), initiates a DH exchange, and sends a pseudorandom number and its IKE identity. When configuring aggressive mode with multiple proposals for Phase 1 negotiations, use the same DH group in all proposals because the DH group cannot be negotiated. Up to four proposals can be configured. Message one contains everything that was in messages 1,3,5 in Main mode
+
+**Message 2: Responder > Initiator**  
+
+It contains the same as messages 2,4,6 in Main mode
+
+- Responder cookie
+- Chosen SA proposal - accepts the SA
+- Key exchange Diffie-Hellman group + Key Exchange Data
+- Nonce
+- IKE Identity
+- Hash - HASH_R (Responder Authentication Hash)
+    - It is the responder’s proof of identity and possession of the shared secret
+    - HASH_R proves all of the following at once:
+        - The responder knows the Pre-Shared Key (PSK)
+        - The responder participated in the Diffie–Hellman exchange
+        - The responder is the owner of the claimed identity (IDir)
+        - The responder did not modify the exchange
+    - If any of these are false → hash verification fails → Phase 1 fails
+    - HASH_R = `HMAC(Key, Data)
+        - Key = Derived from PSK, Nonce-Initiator, Nonce-Responder
+        - Data = Responder’s DH public value + Initiator’s DH public value + Responder cookie | Initiator cookie + Initiator’s SA payload + Responder’s identity)`
+    - It is said that `Responder authenticates itself to the initiator` with HASH_R, so it `proves` that it is legal
+- Vendor IDs
+
+```
+Internet Key Exchange
+  Exchange Type: Aggressive Mode (4)
+  Initiator Cookie: 0x9f3a7c1e2b4d8a91
+  Responder Cookie: 0xa8d4c2e9f1234567
+  Flags: Responder
+  Message ID: 0x00000000
+
+  Payload: Security Association
+    DOI: IPSEC (1)
+    Situation: Identity Only
+    Proposal: 1
+      Proposal Number: 1
+      Protocol ID: ISAKMP
+      SPI Size: 0
+      Number of Transforms: 1
+      Transform: 1
+        Transform Number: 1
+        Transform ID: KEY_IKE
+        Encryption Algorithm: AES-CBC (7)
+        Hash Algorithm: SHA1 (2)
+        Authentication Method: Pre-Shared Key (1)
+        Group Description: MODP 1024 (2)
+        Life Type: Seconds (1)
+        Life Duration: 86400
+
+  Payload: Key Exchange
+    Diffie-Hellman Group: MODP 1024 (2)
+    Key Exchange Data: 0x8a72b91f4c9e...
+
+  Payload: Nonce
+    Nonce Data: 0xa91c8f3e52d4...
+
+  Payload: Identification - Responder
+    ID Type: IPv4 Address (1)
+    Protocol ID: Unused (0)
+    Port: 0
+    Identification Data: 198.51.100.20
+
+  Payload: Hash
+    Hash (HASH_R): 0x4b8f2a7e91c3...
+
+  Payload: Vendor ID
+    Vendor ID: RFC 3947 - NAT Traversal
+
+  Payload: Vendor ID
+    Vendor ID: Cisco-Unity
+
+  Payload: Vendor ID
+    Vendor ID: XAUTHInternet Key Exchange
+  Exchange Type: Aggressive Mode (4)
+  Initiator Cookie: 0x9f3a7c1e2b4d8a91
+  Responder Cookie: 0xa8d4c2e9f1234567
+  Flags: Responder
+  Message ID: 0x00000000
+
+  Payload: Security Association
+    DOI: IPSEC (1)
+    Situation: Identity Only
+    Proposal: 1
+      Proposal Number: 1
+      Protocol ID: ISAKMP
+      SPI Size: 0
+      Number of Transforms: 1
+      Transform: 1
+        Transform Number: 1
+        Transform ID: KEY_IKE
+        Encryption Algorithm: AES-CBC (7)
+        Hash Algorithm: SHA1 (2)
+        Authentication Method: Pre-Shared Key (1)
+        Group Description: MODP 1024 (2)
+        Life Type: Seconds (1)
+        Life Duration: 86400
+
+  Payload: Key Exchange
+    Diffie-Hellman Group: MODP 1024 (2)
+    Key Exchange Data: 0x8a72b91f4c9e...
+
+  Payload: Nonce
+    Nonce Data: 0xa91c8f3e52d4...
+
+  Payload: Identification - Responder
+    ID Type: IPv4 Address (1)
+    Protocol ID: Unused (0)
+    Port: 0
+    Identification Data: 198.51.100.20
+
+  Payload: Hash
+    Hash (HASH_R): 0x4b8f2a7e91c3...
+
+  Payload: Vendor ID
+    Vendor ID: RFC 3947 - NAT Traversal
+
+  Payload: Vendor ID
+    Vendor ID: Cisco-Unity
+
+  Payload: Vendor ID
+    Vendor ID: XAUTH
+```
+
+**Message 3: Initiator to Responder**
+
+- Cookies
+- Hash - Initiator authenticates itself to the Responder
+
+```
+Internet Key Exchange
+  Exchange Type: Aggressive Mode (4)
+  Initiator Cookie: 0x9f3a7c1e2b4d8a91
+  Responder Cookie: 0xa8d4c2e9f1234567
+  Flags: Initiator
+  Message ID: 0x00000000
+
+  Payload: Hash
+    Hash (HASH_I): 0x91a2cbe4d88f...
+```
+
 - Because the participants’ identities are exchanged in the clear (in the first two messages), aggressive mode does not provide identity protection
 - Main and aggressive modes applies only to IKEv1 protocol. IKEv2 protocol does not negotiate using main and aggressive modes
+
+**Why aggressive mode  enables offline PSK attacks? Why it is dangerous?**
+
+An attacker capturing message 2 has:
+
+- SA proposal
+- DH public values
+- IDs
+- HASH_R
+
+They can brute-force PSK offline until HASH_R matches  
+This is why Aggressive Mode + PSK is discouraged
 
 ### 6.3 Phase 2
 
