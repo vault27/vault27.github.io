@@ -529,14 +529,51 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - main mode(6 messages)  
 - aggressive mode(3 messages) 
 
-**IKE identity**
+#### 6.2.1 IKE identity
 
-- If you do not configure a local-identity, the device uses the IPv4 or IPv6 address corresponding to the local endpoint by default
-- It can be: distinguished-name, hostname, ip-address, e-mail-address, key-id
-- Configurated on most devices, maybe none, on every device we configure both local and remote ID - on Palo Alto it is configured in IKE gateway
+- IKE Identity is a `Value` which is sent by both Initiator and Responder to each other during `Authentication` Stage of Phase 1 in IKEv1 and during the IKE_AUTH exchange in IKEv2
+- IKE Identity is `mandatory` for use in both IKE versions, Site-to-Site VPNs and RA VPNs
+- It can be in the form of: `distinguished-name, hostname, ip-address, e-mail-address, key-id, FQDN (explicit), RFC822 (email), ASN.1 DN`
+- IKE identity is a mandatory input to authentication and IKE SA establishment
+- Authentication HASH is based not only on PSK and Nonce, but also on both IKE IDs
+- `IKE ID = endpoint(peer, node) name, not the User`
+- IKE ID is used to select which PSK to use, which certificate to validate, which EAP policy applies
+- If IKE identity is not configured, the device uses the IPv4 or IPv6 address of interface by default
+
+**Site-to-Site VPNs**
+
+- It is configured manually on both Peers for Site-to-Site VPNs if PSK is used, and if Certificate-based → identity derived from cert
+- We configure local Identity-what to send to remote Peer, and remote Idenity-what to expect from remote peer
+- If Identity mismatch - `Authentication and Phase 1 will fail` 
 - It must match the peer’s expectations
 
-**Main Mode**
+**IKE Identity in RA VPN with IKEv1**
+
+- IKE Identities in RA VPNs may be flexible, depending on configuration, it may not match
+- IKE Identity for VPN Client: group name(Cisco ASA) | IP address | FQDN from certificate
+- IKE Identiry for VPN Server: group name, if group name from client request exists, connection is accepted, if not it is rejected
+- 1 user or 10,000 users can use the same IKE ID of the VPN client
+- Any VPN client IKE ID maybe allowed on VPN server side, if default group is configured
+- XAuth is used with username and password for exact user identification after Phase 1 is authenticated via IKE IDs, PSK or certs
+- RA VPN Server using IKEv1 will reject connection if either one of these is wrong in client's request in case of strict configuration: `Client IKE ID, Server IKE ID, PSK, Xauth username, Xauth password`
+
+**IKE Identity in RA VPN with IKEv2**
+
+- The role of IKE Identity (IDi / IDr) is similar to IKEv1:
+    - it identifies the VPN endpoint, not the user
+    - it may be shared by many clients
+    - it is used for policy and authentication selection
+- Unlike IKEv1:
+    - XAUTH is not used
+    - User authentication is performed via EAP
+    - EAP authenticates the user, not the IKE SA
+- The IKE SA must still be authenticated using:
+    - PSK, or
+    - certificates
+- EAP is used in addition to, not instead of, PSK or certificates
+- Generic or anonymous client IKE IDs are commonly used
+
+#### Main Mode
 
 - At the cost of three extra messages, Main Mode provides identity protection, enabling the peers to hide their actual identities from potential attackers. This means that the peers’ identities are never exchanged unencrypted in the course of the IKE negotiation
 - In main mode, the initiator and recipient send three two-way exchanges (six messages total) to accomplish the following services:
@@ -759,15 +796,17 @@ Internet Key Exchange
 
 **Why aggressive mode  enables offline PSK attacks? Why it is dangerous?**
 
-An attacker capturing message 2 has:
+An attacker capturing message 2, for example with ike-scan tool, has:
 
 - SA proposal
 - DH public values
 - IDs
 - HASH_R
 
-They can brute-force PSK offline until HASH_R matches  
+They can brute-force PSK offline until hash matches  
 This is why Aggressive Mode + PSK is discouraged
+
+And what about certs instead of PSK?
 
 ### 6.3 Phase 2
 
