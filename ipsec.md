@@ -7,6 +7,15 @@
 - [3. SA](#3-sa)
     - [3.1 Phase 1 - IKE SA](#31-phase-1---ike-sa)
     - [3.2 Phase 2 - IPSec SA](#32-phase-2---ipsec-sa)
+    - [3.3 Manual and Dynamic SAs](#33-manual-and-dynamic-sas)
+- [4. Transform Set](#4-transform-set)
+- [5. Traffic Selectors](#5-traffic-selectors)
+- [6. IKEv1](#6-ikev1)
+    - [6.1 Workflow](#61-workflow)
+    - [6.2 Phase 1](#62-phase-1)
+        - [6.2.1 IKE identiry](#621-ike-identity)
+        - [6.2.2 Main Mode](#622-main-mode)
+        - [6.2.3 Aggressive Mode](#623-aggressive-mode)
 
 ## 1. Introduction
 
@@ -32,7 +41,7 @@
 - Original Internet had no built-in security
 - IP provides no: Encryption, Authentication, Integrity protection, Anti-replay protection
 - Anyone on the path could: Read packets, Modify packets, Spoof IP addresses, Inject traffic
-- Security at higher layers was not enough: Every application had to implement its own security, traffic like routing, management, or custom protocols remained exposed
+- Security at higher layers was not enough: Every application   had to implement its own security, traffic like routing, management, or custom protocols remained exposed
 - IPsec enabled: Site-to-site VPNs, Remote-access VPNs, Secure inter-datacenter links
 
 **Who and when invented it?**
@@ -122,6 +131,24 @@ AH  → Integrity / Authentication
 │   ├── Tunnel Mode
 │   └── Transport Mode
 ```
+
+**RFC**
+
+- RFC 4301 — Security Architecture for the Internet Protocol (IPsec architecture)
+- RFC 2411 — IP Security Document Roadmap
+- RFC 4303 — IP Encapsulating Security Payload (ESP)
+- RFC 4302 — IP Authentication Header (AH)
+- RFC 2409 — Internet Key Exchange (IKEv1)
+- RFC 2407 — ISAKMP DOI for IPsec
+- RFC 2408 — ISAKMP
+- RFC 2412 — Oakley Key Determination Protocol
+- RFC 7296 — Internet Key Exchange Protocol Version 2 (IKEv2)
+- RFC 3947 — Negotiation of NAT-Traversal in the IKE
+- RFC 3948 — UDP Encapsulation of IPsec ESP Packets
+- RFC 5998 — Use of EAP Authentication in IKEv2
+- XAUTH (IKEv1, non-RFC standard)
+- IKEv1 Mode Config - No RFC
+- Vendor RA extensions
 
 **Terms**  
   
@@ -395,7 +422,7 @@ IPsec SA (inbound)
 - ESP(Phase 2) transform set includes encryption + integrity transforms
 - AH (Phase 2) - integrity only  
 
-## 5. Traffic Selectors/Proxy IDs
+## 5. Traffic Selectors
 
 - These are parametres, used during negotiations during Phase 2
 - In Palo Alto terms it is called Proxy ID
@@ -594,7 +621,7 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - `Third exchange` (messages 5 and 6) — `Sends and verifies the identities of the initiator and recipient - authentication is here via PSK` - `Each side now proves knowledge of the PSK without sending it` - Both nodes computes a hash based on PSK and many other parametres
 - The information transmitted in the third exchange of messages is protected by the encryption algorithm established in the first two exchanges. Thus, the participants’ identities are encrypted and therefore not transmitted “in the clear.”
 
-#### Aggressive mode
+#### 6.2.3 Aggressive Mode
 
 - Aggressive Mode compresses Phase 1 into three messages by sending identities and authentication data before a secure channel exists
 - Thus `IKE Identities of both sides and authentication data (hashes based on PSK)` are sent in clear text
