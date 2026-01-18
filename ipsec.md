@@ -5,8 +5,8 @@
 - [1. Introduction](#1-introduction)
 - [2. SPI](#2-spi)
 - [3. SA](#3-sa)
-    - [3.1 Phase 1 - IKE SA](#31-phase-1--ike-sa)
-    - [3.2 Phase 2 - IPSec SA](#32-phase-2--ipsec-sa)
+    - [3.1 Phase 1 - IKE SA](#31-phase-1---ike-sa)
+    - [3.2 Phase 2 - IPSec SA](#32-phase-2---ipsec-sa)
 
 ## 1. Introduction
 
@@ -540,21 +540,21 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - IKE ID is used to select which PSK to use, which certificate to validate, which EAP policy applies
 - If IKE identity is not configured, the device uses the IPv4 or IPv6 address of interface by default
 
-**Why it is required and how it is used**
+**Why IKE ID is required and how it is used**
 
 - When the responder receives the initiator’s ID, it verifies that the ID matches the configuration
 - Using this ID, the responder selects the correct authentication data (PSK or certificate) and applies the appropriate authorization policy
-- Cryptographic proposals are negotiated earlier during IKE_SA_INIT and are not selected based on the ID
+- In both IKEv1 and IKEv2, cryptographic proposals `are not` selected based on the IKE ID
 - In IKEv2 IP address is not used for PSK selection
 - In IKEv1 main mode with PSK IP address is used for selecting PSK, because the responder does not know the peer ID early, ID is sent after PSK
 - In IKEv1 aggressive mode with PSK ID is sent early and in cleartext, Responder can choose PSK based on ID
 - In IKEv1 all modes with certificates IP is not used, only ID
-- IP is not reliable, it maybe changed during NAT, so ID is required
+- IP is not reliable, it may be changed during NAT, so ID is required
 - Using ID node also applies authorization policy: where the remote node can connect, both for Site-to-Site and RA VPNs 
 
-**Site-to-Site VPNs**
+**IKE Identity in Site-to-Site VPNs**
 
-- It is configured manually on both Peers for Site-to-Site VPNs if PSK is used, and if Certificate-based → identity derived from cert
+- IKE identity is configured manually on both Peers for Site-to-Site VPNs if PSK is used, and if Certificate-based → identity derived from cert
 - We configure local Identity-what to send to remote Peer, and remote Idenity-what to expect from remote peer
 - If Identity mismatch - `Authentication and Phase 1 will fail` 
 - It must match the peer’s expectations
