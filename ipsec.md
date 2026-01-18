@@ -540,6 +540,18 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - IKE ID is used to select which PSK to use, which certificate to validate, which EAP policy applies
 - If IKE identity is not configured, the device uses the IPv4 or IPv6 address of interface by default
 
+**Why it is required and how it is used**
+
+- When the responder receives the initiator’s ID, it verifies that the ID matches the configuration
+- Using this ID, the responder selects the correct authentication data (PSK or certificate) and applies the appropriate authorization policy
+- Cryptographic proposals are negotiated earlier during IKE_SA_INIT and are not selected based on the ID
+- In IKEv2 IP address is not used for PSK selection
+- In IKEv1 main mode with PSK IP address is used for selecting PSK, because the responder does not know the peer ID early, ID is sent after PSK
+- In IKEv1 aggressive mode with PSK ID is sent early and in cleartext, Responder can choose PSK based on ID
+- In IKEv1 all modes with certificates IP is not used, only ID
+- IP is not reliable, it maybe changed during NAT, so ID is required
+- Using ID node also applies authorization policy: where the remote node can connect, both for Site-to-Site and RA VPNs 
+
 **Site-to-Site VPNs**
 
 - It is configured manually on both Peers for Site-to-Site VPNs if PSK is used, and if Certificate-based → identity derived from cert
@@ -550,7 +562,7 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 **IKE Identity in RA VPN with IKEv1**
 
 - IKE Identities in RA VPNs may be flexible, depending on configuration, it may not match
-- IKE Identity for VPN Client: group name(Cisco ASA) | IP address | FQDN from certificate
+- IKE Identity for VPN Client: group name(Cisco ASA) or IP address or FQDN from certificate
 - IKE Identiry for VPN Server: group name, if group name from client request exists, connection is accepted, if not it is rejected
 - 1 user or 10,000 users can use the same IKE ID of the VPN client
 - Any VPN client IKE ID maybe allowed on VPN server side, if default group is configured
@@ -573,7 +585,7 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - EAP is used in addition to, not instead of, PSK or certificates
 - Generic or anonymous client IKE IDs are commonly used
 
-#### Main Mode
+#### 6.2.2 Main Mode
 
 - At the cost of three extra messages, Main Mode provides identity protection, enabling the peers to hide their actual identities from potential attackers. This means that the peers’ identities are never exchanged unencrypted in the course of the IKE negotiation
 - In main mode, the initiator and recipient send three two-way exchanges (six messages total) to accomplish the following services:
