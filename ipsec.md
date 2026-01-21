@@ -620,7 +620,7 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - Each proposal can contain multiple transforms
 - Each transform is a full combination of all cryptographic parameters - `not like in Phase 2` - `no transform sets`
 
-**Message 1 Example**
+**Message 1 Example: Initiator → Responder (SA Proposal)**
 
 ```
 Frame 1: 192.0.2.10 → 198.51.100.20, UDP 500 → 500
