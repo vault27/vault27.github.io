@@ -614,9 +614,48 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 
 #### 6.2.2 Main Mode
 
-- At the cost of three extra messages, Main Mode provides identity protection, enabling the peers to hide their actual identities from potential attackers. This means that the peers’ identities are never exchanged unencrypted in the course of the IKE negotiation
-- In main mode, the initiator and recipient send three two-way exchanges (six messages total) to accomplish the following services:
-- `First exchange` (messages 1 and 2) — `Proposes and accepts the encryption and authentication algorithms`
+- `6 messages`
+- IKE Identities are protected and sent encrypted only > no one can see it
+- `First exchange` (messages 1 and 2) — `Proposes and accepts the encryption and authentication algorithms` - via SA > Proposals > transforms, each transform contains all crypto and auth options + SPI
+- Each proposal can contain multiple transforms
+- Each transform is a full combination of all cryptographic parameters - `not like in Phase 2` - `no transform sets`
+
+**Message 1 Example**
+
+```
+Frame 1: 192.0.2.10 → 198.51.100.20, UDP 500 → 500
+Internet Key Exchange v1
+  ISAKMP Header
+    Initiator SPI: 0xA1B2C3D4E5F60708
+    Responder SPI: 0x0000000000000000
+    Next Payload: Security Association (1)
+    Version: 1.0
+    Exchange Type: Main Mode (2)
+    Flags: 0x00
+    Message ID: 0x00000000
+  Payload: Security Association (SA)
+    DOI: IPsec (1)
+    Situation: Identity Only
+    Proposal #1
+      Protocol ID: ISAKMP
+      SPI Size: 0
+      Number of Transforms: 2
+      Transform #1
+        Transform ID: KEY_IKE
+        Encryption: AES-CBC-256
+        Hash: SHA-1
+        Authentication: Pre-Shared Key
+        DH Group: 14
+        Lifetime: 28800s
+      Transform #2
+        Transform ID: KEY_IKE
+        Encryption: 3DES
+        Hash: SHA-1
+        Authentication: Pre-Shared Key
+        DH Group: 2
+        Lifetime: 28800s
+```
+
 - `Second exchange` (messages 3 and 4) — `Executes a DH exchange, and the initiator and recipient each provide a pseudorandom number`
 - `Third exchange` (messages 5 and 6) — `Sends and verifies the identities of the initiator and recipient - authentication is here via PSK` - `Each side now proves knowledge of the PSK without sending it` - Both nodes computes a hash based on PSK and many other parametres
 - The information transmitted in the third exchange of messages is protected by the encryption algorithm established in the first two exchanges. Thus, the participants’ identities are encrypted and therefore not transmitted “in the clear.”
