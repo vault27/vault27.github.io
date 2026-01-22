@@ -23,13 +23,12 @@
 
 - IPsec is not a single protocol, but a framework for securing IP traffic
 - It is primarily designed to protect unicast traffic in point-to-point VPNs
-- IPsec establishes a secure control channel first - Phase 1, then negotiates data-protecting channel - Pahse 2
+- IPsec establishes a secure control channel first - Phase 1, then negotiates data-protecting channel - Phase 2
 - The control channel is used only for key management and crypto parametres negotioation for data channel
 - User data is protected separately using Data channel
 - All communications inside both tunnels are encrypted and authenticated
 - Routing protocols that rely on multicast or broadcast (e.g., OSPF, EIGRP) cannot run directly over classic IPsec tunnels
 - To support such protocols, a GRE tunnel is built first, and IPsec is used to encrypt the GRE traffic
- Process of building a first tunnel is called Phase 1
 - IPSec consists of 3 protocols:
     - ESP - data plane
     - AH(obsolete) - data plane
@@ -164,9 +163,13 @@ Below is their meaning and description
 ## 2. SPI
 
 - SPI stands for `Security Parameters Index`
-- 32-bit identifier(number) used to identify a specific Security Association (SA) in IPsec
+- `There are two types of SPI`: IKE SPI used in Phase 1 IKEv1, IKE_SA_INIT in IKEv2 and IPSec SPI used used in Phase 2 IKEv1, IKE_AUTH IKEv2
+- IKE SPI is also called `Cookie`  and is 64 bits and identifies Security Association (SA) in IKE Tunnel (Control Tunnel)
+- In IKEv1, the values in the ISAKMP header are formally called cookies, but the RFC explicitly defines them as SPIs for the ISAKMP/IKE SA
+- `IKEv2 removed the word cookie entirely`
+- IPSec SPI is 32 bits - identifies a specific Security Association (SA) in IPsec (Data Tunnel)
 - This number is injected into the header of  every ESP/AH/IKE packet, so the remote peer knows which Security Assosiation (SA) `[cryptographic parametres and keys]` to use for decryption and authentication
-- Also these numbers (for both local and remote peer) are stored in router's memory for Phase 1 and Phase 2 Security Assosiations 
+- Also these numbers (for both local and remote peer) are stored in router's memory for Phase 1 and Phase 2 Security Assosiations - in IKEv1, and for SAs in IKEv2
 - It is used in both phases during tunnels establishment and in both tunnels: data and control
 - Each peer generates its own SPI and sends to peer during Tunnel 1 creation and Tunnel 2 creation, and it means that the peer wants to receive traffic, using this SPI
 - Different SPIs for different tunnels are generated
@@ -615,10 +618,43 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 #### 6.2.2 Main Mode
 
 - `6 messages`
-- IKE Identities are protected and sent encrypted only > no one can see it
-- `First exchange` (messages 1 and 2) — `Proposes and accepts the encryption and authentication algorithms` - via SA > Proposals > transforms, each transform contains all crypto and auth options + SPI
-- Each proposal can contain multiple transforms
+- IKE Identities and Authentication Hash are protected and sent encrypted only > no one can see it
+- `This makes it imposiible to Brute Force Authentication Hash`
+- All Phase 1 Main Mode packets must include IKE SPIs(Cookies)
+- No ESP/AH SPIs yet — Phase 2 Quick Mode creates those
+
+**Main mode in a Nutshell**
+
+```
+│── 1. Generate Initiator and Responder SPIs and Negotiate all required crypto options - messages 1 and 2
+│   ├── Encryption
+│   ├── Hash - for auth of every packet
+│   ├── Authentication: PSK or certs
+│   ├── DH Group
+│   └── Lifetime 
+│ 
+│── 2. Exchange keys with Diffie Hellman algorithm - messages 3 and 4
+│   ├── DH Group
+│   ├── DH public key
+│   └── Nonce
+│ 
+│── 3. Send Encrypted ID and Encrypted Authentication Hash - messages 5 and 6
+│   ├── Encrypted ID
+│   └── Encrypted Authentication Hash
+│   
+```
+
+Authentication Hash should match the one calculated locally > IKE tunnel is established  
+Derived encryption keys are used to encrypt creation of IPSec tunnel   
+
+- `First message` - SA > Proposals > Transforms + Initiator SPI
+- Each proposal can contain many transforms
 - Each transform is a full combination of all cryptographic parameters - `not like in Phase 2` - `no transform sets`
+  - Encryption
+  - Hash - for auth of every packet
+  - Authentication method: PSK or certs
+  - DH Group
+  - Lifetime 
 
 **Message 1 Example: Initiator → Responder (SA Proposal)**
 
@@ -656,9 +692,178 @@ Internet Key Exchange v1
         Lifetime: 28800s
 ```
 
-- `Second exchange` (messages 3 and 4) — `Executes a DH exchange, and the initiator and recipient each provide a pseudorandom number`
-- `Third exchange` (messages 5 and 6) — `Sends and verifies the identities of the initiator and recipient - authentication is here via PSK` - `Each side now proves knowledge of the PSK without sending it` - Both nodes computes a hash based on PSK and many other parametres
-- The information transmitted in the third exchange of messages is protected by the encryption algorithm established in the first two exchanges. Thus, the participants’ identities are encrypted and therefore not transmitted “in the clear.”
+- `Second message` - Initiator SPI, Responder SPI, Selected SA with 1 Proposal inside and 1 Transform inside Proposal
+
+**Message 2 Example — Responder → Initiator (SA Selection)**
+
+```
+Frame 2: 198.51.100.20 → 192.0.2.10, UDP 500 → 500
+Internet Key Exchange v1
+  ISAKMP Header
+    Initiator SPI: 0xA1B2C3D4E5F60708
+    Responder SPI: 0x1122334455667788
+    Next Payload: Security Association (1)
+    Version: 1.0
+    Exchange Type: Main Mode (2)
+    Flags: 0x00
+    Message ID: 0x00000000
+  Payload: Security Association (SA)
+    Selected Proposal
+      Protocol ID: ISAKMP
+      SPI Size: 0
+      Transform
+        Encryption: AES-CBC-256
+        Hash: SHA-1
+        Authentication: Pre-Shared Key
+        DH Group: 14
+        Lifetime: 28800s
+```
+
+- `Third message` - DH Group + DH public Key + Nonce + SPIs
+- Nonce - is a a large, random, unpredictable number generated fresh for each exchange
+- Nonce is required to - Nonces bind the Diffie–Hellman exchange to this specific IKE run and prevent replay, key reuse, and precomputation attacks
+- Without nonces: `An attacker could replay an old DH public value` - `Both sides might unknowingly derive the same key again`
+- Nonce ensures: Even if DH values repeat, keys will not
+
+**Message 3 Example - Initiator → Responder - Key Exchange + Nonce**
+
+```
+Frame 3: 192.0.2.10 → 198.51.100.20, UDP 500 → 500
+Internet Key Exchange v1
+  ISAKMP Header
+    Initiator SPI: 0xA1B2C3D4E5F60708
+    Responder SPI: 0x1122334455667788
+    Next Payload: Key Exchange (4)
+    Version: 1.0
+    Exchange Type: Main Mode (2)
+    Flags: 0x00
+    Message ID: 0x00000000
+  Payload: Key Exchange (KE)
+    DH Group: 14
+    Public Value: g^xi mod p
+  Payload: Nonce (Ni)
+```
+
+- `Fourth message` - DH Group + DH public Key + Nonce + SPIs
+
+**Message 4 Example — Responder → Initiator - Key Exchange + Nonce**
+
+```
+Frame 4: 198.51.100.20 → 192.0.2.10, UDP 500 → 500
+Internet Key Exchange v1
+  ISAKMP Header
+    Initiator SPI: 0xA1B2C3D4E5F60708
+    Responder SPI: 0x1122334455667788
+    Next Payload: Key Exchange (4)
+    Version: 1.0
+    Exchange Type: Main Mode (2)
+    Flags: 0x00
+    Message ID: 0x00000000
+  Payload: Key Exchange (KE)
+    DH Group: 14
+    Public Value: g^xr mod p
+  Payload: Nonce (Nr)
+```
+
+- `Fifth message` - SPIs + IIKE iD encrypted + Authentication Hash Encrypted
+- Authentication Hash is calculated based on:
+
+```
+IKEv1 Phase 1 – Authentication HASH Inputs
+│
+├─ Shared Secret
+│  ├─ Pre-Shared Key (PSK)
+│  └─ or Private Key (RSA / DSS signatures)
+│
+├─ Derived Keying Material
+│  ├─ SKEYID
+│  ├─ SKEYID_d
+│  └─ SKEYID_a        ← directly used for authentication
+│
+├─ Diffie-Hellman Data
+│  ├─ g^i             (Initiator DH public value)
+│  └─ g^r             (Responder DH public value)
+│
+├─ ISAKMP Cookies (IKE SPIs)
+│  ├─ Initiator Cookie (SPIi)
+│  └─ Responder Cookie (SPIr)
+│
+├─ Nonces
+│  ├─ Ni              (Initiator nonce)
+│  └─ Nr              (Responder nonce)
+│
+├─ Phase 1 SA Payload
+│  └─ SA              (complete negotiated proposal payload)
+│
+├─ Identification Payloads
+│  ├─ IDii            (Initiator ID – used in HASH_I)
+│  └─ IDir            (Responder ID – used in HASH_R)
+│
+└─ Direction Context
+   ├─ HASH_I          (calculated by Initiator)
+   │  └─ includes IDii
+   └─ HASH_R          (calculated by Responder)
+      └─ includes IDir
+```
+
+- In IKEv1 Phase 1, there are two different authentication values
+- `HASH_I` - computed, sent by Initiator
+- `HASH_R` - computed, sent by Responder
+- Initiator proves “I am who I claim to be” → HASH_I
+- Responder proves “I am who I claim to be” → HASH_R
+- If the same hash were used, replay or reflection attacks would be possible
+- Everything is the same except the ID payload included
+- HASH_I includes IDii (Initiator Identification)
+- HASH_R includes IDir (Responder Identification)
+- `The initiator sends its identity and a hash; the responder recomputes the hash using the received identity and verifies it, thereby authenticating the initiator`
+- `Hash is a proof of possession` of the shared secret, bound to:
+  - The negotiated SA
+  - Both nonces
+  - Both SPIs
+  - The sender’s ID
+
+
+**Message 5 Example — Initiator → Responder (Encrypted ID + Authentication HASH)**
+
+```
+Frame 5: 192.0.2.10 → 198.51.100.20, UDP 500 → 500
+Internet Key Exchange v1
+  ISAKMP Header
+    Initiator SPI: 0xA1B2C3D4E5F60708
+    Responder SPI: 0x1122334455667788
+    Next Payload: Identification (5)
+    Version: 1.0
+    Exchange Type: Main Mode (2)
+    Flags: Encryption (0x01)
+    Message ID: 0x00000000
+  Encrypted Payloads
+    Identification (IDii)
+      Type: FQDN
+      Value: vpn-client.example.com
+    HASH_I
+```
+
+- `Sixth message` - SPIs + IKE ID encrypted + Authentication Hash Encrypted
+
+**Message 6 Example — Responder → Initiator (Encrypted ID + Authenticated HASH)**
+
+```
+Frame 6: 198.51.100.20 → 192.0.2.10, UDP 500 → 500
+Internet Key Exchange v1
+  ISAKMP Header
+    Initiator SPI: 0xA1B2C3D4E5F60708
+    Responder SPI: 0x1122334455667788
+    Next Payload: Identification (5)
+    Version: 1.0
+    Exchange Type: Main Mode (2)
+    Flags: Encryption (0x01)
+    Message ID: 0x00000000
+  Encrypted Payloads
+    Identification (IDir)
+      Type: FQDN
+      Value: vpn-gateway.example.com
+    HASH_R
+```
 
 #### 6.2.3 Aggressive Mode
 
