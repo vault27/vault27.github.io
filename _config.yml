@@ -1,5 +1,5 @@
-title: Vault27 | Network Engineering Notes
-description: Network Engineering Notes
+title: Vault-27 | Network Engineering Archive
+description: Network Engineering Archive
 show_downloads: false
 markdown: kramdown
 highlighter: rouge
@@ -10,4 +10,4 @@ kramdown:
   syntax_highlighter_opts:
     css_class: highlight
     block:
-      line_numbers: false
+      line_numbers: true
