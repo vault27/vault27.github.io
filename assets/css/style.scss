@@ -32,10 +32,23 @@ code.language-plaintext {
 /* Full code block styling */
 .language-plaintext.highlighter-rouge .highlight pre {
     font-family: "Fira Code", "Source Code Pro", monospace;
-    background-color: #1b2a1f;   /* Solarized Dark */
-    color: #33ff77;
+    background-color: #0f2a1c;   /* Solarized Dark */
+    color: #2bff88;
     padding: 14px 18px;
     border-radius: 6px;
+     /* CRT depth + glow */
+  box-shadow:
+    inset 0 0 18px rgba(43, 255, 136, 0.08),
+    inset 0 0 1px rgba(120, 255, 190, 0.35),
+    0 0 20px rgba(0, 0, 0, 0.6);
+
+  /* Subtle scanline texture */
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,0.025) 50%,
+      transparent 50%
+    );
+  background-size: 100% 4px;
     font-size: 0.95em;
     line-height: 1.5;
     overflow-x: auto;           /* horizontal scroll for long lines */
