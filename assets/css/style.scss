@@ -6,7 +6,7 @@
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.95rem;
   line-height: 1.7;
-  background-color: #00262f;
+  background-color: #00262f
   color: #93a1a1;
 }
 h1,
@@ -32,11 +32,10 @@ code.language-plaintext {
 /* Full code block styling */
 .language-plaintext.highlighter-rouge .highlight pre {
     font-family: "Fira Code", "Source Code Pro", monospace;
-    background-color: #001b22;   /* Solarized Dark */
+    background-color: #1b2a1f;   /* Solarized Dark */
     color: #33ff77;
     padding: 14px 18px;
     border-radius: 6px;
-    border-left: 3px solid #2aa198;
     font-size: 0.95em;
     line-height: 1.5;
     overflow-x: auto;           /* horizontal scroll for long lines */
