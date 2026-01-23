@@ -63,6 +63,13 @@ code.language-plaintext {
     tab-size: 4;                /* optional: tabs width */
     display: block;
 }
+/* FONT GOES HERE */
+.highlight pre code {
+  font-family: 'VT323', monospace !important;
+  font-size: 18px;          /* VT323 needs size */
+  line-height: 1.45;
+  letter-spacing: 0.04em;   /* CRT spacing */
+}
 
 /* Ensure <code> inside <pre> does not clip text */
 .language-plaintext.highlighter-rouge .highlight pre code {
