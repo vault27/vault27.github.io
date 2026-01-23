@@ -1,8 +1,13 @@
 ---
 ---
-
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 @import "{{ site.theme }}";
+/* VT323 ONLY for code blocks */
+.highlight pre {
+  font-family: 'VT323', monospace !important;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+}
 .markdown-body {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.95rem;
