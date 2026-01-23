@@ -32,10 +32,11 @@ code.language-plaintext {
 /* Full code block styling */
 .language-plaintext.highlighter-rouge .highlight pre {
     font-family: "Fira Code", "Source Code Pro", monospace;
-    background-color: #002b36;   /* Solarized Dark */
-    color: #839496;
+    background-color: #001b22;   /* Solarized Dark */
+    color: #33ff77;
     padding: 14px 18px;
     border-radius: 6px;
+    border-left: 3px solid #2aa198;
     font-size: 0.95em;
     line-height: 1.5;
     overflow-x: auto;           /* horizontal scroll for long lines */
