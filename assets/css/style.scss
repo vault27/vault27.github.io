@@ -9,6 +9,12 @@
   font-family: "Monoton", sans-serif;
   font-weight: 400;
   font-style: normal;
+  color: #7ec07c;
+}
+.markdown-body > h1:first-of-type::after {
+  content: "█";
+  animation: blink 1s steps(1) infinite;
+  margin-left: 0.4ch;
 }
 /* VT323 ONLY for code blocks */
 .highlight pre {
@@ -27,7 +33,7 @@ h1,
 h2,
 h3,
 h4 {
-  text-decoration: underline;
+  
 }
 strong, b {
   color: #cfa96a;
