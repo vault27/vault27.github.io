@@ -622,6 +622,12 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - `This makes it imposiible to Brute Force Authentication Hash`
 - All Phase 1 Main Mode packets must include IKE SPIs(Cookies)
 - No ESP/AH SPIs yet — Phase 2 Quick Mode creates those
+- `Nothing in the RFC forbids Main Mode + Initiator dynamic IP`
+- `Implementation-wise` it will not work
+- Main Mode + certs + dynamic IP = totally fine - so with certificates instead of PSK Main Mode works OK
+- `Main Mode with PSK will not work for RA VPNs or S2S VPNs with dynamic IP`
+- PSK is used to derive SKEYID > SKEYID is used to verify HASH_I / HASH_R > The responder must already know which PSK to use when it receives message 5 with ID and Auth Hash > And it knows it based on IP, which should be static
+- To choose PSK Main Mode needs correct IP of Initiator
 
 **Main mode in a Nutshell**
 
@@ -720,8 +726,8 @@ Internet Key Exchange v1
 ```
 
 - `Third message` - DH Group + DH public Key + Nonce + SPIs
-- Nonce - is a a large, random, unpredictable number generated fresh for each exchange
-- Nonce is required to - Nonces bind the Diffie–Hellman exchange to this specific IKE run and prevent replay, key reuse, and precomputation attacks
+- `Nonce - is a a large, random, unpredictable number generated fresh for each exchange`
+- Nonce is required to  bind the Diffie–Hellman exchange to this specific IKE run and prevent replay, key reuse, and precomputation attacks
 - Without nonces: `An attacker could replay an old DH public value` - `Both sides might unknowingly derive the same key again`
 - Nonce ensures: Even if DH values repeat, keys will not
 
@@ -765,7 +771,7 @@ Internet Key Exchange v1
   Payload: Nonce (Nr)
 ```
 
-- `Fifth message` - SPIs + IIKE iD encrypted + Authentication Hash Encrypted
+- `Fifth message` - SPIs + IKE ID encrypted + Authentication Hash Encrypted
 - Authentication Hash is calculated based on:
 
 ```
@@ -822,8 +828,7 @@ IKEv1 Phase 1 – Authentication HASH Inputs
   - Both SPIs
   - The sender’s ID
 
-
-**Message 5 Example — Initiator → Responder (Encrypted ID + Authentication HASH)**
+**Message 5 Example — Initiator → Responder (Encrypted ID + Initiator Authentication HASH)**
 
 ```
 Frame 5: 192.0.2.10 → 198.51.100.20, UDP 500 → 500
@@ -843,7 +848,7 @@ Internet Key Exchange v1
     HASH_I
 ```
 
-- `Sixth message` - SPIs + IKE ID encrypted + Authentication Hash Encrypted
+- `Sixth message` - SPIs + IKE ID encrypted + Responder Authentication Hash Encrypted
 
 **Message 6 Example — Responder → Initiator (Encrypted ID + Authenticated HASH)**
 
@@ -865,29 +870,92 @@ Internet Key Exchange v1
     HASH_R
 ```
 
+**In Case of Certificates instead of PSK**
+
+`When using certificates, the initiator replaces PSK-based HASH authentication with a CA-validated public certificate plus a signature created with its private key over the IKE exchange data — while the rest of Phase 1 remains largely the same`
+
+The responder:
+
+- Receives the certificate
+- Extracts the public key
+- Verifies the signature of connection options - initiator proves that it has a private key
+- Verifies The CA’s digital signature on the Public certificate - This public key was issued by a CA I trust for this identity
+
+Digital signatures over connection options:
+
+- DH values
+- Nonces
+- SA payloads
+- IDs
+
+`No pre-shared lookup is required` - so Main Mode witth Certs can be used with Initiator dynamic IP
+
+Responder logic:
+
+```
+1. Decrypt message 5
+2. Read IDii
+3. Read CERT
+4. Verify CA trust
+5. Verify SIG_I using public key
+6. Accept peer
+```
+
 #### 6.2.3 Aggressive Mode
 
-- Aggressive Mode compresses Phase 1 into three messages by sending identities and authentication data before a secure channel exists
-- Thus `IKE Identities of both sides and authentication data (hashes based on PSK)` are sent in clear text
-- This provides security risks via `oflline brute force of PSK`
+- `3 messages instead of 6 in Main Mode`
+- Aggressive mode was created to reduce load on links and CPU
+- `Aggressive Mode was part of IKEv1 from day one, added to enable faster handshakes and remote-access VPNs with dynamic peers, at the cost of identity protection and PSK security`
+- It allows connections from `initiator with dynamic IP`
+- ID is sent early, responder may `select PSK based on ID, not IP`
+- Several Initiators may work behind one IP and NAT
+- It is critical for remote-access VPNs
+- `Nothing in the RFC forbids Main Mode + dynamic IP`
+- `Implementation-wise` it will not work
+- Main Mode + certs + dynamic IP = totally fine - so with certificates instead of PSK Main Mode works OK
+- Most classic IKEv1 Remote Access VPNs used:
+  - Aggressive Mode
+  - PSK
+  - XAuth (username/password after Phase 1)
+  - Mode Config
+- Aggressive Mode sacrifices identity Security:
+  - IDs are sent in cleartext
+  - HASH_I and HASH_R are exposed
+  - Enables offline dictionary attacks against PSK
+- It is considered acceptable because of Cryptographic maturity and strong PSKs
+- IKEv2 eliminated Aggressive mode and always protects IDs and HASHes
+
+**Main mode, Aggressive Mode, IKEv2, RA VPNs**
+
+```
+IKEv1 Main Mode
+├─ Dynamic IP allowed by RFC
+├─ Works well with certificates
+└─ Painful / impractical with PSK
+
+IKEv1 Aggressive Mode
+├─ Designed for dynamic peers
+├─ Identity arrives early
+├─ PSK selection based on ID
+└─ Used by almost all PSK-based RA VPNs
+
+IKEv2
+├─ No Aggressive Mode
+├─ Always identity-protected
+└─ Dynamic peers fully supported
+```
 
 **Message 1: Initiator > Responder**
 
-- Initiator Cookie
-- Security Assosiation Proposals
-- Key Exchange Diffie-Hellman group + Key Exchange Data
-- Nonce - A cryptographically random bit string - 16-32 bits - adds randomness to a HASH generated for PSK 
-    - Even with the same PSK, every exchange gets new keys
-    - Replay attacks are prevented
-    - Keys are bound to this specific exchange
-- IKE Identity
+- Initiator SPI
+- `SA Proposals, DH Group, Key Exchange Data, Nonce, IKE ID - Everything! - Instead of only SA proposal in Main Mode`
 - Vendor IDs
 
 ```
 Internet Key Exchange
   Exchange Type: Aggressive Mode (4)
-  Initiator Cookie: 0x9f3a7c1e2b4d8a91
-  Responder Cookie: 0x0000000000000000
+  Initiator SPI: 0x9f3a7c1e2b4d8a91
+  Responder SPI: 0x0000000000000000
   Flags: Initiator
   Message ID: 0x00000000
 
@@ -1086,10 +1154,36 @@ An attacker capturing message 2, for example with ike-scan tool, has:
 - IDs
 - HASH_R
 
-They can brute-force PSK offline until hash matches  
-This is why Aggressive Mode + PSK is discouraged
+They can brute-force PSK offline until hash matches.   
+This is why Aggressive Mode + PSK is discouraged. 
+An attacker only needs:
+
+- A packet capture
+- The initiator identity
+
+No interaction with the gateway required.
 
 And what about certs instead of PSK?
+
+**Why XAuth made Aggressive Mode even worse?**
+
+To scale RA VPNs with XAuth, admins typically configured:
+
+- Single global PSK
+- Shared by all users
+- Rarely rotated
+- Often human-memorable
+
+Perfect target for offline cracking
+
+After PSK compromise, attacker can:
+
+- Successfully complete IKE Phase 1
+- Trigger XAuth prompts
+- Perform:
+  - Online password guessing
+  - Credential harvesting
+  - MFA fatigue (later setups)
 
 ### 6.3 Phase 2
 
@@ -1264,6 +1358,8 @@ If only ONE peer supports NAT-T
 - Tunnel will fail if a real NAT is present
 
 ## 8. IKEv2
+
+- `IKEv2 achieves Main-Mode-level security with Aggressive-Mode-level efficiency`
 
 **EAP**
 
