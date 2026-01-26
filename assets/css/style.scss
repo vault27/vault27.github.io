@@ -4,9 +4,17 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap");
 @import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap');
 @import "{{ site.theme }}";
+@font-face {
+  font-family: 'PxPlus IBM VGA9';
+  src:
+    url('/assets/fonts/PxPlus_IBM_VGA9.woff') format('woff'),
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 .markdown-body > h1:first-of-type,
 .markdown-body > h1:first-of-type a {
-  font-family: "Monoton", sans-serif;
+  font-family: "PxPlus IBM VGA9", monospace;
   font-weight: 400;
   font-style: normal;
   color: #7ec07c;
