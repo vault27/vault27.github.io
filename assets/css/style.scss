@@ -50,7 +50,10 @@ ul li::before {
   color: #93a1a1;
   max-width: 100ch;
 }
-
+/* Widen content */
+.container-lg {
+  max-width: 1100px;
+}
 html, body {
   background-color: #1a0f0a;
 }
