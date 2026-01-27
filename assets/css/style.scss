@@ -103,6 +103,7 @@ code.language-plaintext {
     font-weight: bold;                     /* optional, makes it pop */
     box-shadow: 0 0 2px rgba(0,0,0,0.3);  /* small shadow for contrast */
 }
+
 /* Full code block styling */
 .language-plaintext.highlighter-rouge .highlight pre {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
@@ -130,7 +131,12 @@ code.language-plaintext {
     white-space: pre;           /* preserve all spaces and indentation */
     tab-size: 4;                /* optional: tabs width */
     display: block;
-}
+  border-top: 1px dashed rgba(255,179,92,.7);
+  border-bottom: 1px dashed rgba(255,179,92,.7);
+  border-left: 1px dotted rgba(255,179,92,.6);
+  border-right: 1px dotted rgba(255,179,92,.6);
+ }
+
 /* FONT GOES HERE */
 .highlight pre code {
   font-family: 'VT323', monospace !important;
