@@ -1,9 +1,8 @@
 ---
 ---
+/* ---------- Import required fonts ---------- */
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Monoton&display=swap');
-@import "{{ site.theme }}";
 @font-face {
   font-family: 'PxPlus IBM VGA9';
   src:
@@ -12,6 +11,12 @@
   font-style: normal;
   font-display: swap;
 }
+
+/* --------- Load the entire theme’s base CSS before my overrides---------- */
+@import "{{ site.theme }}";
+
+/* --------- My overrides ---------- */
+
 .markdown-body > h1:first-of-type,
 .markdown-body > h1:first-of-type a {
   font-family: "PxPlus IBM VGA9", monospace;
