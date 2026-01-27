@@ -46,12 +46,13 @@ ul li::before {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.95rem;
   line-height: 1.7;
-  background-color: #00262f;
+  background-color: #1a0f0a;
   color: #93a1a1;
+  max-width: 100ch;
 }
 
 html, body {
-  background-color: #00262f;
+  background-color: #1a0f0a;
 }
 
 h1, h2, h3, h4, h5, h6 {
