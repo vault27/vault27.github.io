@@ -1432,15 +1432,29 @@ If only ONE peer supports NAT-T
 - Traffic stays UDP/500 + ESP
 - Tunnel will fail if a real NAT is present
 
-## 8. IKEv2
+## 7 IKEv2
 
 - `IKEv2 achieves Main-Mode-level security with Aggressive-Mode-level efficiency`
-
-**EAP**
-
-- Supports EAP - allows IKEv2 to authenticate users dynamically (per-user), using external identity systems, without changing the IKEv2 protocol itself
-- EAP allows IKEv2 to integrate cleanly with: RADIUS, Active Directory, LDAP, MFA systems
-- EAP may subsitute PSK or certificates, so you need only username and password, no additional PSK or cert, like in IKEv1
+- `4 messages instead of 6 or 9 in IKEv1`
+- IKEv2 removed ISAKMP entirely and defined its own message format
+- Consist of request/response pairs, called exchages: `IKE_SA_INIT, IKE_AUTH`
+- In IKEv2 there is no Main Mode or Aggressive Mode
+- 2 separate HMAC functions are negotiated in SA: PRF and Integrity, IKEv1 used a single HMAC for everything
+- IKEv2 has:
+    - IKE SPI (used in both IKE_SA_INIT and IKE_AUTH)
+    - ESP/AH SPI for CHILD_SA (used only in ESP/AH traffic)
+- IKEv2 does not have phases: 1 and 2
+- One child Ipsec SA is created by default in IKE_AUTH message
+- If you need additional Child SA - 2 more messages - request and response
+- Functionally, Phase 2 in IKEv1 (Quick Mode) and IKEv2 (Child SA) both negotiate ESP/AH SAs, keys, lifetimes, and traffic selectors, optionally with PFS
+- IKEv2 merges and simplifies the process, reduces message count, enforces explicit traffic selectors, and has cleaner rekey/Child SA creation flows
+- Traffic selectors are Mandatory: you must specify the exact local and remote subnets or hosts that this Child SA will cover
+- Workarounds for “any-to-any” for route based VPN: Cover all relevant subnets with broad TS + Use the VTI to route all traffic through a single IPsec SA
+- IKEv2 replaced XAuth with EAP (Extensible Authentication Protocol) for user-level auth - carried inside IKE_AUTH
+- EAP does not subsitute PSK or certificates, so you still need username and password
+- In IKEv2 Mode-Config phase is called Configuration Payloads (CP) inside the IKE_AUTH exchange
+- Next generation encryption support: AES-GCM, ECDH, etc...
+- Assymetric authentication support: one peer uses cert and other one uses password
 
 **Anti-DDoS**
 
@@ -1470,29 +1484,7 @@ State allocation, Result: CPU and memory exhaustion
 - Decryption Failure Detection: If a peer sends multiple packets that fail decryption (often a sign of a junk flood), the server automatically tears down the session
 - Certificate Size Limits: To prevent memory exhaustion from massive, fake certificates, administrators can set a maximum allowed size for certificates received during authentication
 
-
-
-- Fewer messages to establish IKE and IPSEC SAs: 4, instead of 6 or 9 in IKEv1
-- IKEv2 removed ISAKMP entirely and defined its own message format
-- Consist of request/response  pairs, called exchages: IKE_SA_INIT, IKE_AUTH, 
-- In IKEv2 there is no Main Mode or Aggressive Mode
-- Total: 4 messages if no EAP. More if EAP
-- IKEv2 has:
-    - IKE SPI (for both IKE_SA_INIT and IKE_AUTH)
-    - ESP/AH SPI for CHILD_SA (used only in ESP/AH traffic)
-- IKEv2 does not have phase 2
-- One child Ipsec SA is created by default in IKE_AUTH message
-- If you need additional Child SA - 2 more messages - request and response
-- Functionally, Phase 2 in IKEv1 (Quick Mode) and IKEv2 (Child SA) both negotiate ESP/AH SAs, keys, lifetimes, and traffic selectors, optionally with PFS
-- IKEv2 merges and simplifies the process, reduces message count, enforces explicit traffic selectors, and has cleaner rekey/Child SA creation flows
-- Traffic selectors are Mandatory: you must specify the exact local and remote subnets or hosts that this Child SA will cover
-- Workarounds for “any-to-any” for route based VPN: Cover all relevant subnets with broad TS + Use the VTI to route all traffic through a single IPsec SA
-- IKEv2 replaced XAuth with EAP (Extensible Authentication Protocol) for user-level auth - carried inside IKE_AUTH
-- In IKEv2 Mode-Config phase is called Configuration Payloads (CP) inside the IKE_AUTH exchange
-- Next generation encryption support: AES-GCM, ECDH, etc...
-- Assymetric authentication support: one peer uses cert and other one uses password
-
-**In a Nutshell - 4 mandatory messages only**
+**In a Nutshell - 4 mandatory messages only - without EAP and Configuration Payload**
 
 ```
 Initiator > IKE_SA_INIT > Responder
@@ -1504,51 +1496,85 @@ Initiator > CREATE_CHILD_SA > Responder - Optional
 Responder > CREATE_CHILD_SA > Initiator - Optional
 ```
 
-**Initiator sends IKE_SA_INIT packet: it contains Security assosiations wuth proposals: Encryption, Integrity, DH group + Key Exchange + Nonce + Initiator SPI**
+### IKEv2 PSK Example
+
+**Packet 1 - INIT_SA**  
+
+Initiator sends first IKE_SA_INIT packet, which includes: 
+
+```
+Initiator SPI
+SA
+ |-Proposals
+           |-Transforms (Encryption, Integrity, PRF, DH Group) 
+DH Public Key
+Nonce
+Source IP address hash for NAT-T detection - HASH(Initiator SPI | Responder SPI | IP address | UDP port)
+Destination IP address hash for NAT-T detection
+```
+
+**Packet itself**
 
 ```
 Internet Key Exchange Version 2
-  Initiator SPI:  a1b2c3d4e5f60708
-  Responder SPI:  0000000000000000
-  Next payload:   SA
-  Exchange type:  IKE_SA_INIT (34)
-  Flags:          Initiator
+  Initiator SPI: a1b2c3d4e5f60718
+  Responder SPI: 0000000000000000
+  Next Payload: Security Association (33)
+  Version: 2.0
+  Exchange Type: IKE_SA_INIT (34)
+  Flags: 0x08 (Initiator)
+  Message ID: 0
+  Length: 430
 
-  Payload: Security Association
-    Proposal #1: ESP + IKE transforms
-      Encryption: AES-CBC-256
-      Integrity : SHA256
-      DH group  : 14 (2048-bit MODP)
-  Payload: Key Exchange
-    DH Group: 14
-    KEi: <256 bytes of DH>
-  Payload: Nonce (Ni)
-    Ni: <random 32 bytes>
+Security Association
+  Next Payload: Key Exchange (34)
+  Length: 120
+  Proposal Number: 1
+  Protocol ID: IKE (1)
+  SPI Size: 0
+  Number of Transforms: 4
+  Transform: Encryption Algorithm (AES-CBC, 256-bit)
+  Transform: Integrity Algorithm (HMAC-SHA2-256-128)
+  Transform: Pseudorandom Function (PRF-HMAC-SHA2-256)
+  Transform: Diffie-Hellman Group (MODP 2048) - I am willing to use DH group 14 for this IKE SA -    This is negotiation
+
+Key Exchange
+  Next Payload: Nonce (40)
+  Length: 264
+  Diffie-Hellman Group: MODP 2048
+  Key Exchange Data:
+    9f:73:aa:41:4c:90:1e:77:...
+
+Nonce
+  Next Payload: Notify (41)
+  Length: 36
+  Nonce Data:
+    4a:8c:91:ff:10:be:...
+
+Notify
+  Next Payload: Notify (41)
+  Length: 28
+  Notify Message Type: NAT_DETECTION_SOURCE_IP
+  Notification Data:
+    7e:11:3a:...
+
+Notify
+  Next Payload: None (0)
+  Length: 28
+  Notify Message 
+  Type: NAT_DETECTION_DESTINATION_IP
+  Notification Data:
+    91:5a:8c:...
 ```
 
-**Responder sends  IKE_SA_INIT packet as well: chosen proposal, DH public part, Nonce, Cookie if AntiDDoS is used + Initiator, Responder SPI**
+**Packet 2 - INIT_SA**
+
+Responder sends second  IKE_SA_INIT packet, which includes:
+
+chosen proposal, DH public part, Nonce, Cookie if AntiDDoS is used + Initiator, Responder SPI**
 
 ```
-Internet Key Exchange Version 2
-  Initiator SPI:  a1b2c3d4e5f60708
-  Responder SPI:  1122334455667788
-  Next payload:   SA
-  Exchange type:  IKE_SA_INIT (34)
-  Flags:          Response
 
-  Payload: Security Association
-    Selected Proposal:
-      Encryption: AES-CBC-256
-      Integrity : SHA256
-      DH group  : 14
-
-  Payload: Key Exchange
-    KEr: <256 bytes of DH>
-  Payload: Nonce (Nr)
-    Nr: <random 32 bytes>
-
-  OPTIONAL:
-  Payload: Cookie (if DoS-protection active)
 ```
 
 **Initiator sends IKE_AUTH - Encrypted! - ID, SPIs, Auth type, ESP proposal(to create IPSEC SA, the same what is done in Phase 2 in IKEv1), traffic selectors**
@@ -1572,6 +1598,15 @@ Internet Key Exchange Version 2
 
 **Responder sends sends IKE_AUTH - Encrypted! - SPIs, ID, Auth, ESP proposal accepted, traffic selectors**
 
+**EAP**
+
+- EAP happens inside the IKE_AUTH exchange, after
+  - IKE_SA_INIT is complete
+  - DH keys are established
+  - The IKE SA is encrypted
+- All EAP messages are encrypted on the wire.
+- `EAP starts in message 4 when Responder request EAP auth - it is added to message 4`
+- 
 ## IKE scan
 
 **Test Phase 1**

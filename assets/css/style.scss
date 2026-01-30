@@ -1,6 +1,7 @@
 ---
 ---
 /* ---------- Import required fonts ---------- */
+
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap");
 @font-face {
@@ -16,6 +17,45 @@
 @import "{{ site.theme }}";
 
 /* --------- My overrides ---------- */
+
+/* --------- Body ---------- */
+
+.markdown-body {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  background-color: #2c1a12;
+  color: #93a1a1;
+  max-width: 100ch;
+}
+
+/* Widen content */
+.container-lg {
+  max-width: 1200px;
+}
+
+html, body {
+  background-color: #2c1a12;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 170, 100, 0.14),
+      rgba(255, 120, 40, 0.04) 40%,
+      transparent 70%
+    );
+
+  mix-blend-mode: screen;
+}
+
+/* --------- Title ---------- */
 
 .markdown-body > h1:first-of-type,
 .markdown-body > h1:first-of-type a {
@@ -46,37 +86,6 @@ ul li::before {
   font-family: 'VT323', monospace !important;
   font-size: 18px;
   letter-spacing: 0.04em;
-}
-.markdown-body {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  background-color: #2c1a12;
-  color: #93a1a1;
-  max-width: 100ch;
-}
-/* Widen content */
-.container-lg {
-  max-width: 1200px;
-}
-html, body {
-  background-color: #2c1a12;
-}
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(255, 170, 100, 0.14),
-      rgba(255, 120, 40, 0.04) 40%,
-      transparent 70%
-    );
-
-  mix-blend-mode: screen;
 }
 
 h1, h2, h3, h4, h5, h6 {
