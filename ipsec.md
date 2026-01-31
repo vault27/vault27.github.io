@@ -1439,7 +1439,13 @@ If only ONE peer supports NAT-T
 - IKEv2 removed ISAKMP entirely and defined its own message format
 - Consist of request/response pairs, called exchages: `IKE_SA_INIT, IKE_AUTH`
 - In IKEv2 there is no Main Mode or Aggressive Mode
-- 2 separate HMAC functions are negotiated in SA: PRF and Integrity, IKEv1 used a single HMAC for everything
+- 2 separate HMAC functions are negotiated in SA for control channel: PRF and Integrity, IKEv1 used a single HMAC for everything
+
+```
+Integrity: HMAC-SHA1-96   (fast, smaller packets)
+PRF:       HMAC-SHA256    (stronger key derivation)
+```
+
 - IKEv2 has:
     - IKE SPI (used in both IKE_SA_INIT and IKE_AUTH)
     - ESP/AH SPI for CHILD_SA (used only in ESP/AH traffic)
