@@ -523,6 +523,7 @@ Vendor ID
   Vendor ID: 1f07f70eaa6514d3b0fa96542a500000
   Meaning: Microsoft Windows IPsec
 ```
+
 - Why so many VIDs?
 - Because IKEv1 had no standard way to say:
     - “I support NAT-T”
