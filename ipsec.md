@@ -489,6 +489,10 @@ interface: GigabitEthernet0/0
         Status: ACTIVE
 ```
 
+## 6 Vendor IDs
+
+
+
 ## 6 IKE v1
 
 - IKEv1 was designed by the IETF IPsec work group in the mid-1990s and standardized in 1998 as RFC 2409
@@ -1450,6 +1454,7 @@ PRF:       HMAC-SHA256    (stronger key derivation)
     - IKE SPI (used in both IKE_SA_INIT and IKE_AUTH)
     - ESP/AH SPI for CHILD_SA (used only in ESP/AH traffic)
 - IKEv2 does not have phases: 1 and 2
+- No Vendor IDs, which are used in IKEv1 for NAT-T, XAUTH.....
 - One child Ipsec SA is created by default in IKE_AUTH message
 - If you need additional Child SA - 2 more messages - request and response
 - Functionally, Phase 2 in IKEv1 (Quick Mode) and IKEv2 (Child SA) both negotiate ESP/AH SAs, keys, lifetimes, and traffic selectors, optionally with PFS
@@ -1519,6 +1524,8 @@ Source IP address hash for NAT-T detection - HASH(Initiator SPI | Responder SPI 
 Destination IP address hash for NAT-T detection
 ```
 
+`No Auth method, no lifetime like in IKEv1, but separate PRF transform, NAT-T is embeded, not negotiated, no VIDs, DH exchange is immediate, not after crypto options negotiation`
+
 **Packet itself**
 
 ```
@@ -1577,10 +1584,64 @@ Notify
 
 Responder sends second  IKE_SA_INIT packet, which includes:
 
-chosen proposal, DH public part, Nonce, Cookie if AntiDDoS is used + Initiator, Responder SPI**
+```
+Initiator, Responder SPI
+Chosen proposal
+DH public part
+Nonce
+Cookie if AntiDDoS is used +*
+```
+**Packet Itself**
 
 ```
+Internet Key Exchange Version 2
+  Initiator SPI: a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Next Payload: Security Association (33)
+  Version: 2.0
+  Exchange Type: IKE_SA_INIT (34)
+  Flags: 0x20 (Response)
+  Message ID: 0
+  Length: 434
 
+Security Association
+  Next Payload: Key Exchange (34)
+  Length: 120
+  Proposal Number: 1
+  Protocol ID: IKE (1)
+  SPI Size: 0
+  Number of Transforms: 4
+  Transform: Encryption Algorithm (AES-CBC, 256-bit)
+  Transform: Integrity Algorithm (HMAC-SHA2-256-128)
+  Transform: Pseudorandom Function (PRF-HMAC-SHA2-256)
+  Transform: Diffie-Hellman Group (MODP 2048)
+
+Key Exchange
+  Next Payload: Nonce (40)
+  Length: 264
+  Diffie-Hellman Group: MODP 2048
+  Key Exchange Data:
+    3c:81:de:aa:55:09:...
+
+Nonce
+  Next Payload: Notify (41)
+  Length: 36
+  Nonce Data:
+    91:ab:cc:42:...
+
+Notify
+  Next Payload: Notify (41)
+  Length: 28
+  Notify Message Type: NAT_DETECTION_SOURCE_IP
+  Notification Data:
+    1c:55:99:...
+
+Notify
+  Next Payload: None (0)
+  Length: 28
+  Notify Message Type: NAT_DETECTION_DESTINATION_IP
+  Notification Data:
+    8e:44:21:...
 ```
 
 **Initiator sends IKE_AUTH - Encrypted! - ID, SPIs, Auth type, ESP proposal(to create IPSEC SA, the same what is done in Phase 2 in IKEv1), traffic selectors**
