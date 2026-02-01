@@ -491,7 +491,75 @@ interface: GigabitEthernet0/0
 
 ## 6 Vendor IDs
 
+- In IKEv1, a Vendor ID (VID) is just bytes
+- IKEv1 Phase 1 Message 1 Main Mode capture with lots of Vendor IDs, exactly like you’d see from a Cisco RA VPN headend in the 2000s
 
+```
+Vendor ID
+  Vendor ID: 4a131c81070358455c5728f20e95452f
+  Meaning: NAT-Traversal (RFC 3947)
+
+Vendor ID
+  Vendor ID: afcad71368a1f1c96b8696fc77570100
+  Meaning: Dead Peer Detection (Cisco)
+
+Vendor ID
+  Vendor ID: 09002689dfd6b712
+  Meaning: XAuth (Cisco Extended Authentication)
+
+Vendor ID
+  Vendor ID: 4048b7d56ebce88525e7de7f00d6c2d3
+  Meaning: Cisco Unity (Remote Access VPN)
+
+Vendor ID
+  Vendor ID: 12f5f28c457168a9702d9fe274cc0100
+  Meaning: IKE Fragmentation (Cisco proprietary)
+
+Vendor ID
+  Vendor ID: 3f237c7f2c7a3f8a6d8e97c2c4a9f001
+  Meaning: Vendor-specific (often ignored)
+
+Vendor ID
+  Vendor ID: 1f07f70eaa6514d3b0fa96542a500000
+  Meaning: Microsoft Windows IPsec
+```
+- Why so many VIDs?
+- Because IKEv1 had no standard way to say:
+    - “I support NAT-T”
+    - “I support DPD”
+    - “I support username/password”
+    - “I support fragmentation”
+- What the responder does? If recognized → enable feature - If unknown → silently ignore
+- Why Vendor IDs existed (historical reason)
+    - IKEv1 (RFC 2409, 1998) had a problem
+    - The protocol was underspecified
+    - Many features were missing or unclear
+    - Vendors implemented incompatible extensions
+- So vendors needed a way to say: Hey peer, I support this non-standard thing
+- No negotiation, No security, No guarantees
+- What Vendor IDs were used for (real use cases)
+    - NAT Traversal (before RFC) - Before NAT-T was standardized
+    - Dead Peer Detection (DPD)
+    - XAuth - Remote-access extensions (username/password auth) - Not in base IKEv1 - Implemented via VID
+    - Fragmentation - IKEv1 fragmentation (pre-RFC 7383)
+    - Implementation quirks
+    - Config Mode
+- Some VIDs existed just to say: “I am Cisco”, “I am Check Point”, “I am Windows”
+- Peers then adjusted behavior (!)
+- Why Vendor IDs are bad (architecturally)
+    - Fingerprinting
+    - Interoperability hacks
+    - Undocumented behavior
+    - Works only with vendor
+    - They are out-of-band signaling, which protocols should avoid
+- IKEv2 removed Vendor IDs completely
+- IKEv2 designers said: never again
+- IKEv2 replaced VIDs with Notify payload: Standardized, RFC-defined behavior
+- Examples:
+    - NAT-T → built-in
+    - DPD → INFORMATIONAL exchanges
+    - Fragmentation → RFC-defined
+    - Cookies → standardized DoS protection
 
 ## 6 IKE v1
 
