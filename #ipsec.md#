@@ -35,7 +35,9 @@
     - IKE v1 or v2 - control plane
 
 **Why it was invented?**
+As per RITM1089053:
 
+After the Workspace ONE UEM application upgrade, the profile page on the Admin Console is no longer accessible. Upon analyzing the logs, the vendor identified issues with the server P53PAJAWDS03.3p.adx.ctcx. Therefore, they recommend disabling this problematic device services server from the network pool mdm.cantire.com and routing traffic exclusively to the server P53PAJAWDS04.3p.adx.ctcx, as DS04 is functioning correctly with respect to MTS profile accessibility. Once the routing is updated, we can validate whether the issue is resolved and test the profile page accessibility.
 - To add security to IP networking itself
 - Original Internet had no built-in security
 - IP provides no: Encryption, Authentication, Integrity protection, Anti-replay protection
@@ -1576,7 +1578,7 @@ Initiator > CREATE_CHILD_SA > Responder - Optional
 Responder > CREATE_CHILD_SA > Initiator - Optional
 ```
 
-### IKEv2 PSK
+### IKEv2 PSK Example
 
 **Packet 1 - INIT_SA**  
 
@@ -1655,14 +1657,11 @@ Responder sends second  IKE_SA_INIT packet, which includes:
 
 ```
 Initiator, Responder SPI
-SA
- |-Chosen Proposal 
-                 |-Transforms (Encryption, Integrity, PRF, DH Group) 
+Chosen proposal
 DH public part
 Nonce
-NAT-T hashes
+Cookie if AntiDDoS is used +*
 ```
-
 **Packet Itself**
 
 ```
@@ -1716,146 +1715,26 @@ Notify
     8e:44:21:...
 ```
 
-
-**Packet 3 - INIT_AUTH**
-
-Initiator sends first IKE_AUTH Encrypted Packet, which includes:
-
-```
-Initiator, Reponder SPI from IKE_INIT
-Encrypted
-        |-Initiator ID
-        |-Auth method
-        |-Auth Hash
-        |-SA
-           |-Proposal
-                    |-SPI - for traffic it will RECEIVE
-                    |-Transform for Encryption
-                    |-Transform for Packet Authentication and Integrity
-        |-Traffic Selector for Initiator
-        |-Traffic Selector for Responder
-```
-
-**Packet itself**
+**Initiator sends IKE_AUTH - Encrypted! - ID, SPIs, Auth type, ESP proposal(to create IPSEC SA, the same what is done in Phase 2 in IKEv1), traffic selectors**
 
 ```
 Internet Key Exchange Version 2
-  Initiator SPI: a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload: Encrypted and Authenticated (46)
-  Version: 2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags: 0x08 (Initiator)
-  Message ID: 1
-  Length: 348
+  Initiator SPI:  a1b2c3d4e5f60708
+  Responder SPI:  1122334455667788
+  Next payload:   Encrypted
+  Exchange type:  IKE_AUTH (35)
+  Flags:          Initiator, Encrypted
 
-Encrypted and Authenticated
-  Initialization Vector:
-    7e:19:aa:03:...
-  Encrypted Data:
-    Identification - Initiator
-      ID Type: ID_USER_FQDN (3)
-      Identification Data: user1
-
-    Authentication
-      Authentication Method: Shared Key Message Integrity Code
-      Authentication Data:
-        6f:92:11:88:...
-
-    Security Association (Child SA)
-      Proposal Number: 1
-      Protocol ID: ESP (3)
-      SPI Size: 4
-      SPI: 1a2b3c4d
-      Transform: AES-CBC-256
-      Transform: HMAC-SHA2-256-128
-
-    Traffic Selector - Initiator
-      Number of TSs: 1
-      TS Type: IPv4 Address Range
-      Start Address: 0.0.0.0
-      End Address: 255.255.255.255
-      Start Port: 0
-      End Port: 65535
-
-    Traffic Selector - Responder
-      Number of TSs: 1
-      TS Type: IPv4 Address Range
-      Start Address: 0.0.0.0
-      End Address: 255.255.255.255
-      Start Port: 0
-      End Port: 65535
-
-  Padding Length: 3
-  Integrity Checksum: verified
+  Encrypted payload contents:
+    IDi             → "CN=vpn-client.example.com"
+    AUTH            → HMAC or RSA signature
+    SA (for CHILD_SA)
+      ESP proposal (AES-GCM-128, no integrity)
+    TSi             → 192.168.10.0/24
+    TSr             → 10.10.10.0/24
 ```
 
-**Packet 4**
-
-Responder sends reply to IKE_AUTH message, which includes:
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-Responder ID
-        |-Auth Method
-        |-Auth Hash
-        |-SA
-           |-Proposal
-                    |-SPI - which it wants to get inbound
-                    |-Encryption Transform
-                    |-Integrity transform - if not AEAD cipher is used
-        |-Traffic selector initiator
-        |-Traffic selector responder
-```
-
-**Packet itself**
-
-```
-Internet Key Exchange Version 2
-  Initiator SPI: a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload: Encrypted and Authenticated (46)
-  Version: 2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags: 0x20 (Response)
-  Message ID: 1
-  Length: 466
-
-Encrypted and Authenticated
-  Initialization Vector
-  Decrypted Data:
-
-    Identification - Responder
-      ID Type: ID_FQDN
-      Identification Data: vpn.example.com
-
-    Authentication
-      Authentication Method: Shared Key Message Integrity Code
-      Authentication Data: AUTH_r
-
-    Security Association (CHILD_SA)
-      Proposal 1: ESP
-        SPI: 0x1122EEFF        ← Responder inbound ESP SPI
-        Encryption Algorithm: AES-GCM-256
-        Integrity Algorithm: NONE
-        ESN: No
-
-    Traffic Selector - Initiator
-      TS Type: IPv4
-      Start Address: 10.0.0.10
-      End Address: 10.0.0.10
-
-    Traffic Selector - Responder
-      TS Type: IPv4
-      Start Address: 0.0.0.0
-      End Address: 255.255.255.255
-
-  Padding
-  Integrity Checksum: verified
-```
-
-### IKEv2 Certificates
+**Responder sends sends IKE_AUTH - Encrypted! - SPIs, ID, Auth, ESP proposal accepted, traffic selectors**
 
 **EAP**
 
