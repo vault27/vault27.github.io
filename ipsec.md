@@ -1857,6 +1857,140 @@ Encrypted and Authenticated
 
 ### IKEv2 Certificates
 
+What does NOT change:
+
+- Number of messages (still 4 in the basic flow)
+- IKE_SA_INIT packets (frames 1 & 2)
+- DH, nonces, NAT detection, SPIs
+- CHILD_SA negotiation
+- Traffic selectors
+- Encryption of IKE_AUTH
+
+What DOES change:
+
+- New payloads appear
+- AUTH payload content changes: Digital Signature instead of MAC
+- Certificate validation happens off-wire
+
+Packet 3 — IKE_AUTH (Initiator → Responder) - Changes:
+
+- Certificated added as a payload - initiator’s public certificate
+- Usually full chain (leaf + intermediates)
+- Public key only (never private key)
+- CERTREQ is added - optional
+- CERTREQ means “please send me a certificate issued by one of these CAs”
+- It’s about CA selection, not authentication itself
+- CERTREQ payload says: “If you send me a certificate, it must chain up to one of these Certificate Authorities.”
+- It contains: `Certificate encoding (X.509), One or more CA Distinguished Names`
+- AUTH payload (CHANGED): HMAC of PSK and other fields > Signature: Same data(As for HMAC) is signed - Proves possession of private key
+
+**Packet 3 Example with cert instead of PSK**
+
+```
+Internet Key Exchange Version 2
+  Initiator SPI: a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Next Payload: Encrypted and Authenticated (46)
+  Version: 2.0
+  Exchange Type: IKE_AUTH (35)
+  Flags: 0x08 (Initiator)
+  Message ID: 1
+  Length: 652
+
+Encrypted and Authenticated
+  Initialization Vector:
+    7a:3c:91:8f:2d:11:aa:6e:43:90:cd:1f:82:54:9a:01
+  Decrypted Data:
+    Identification - Initiator
+      Next Payload: Certificate (37)
+      ID Type: ID_FQDN (2)
+      Identification Data: user@vpn.example.com
+
+    Certificate
+      Next Payload: Certificate Request (38)
+      Certificate Encoding: X.509 Certificate - Signature (4)
+      Certificate Data:
+        -----BEGIN CERTIFICATE-----
+        MIIDqTCCApGgAwIBAgIUVn6n...
+        ...base64 omitted...
+        -----END CERTIFICATE-----
+
+    Certificate Request
+      Next Payload: Authentication (39)
+      Certificate Encoding: X.509 Certificate - Signature (4)
+      Certification Authority:
+        CN=User-CA,O=Example Corp,C=US
+
+    Authentication
+      Next Payload: Security Association (33)
+      Authentication Method: Digital Signature (14)
+      Authentication Data:
+        30:45:02:21:00:9c:81:5a:3e:7f:2b:19:ae:
+        6f:44:32:aa:91:cd:2e:55:1f:8b:3c:01:
+        02:20:6d:9e:43:bb:91:ca:fe:12:7a:cc:
+        9f:48:8e:91:0b:11:82:77:41:9e:aa:2d
+
+    Security Association
+      Next Payload: Traffic Selector - Initiator (44)
+      Proposal Number: 1
+      Protocol ID: ESP (3)
+      SPI Size: 4
+      SPI: 0xAABBCCDD
+      Transforms:
+        Transform Type: Encryption Algorithm (ENCR)
+          Transform ID: AES-GCM-256 (20)
+        Transform Type: Extended Sequence Numbers (ESN)
+          Transform ID: No ESN (0)
+
+    Traffic Selector - Initiator
+      Next Payload: Traffic Selector - Responder (45)
+      Number of TSs: 1
+      TS Type: IPv4 (7)
+      IP Protocol ID: Any (0)
+      Start Port: 0
+      End Port: 65535
+      Start Address: 10.0.0.10
+      End Address: 10.0.0.10
+
+    Traffic Selector - Responder
+      Next Payload: None (0)
+      Number of TSs: 1
+      TS Type: IPv4 (7)
+      IP Protocol ID: Any (0)
+      Start Port: 0
+      End Port: 65535
+      Start Address: 0.0.0.0
+      End Address: 255.255.255.255
+
+  Padding Length: 6
+  Padding: 00 00 00 00 00 00
+  Integrity Checksum: verified
+```
+
+Packet 4 — IKE_AUTH (Responder → Initiator)
+
+- The same as for PSK, But
+- Sends its certificate
+- Signs AUTH with its private key - Signature instead of PSK
+
+**What AUTH actually signs (important)**  
+Exactly the same data for PSK and certs:
+
+- IKE_SA_INIT messages (entire payloads)
+- ID payload
+- SA payload (if present)
+- TS payloads (if present)
+
+**What happens off-wire (but matters)**
+
+- Verifies certificate chain
+- Checks CA trust
+- Checks validity period
+- Checks revocation (CRL / OCSP)
+- Matches ID to certificate identity
+
+`None of that appears in packets`
+
 **EAP**
 
 - EAP happens inside the IKE_AUTH exchange, after
