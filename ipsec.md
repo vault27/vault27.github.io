@@ -1857,6 +1857,18 @@ Encrypted and Authenticated
 
 ### IKEv2 Certificates
 
+- Certs auth is more secure then PSK
+- Certs completely kill offline cracking
+- Because the attack surface disappears
+- If an attacker captures one IKE exchange, he can do bruteforce attack to AUTH payload (MAC)
+- What attacker does not have:
+    - Private key
+    - Any shared secret
+    - Any value that can be guessed
+- Private keys are not guessable
+- Certs completely eliminate PSK dictionary attacks, capture now - crack later attacks
+-
+
 What does NOT change:
 
 - Number of messages (still 4 in the basic flow)
@@ -1871,6 +1883,18 @@ What DOES change:
 - New payloads appear
 - AUTH payload content changes: Digital Signature instead of MAC
 - Certificate validation happens off-wire
+
+**What actually changes on the wire**
+
+```
+PSK:
+  ID + AUTH(MAC)
+
+CERT:
+  ID + CERT + AUTH(SIGN)
+```
+
+`Everything else is identical`  
 
 Packet 3 — IKE_AUTH (Initiator → Responder) - Changes:
 
