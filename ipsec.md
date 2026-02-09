@@ -1509,6 +1509,7 @@ If only ONE peer supports NAT-T
 
 - `IKEv2 achieves Main-Mode-level security with Aggressive-Mode-level efficiency`
 - `4 messages instead of 6 or 9 in IKEv1`
+- IKEv2 is a completely new protocol, not a revised one
 - IKEv2 removed ISAKMP entirely and defined its own message format
 - Consist of request/response pairs, called exchages: `IKE_SA_INIT, IKE_AUTH`
 - In IKEv2 there is no Main Mode or Aggressive Mode
@@ -1520,8 +1521,8 @@ PRF:       HMAC-SHA256    (stronger key derivation)
 ```
 
 - IKEv2 has:
-    - IKE SPI (used in both IKE_SA_INIT and IKE_AUTH)
-    - ESP/AH SPI for CHILD_SA (used only in ESP/AH traffic)
+    - IKE SPI (used in both IKE_SA_INIT and IKE_AUTH) - 2 SPI numbers for Initiator and Responder
+    - ESP/AH SPI for CHILD_SA (used only in ESP/AH traffic) - 2 SPI numbers as well
 - IKEv2 does not have phases: 1 and 2
 - No Vendor IDs, which are used in IKEv1 for NAT-T, XAUTH.....
 - One child Ipsec SA is created by default in IKE_AUTH message
@@ -1535,6 +1536,9 @@ PRF:       HMAC-SHA256    (stronger key derivation)
 - In IKEv2 Mode-Config phase is called Configuration Payloads (CP) inside the IKE_AUTH exchange
 - Next generation encryption support: AES-GCM, ECDH, etc...
 - Assymetric authentication support: one peer uses cert and other one uses password
+- Built-in AntiDDoS protection
+- NAT-T is embeded
+- DPD is built in and mandatory
 
 **Anti-DDoS**
 
@@ -1867,7 +1871,6 @@ Encrypted and Authenticated
     - Any value that can be guessed
 - Private keys are not guessable
 - Certs completely eliminate PSK dictionary attacks, capture now - crack later attacks
--
 
 What does NOT change:
 
@@ -2015,15 +2018,309 @@ Exactly the same data for PSK and certs:
 
 `None of that appears in packets`
 
-**EAP**
+### EAP + PSK
 
+- EAP allows to use additional authentication in addirion to PSK or Certs: username/password or additional cert
+- Used for RA VPN
+- In IKEv1 it called XAUTH
+- 8 messages in total, instead of 4
+- `When EAP is used, messages 1–2 unchanged, 3–4 modified, and extra messages 5-8 are added`
 - EAP happens inside the IKE_AUTH exchange, after
   - IKE_SA_INIT is complete
   - DH keys are established
   - The IKE SA is encrypted
-- All EAP messages are encrypted on the wire.
-- `EAP starts in message 4 when Responder request EAP auth - it is added to message 4`
-- 
+- All EAP messages are encrypted on the wire
+
+**Work flow**
+
+- Messages 3-6 - EAP authentication process + Configuration request
+- Messages 7-8 - Regular IKE_Auth exchange: Authentication, CHILD_SA creation, Traffic selectors + Configuration Reply (IP, GW, DNS...)
+- So EAP + Configuration request inster itself before IKE_AUTH messages
+- Auth and CHILD_SA  happen only after EAP
+
+**Timeline summary**
+
+```
+IKE_SA_INIT      → crypto, DH, NAT, cookies
+IKE_AUTH (3–6)   → WHO ARE YOU? (EAP)
+IKE_AUTH (7–8)   → PROVE IKE ID (PSK) + CREATE CHILD_SA
+```
+
+**EAP + PSK Example - Packets 3-8**
+
+**Packet 3 - IKE_AUTH (Initiator → Responder)**
+
+`No Auth here like in regular packet 3 without EAP, No SA Proposals, No Traffic selectors`
+
+```
+Initiator and Responder SPI from IKE_INIT
+Encrypted
+        |-Initiator ID
+        |-EAP Request
+        |-Configuration Request
+```
+
+**Packet itself**
+
+```
+Internet Key Exchange Version 2
+  Initiator SPI:  a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Next Payload:  Encrypted and Authenticated (46)
+  Version:       2.0
+  Exchange Type: IKE_AUTH (35)
+  Flags:         0x08 (Initiator)
+  Message ID:    1
+  Length:        312
+
+Encrypted and Authenticated Payload
+  Decrypted Data:
+    Identification - Initiator
+      ID Type: ID_FQDN (2)
+      Identification Data: user1@vpn.example.com
+
+    EAP Payload
+      Code: Request (1)
+      Identifier: 0
+      Type: Identity (1)
+      Data: <empty>
+
+    Configuration Payload
+      Configuration Type: CFG_REQUEST (1)
+      Attributes:
+        INTERNAL_IP4_ADDRESS
+        INTERNAL_IP4_DNS
+
+  Padding Length: 5
+  Integrity Checksum: verified
+```
+
+**Packet 4 - IKE_AUTH (Responder → Initiator)**
+
+```
+Initiator and Responder SPI from IKE_INIT
+Encrypted
+        |-Responder ID
+        |-EAP Challenge
+```
+
+**Packet itself**
+
+```
+Internet Key Exchange Version 2
+  Initiator SPI:  a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Next Payload:  Encrypted and Authenticated (46)
+  Version:       2.0
+  Exchange Type: IKE_AUTH (35)
+  Flags:         0x20 (Response)
+  Message ID:    1
+  Length:        298
+
+Encrypted and Authenticated Payload
+  Decrypted Data:
+    Identification - Responder
+      ID Type: ID_FQDN (2)
+      Identification Data: vpn.example.com
+
+    EAP Payload
+      Code: Request (1)
+      Identifier: 1
+      Type: EAP-MD5-Challenge (4)
+      Data:
+        Challenge Length: 16
+        Challenge: 9f:83:21:ab:7c:...
+
+  Padding Length: 6
+  Integrity Checksum: verified
+```
+
+**Packet 5 - IKE_AUTH (Initiator → Responder)**
+
+```
+Initiator and Responder SPI from IKE_INIT
+Encrypted
+        |-Responder ID
+        |-EAP Challenge
+```
+
+**Packet itself**
+
+```
+Internet Key Exchange Version 2
+  Initiator SPI:  a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Next Payload:  Encrypted and Authenticated (46)
+  Version:       2.0
+  Exchange Type: IKE_AUTH (35)
+  Flags:         0x08 (Initiator)
+  Message ID:    2
+  Length:        286
+
+Encrypted and Authenticated Payload
+  Decrypted Data:
+    EAP Payload
+      Code: Response (2)
+      Identifier: 1
+      Type: EAP-MD5-Challenge (4)
+      Data:
+        Response Value: 5e:44:aa:91:...
+
+  Padding Length: 7
+  Integrity Checksum: verified
+```
+
+**Packet 6 - IKE_AUTH (Responder → Initiator) - EAP Done**
+
+```
+Initiator and Responder SPI from IKE_INIT
+Encrypted
+        |-EAP Success
+`   
+```
+
+**Packet itself**
+
+```
+Internet Key Exchange Version 2
+  Initiator SPI:  a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Next Payload:  Encrypted and Authenticated (46)
+  Version:       2.0
+  Exchange Type: IKE_AUTH (35)
+  Flags:         0x20 (Response)
+  Message ID:    2
+  Length:        264
+
+Encrypted and Authenticated Payload
+  Decrypted Data:
+    EAP Payload
+      Code: Success (3)
+
+  Padding Length: 9
+  Integrity Checksum: verified
+```
+
+**Packet 7 - IKE_AUTH (Initiator → Responder) - same as packet 3 without EAP**
+
+```
+Initiator and Responder SPI from IKE_INIT
+Encrypted
+        |-Auth method
+        |-Auth Hash
+        |-SA
+           |-Proposal
+             |-SPI
+             |-Protocol: ESP
+             |-Encryption transform
+             |-Integrity transform
+        |-Traffic selector - Initiator
+        |-Traffic Selector - Responder
+```
+
+**Key points**
+
+- FIRST time AUTH appears
+- PSK proves IKE identity
+- CHILD_SA proposed
+
+**Packet itself**
+
+```
+Internet Key Exchange Version 2
+  Initiator SPI:  a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Next Payload:  Encrypted and Authenticated (46)
+  Version:       2.0
+  Exchange Type: IKE_AUTH (35)
+  Flags:         0x08 (Initiator)
+  Message ID:    3
+  Length:        412
+
+Encrypted and Authenticated Payload
+  Decrypted Data:
+    Authentication
+      Authentication Method: Shared Key Message Integrity Code
+      Authentication Data:
+        8b:19:fa:44:...
+
+    Security Association
+      Proposal #1
+        Protocol ID: ESP (3)
+        SPI: 0x1001a2b3
+        Transforms:
+          ENCR_AES_CBC (256)
+          INTEG_HMAC_SHA2_256
+          ESN disabled
+
+    Traffic Selector - Initiator
+      TS Type: TS_IPV4_ADDR_RANGE
+      Start Address: 0.0.0.0
+      End Address: 255.255.255.255
+
+    Traffic Selector - Responder
+      TS Type: TS_IPV4_ADDR_RANGE
+      Start Address: 10.0.0.0
+      End Address: 10.0.0.255
+
+  Padding Length: 4
+  Integrity Checksum: verified
+```
+
+**Packet 8 - IKE_AUTH (Responder → Initiator) — FINAL**
+
+```
+Initiator and Responder SPI from IKE_INIT
+Encrypted
+        |-Auth method
+        |-Auth Hash
+        |-SA
+           |-Proposal
+             |-SPI
+             |-Protocol: ESP
+             |-Encryption transform
+             |-Integrity transform
+        |-Configuration payload: IP, Gateway, DNS...
+```
+
+**Packet itself**
+
+```
+Internet Key Exchange Version 2
+  Initiator SPI:  a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Next Payload:  Encrypted and Authenticated (46)
+  Version:       2.0
+  Exchange Type: IKE_AUTH (35)
+  Flags:         0x20 (Response)
+  Message ID:    3
+  Length:        398
+
+Encrypted and Authenticated Payload
+  Decrypted Data:
+    Authentication
+      Authentication Method: Shared Key Message Integrity Code
+      Authentication Data:
+        4c:77:19:aa:...
+
+    Security Association
+      Proposal #1
+        Protocol ID: ESP (3)
+        SPI: 0x2009fabc
+        Transforms:
+          ENCR_AES_CBC (256)
+          INTEG_HMAC_SHA2_256
+          ESN disabled
+
+    Configuration Payload
+      Configuration Type: CFG_REPLY (2)
+      Attributes:
+        INTERNAL_IP4_ADDRESS: 10.0.0.25
+        INTERNAL_IP4_DNS: 10.0.0.10
+
+  Padding Length: 6
+  Integrity Checksum: verified 
+```
 ## IKE scan
 
 **Test Phase 1**
