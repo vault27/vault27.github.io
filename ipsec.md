@@ -2050,13 +2050,12 @@ IKE_AUTH (7–8)   → PROVE IKE ID (PSK) + CREATE CHILD_SA
 
 **Packet 3 - IKE_AUTH (Initiator → Responder)**
 
-`No Auth here like in regular packet 3 without EAP, No SA Proposals, No Traffic selectors`
+`No Auth here like in regular packet 3 without EAP, No SA Proposals, No Traffic selectors - this means that Client wants EAP`
 
 ```
 Initiator and Responder SPI from IKE_INIT
 Encrypted
         |-Initiator ID
-        |-EAP Request
         |-Configuration Request
 ```
 
@@ -2064,58 +2063,51 @@ Encrypted
 
 ```
 Internet Key Exchange Version 2
-  Initiator SPI:  a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload:  Encrypted and Authenticated (46)
-  Version:       2.0
+  Initiator SPI: 0xa1b2c3d4e5f60718
+  Responder SPI: 0x1122334455667788
+  Next Payload: Encrypted and Authenticated (46)
+  Version: 2.0
   Exchange Type: IKE_AUTH (35)
-  Flags:         0x08 (Initiator)
-  Message ID:    1
-  Length:        312
+  Flags: 0x08 (Initiator)
+  Message ID: 1
+  Length: 296
 
 Encrypted and Authenticated Payload
   Decrypted Data:
     Identification - Initiator
       ID Type: ID_FQDN (2)
-      Identification Data: user1@vpn.example.com
-
-    EAP Payload
-      Code: Request (1)
-      Identifier: 0
-      Type: Identity (1)
-      Data: <empty>
+      Identification Data: user1@example.com
 
     Configuration Payload
       Configuration Type: CFG_REQUEST (1)
-      Attributes:
+      Attribute:
         INTERNAL_IP4_ADDRESS
-        INTERNAL_IP4_DNS
 
-  Padding Length: 5
+  Padding Length: 6
   Integrity Checksum: verified
 ```
 
-**Packet 4 - IKE_AUTH (Responder → Initiator)**
+**Packet 4 - IKE_AUTH (Responder → Initiator) - EAP Request**
 
 ```
 Initiator and Responder SPI from IKE_INIT
 Encrypted
         |-Responder ID
-        |-EAP Challenge
+        |-EAP Request
 ```
 
 **Packet itself**
 
 ```
 Internet Key Exchange Version 2
-  Initiator SPI:  a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload:  Encrypted and Authenticated (46)
-  Version:       2.0
+  Initiator SPI: 0xa1b2c3d4e5f60718
+  Responder SPI: 0x1122334455667788
+  Next Payload: Encrypted and Authenticated (46)
+  Version: 2.0
   Exchange Type: IKE_AUTH (35)
-  Flags:         0x20 (Response)
-  Message ID:    1
-  Length:        298
+  Flags: 0x20 (Response)
+  Message ID: 1
+  Length: 308
 
 Encrypted and Authenticated Payload
   Decrypted Data:
@@ -2126,82 +2118,105 @@ Encrypted and Authenticated Payload
     EAP Payload
       Code: Request (1)
       Identifier: 1
-      Type: EAP-MD5-Challenge (4)
-      Data:
-        Challenge Length: 16
-        Challenge: 9f:83:21:ab:7c:...
+      Type: Identity (1)
 
-  Padding Length: 6
+  Padding Length: 5
   Integrity Checksum: verified
 ```
 
-**Packet 5 - IKE_AUTH (Initiator → Responder)**
+**Packet 5 - IKE_AUTH (Initiator → Responder) - EAP Identity from Client - Username**
 
 ```
 Initiator and Responder SPI from IKE_INIT
 Encrypted
-        |-Responder ID
-        |-EAP Challenge
+        |-EAP ID
 ```
 
 **Packet itself**
 
 ```
 Internet Key Exchange Version 2
-  Initiator SPI:  a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload:  Encrypted and Authenticated (46)
-  Version:       2.0
+  Initiator SPI: 0xa1b2c3d4e5f60718
+  Responder SPI: 0x1122334455667788
+  Next Payload: Encrypted and Authenticated (46)
+  Version: 2.0
   Exchange Type: IKE_AUTH (35)
-  Flags:         0x08 (Initiator)
-  Message ID:    2
-  Length:        286
+  Flags: 0x08 (Initiator)
+  Message ID: 2
+  Length: 284
 
 Encrypted and Authenticated Payload
   Decrypted Data:
     EAP Payload
       Code: Response (2)
       Identifier: 1
-      Type: EAP-MD5-Challenge (4)
-      Data:
-        Response Value: 5e:44:aa:91:...
+      Type: Identity (1)
+      Identity: user1@example.com
 
   Padding Length: 7
   Integrity Checksum: verified
 ```
 
-**Packet 6 - IKE_AUTH (Responder → Initiator) - EAP Done**
+**Username is now known**
+
+**Packet 6 - IKE_AUTH (Responder → Initiator) - EAP authentication challenge**
 
 ```
 Initiator and Responder SPI from IKE_INIT
 Encrypted
-        |-EAP Success
+        |-EAP Challenge
 `   
 ```
 
 **Packet itself**
 
 ```
-Internet Key Exchange Version 2
-  Initiator SPI:  a1b2c3d4e5f60718
+IKEv2
+  Initiator SPI: a1b2c3d4e5f60718
   Responder SPI: 1122334455667788
-  Next Payload:  Encrypted and Authenticated (46)
-  Version:       2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags:         0x20 (Response)
-  Message ID:    2
-  Length:        264
+  Exchange Type: IKE_AUTH
+  Flags: Response
+  Message ID: 2
+  Encrypted
 
-Encrypted and Authenticated Payload
-  Decrypted Data:
-    EAP Payload
-      Code: Success (3)
-
-  Padding Length: 9
-  Integrity Checksum: verified
+Decrypted Payloads:
+  EAP Payload
+    Code: Request (1)
+    Identifier: 2
+    Type: MD5-Challenge (4)
+    Value-Size: 16
+    Challenge:
+      9f:83:21:ab:7c:44:9e:12:3d:aa:09:be:77:01:fe:22
 ```
 
-**Packet 7 - IKE_AUTH (Initiator → Responder) - same as packet 3 without EAP**
+**Packet 7 - IKE_AUTH (Initiator → Responder) - Auth challenge**
+
+```
+Initiator and Responder SPI from IKE_INIT
+Encrypted
+        |-EAP Challenge 
+```
+
+**Packet itself**
+
+```
+IKEv2
+  Initiator SPI: a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Exchange Type: IKE_AUTH
+  Flags: Initiator
+  Message ID: 3
+  Encrypted
+
+Decrypted Payloads:
+  EAP Payload
+    Code: Response (2)
+    Identifier: 2
+    Type: MD5-Challenge (4)
+    Value-Size: 16
+    Response:
+      5e:44:aa:91:3c:99:f1:77:6d:02:ab:45:11:fe:88:90
+```
 
 ```
 Initiator and Responder SPI from IKE_INIT
