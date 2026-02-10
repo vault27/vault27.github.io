@@ -2001,6 +2001,7 @@ Packet 4 — IKE_AUTH (Responder → Initiator)
 - Signs AUTH with its private key - Signature instead of PSK
 
 **What AUTH actually signs (important)**  
+
 Exactly the same data for PSK and certs:
 
 - IKE_SA_INIT messages (entire payloads)
@@ -2018,9 +2019,9 @@ Exactly the same data for PSK and certs:
 
 `None of that appears in packets`
 
-### EAP + PSK
+### EAP
 
-- EAP allows to use additional authentication in addirion to PSK or Certs: username/password or additional cert
+- EAP allows to use additional authentication in addition to PSK or Certs: username/password or additional cert
 - Used for RA VPN
 - In IKEv1 it called XAUTH
 - 8 messages in total, instead of 4
@@ -2033,20 +2034,101 @@ Exactly the same data for PSK and certs:
 
 **Work flow**
 
-- Messages 3-6 - EAP authentication process + Configuration request
-- Messages 7-8 - Regular IKE_Auth exchange: Authentication, CHILD_SA creation, Traffic selectors + Configuration Reply (IP, GW, DNS...)
-- So EAP + Configuration request inster itself before IKE_AUTH messages
+- Messages 1-2: IKE_SA_INIT - regular
+- Message 3 - empy IKE_AUTH request with Initiator ID - it means I want EAP
+- Messages 4-8 - EAP authentication process
+- Messages 9-10 - Regular IKE_Auth exchange: Authentication, CHILD_SA creation, Traffic selectors + Configuration Request/Reply (IP, GW, DNS...)
+- `EAP packets are  between IKE_SA_INIT and IKE_AUTH regular packets, but technically EAP authentication is performed within the IKE_AUTH exchange.`
 - Auth and CHILD_SA  happen only after EAP
 
-**Timeline summary**
+Terms
+
+- i - Initiator part
+- r - Responder part
+- SA - Security Assosiation
+- KE - Key Exchange (Diffie-Hellman public value) - DH group (must match SA) - DH public number (g^x mod p, EC point, etc.)
+- N - Nonce (random number)
+- ID - IKE Identity
+- TS - Traffic Selector
 
 ```
-IKE_SA_INIT      → crypto, DH, NAT, cookies
-IKE_AUTH (3–6)   → WHO ARE YOU? (EAP)
-IKE_AUTH (7–8)   → PROVE IKE ID (PSK) + CREATE CHILD_SA
+Initiator                                Responder
+---------                                ----------
+
+Message 1
+IKE_SA_INIT  -------------------------->
+  SAi, KEi, Ni
+  (crypto negotiation, DH, NAT-D)
+
+Message 2
+IKE_SA_INIT  <--------------------------
+  SAr, KEr, Nr
+  (IKE SA keys derived)
+
+--------------------------------------------------
+IKE_AUTH exchange begins (all messages encrypted)
+--------------------------------------------------
+
+Message 3
+IKE_AUTH     -------------------------->
+  IDi
+  (no AUTH payload)
+  (implicitly indicates EAP will be used)
+
+Message 4
+IKE_AUTH     <--------------------------
+  IDr
+  EAP-Request
+
+Message 5
+IKE_AUTH     -------------------------->
+  EAP-Response
+
+Message 6
+IKE_AUTH     <--------------------------
+  EAP-Request
+
+Message 7
+IKE_AUTH     -------------------------->
+  EAP-Response
+
+Message 8
+IKE_AUTH     <--------------------------
+  EAP-Success
+  (EAP authentication complete)
+
+--------------------------------------------------
+Final authentication and CHILD_SA creation
+(still part of the same IKE_AUTH exchange)
+--------------------------------------------------
+
+Message 9
+IKE_AUTH     -------------------------->
+  AUTH (Initiator authentication)
+  SA (CHILD_SA proposal)
+  TSi, TSr
+  CFG_REQUEST
+    - INTERNAL_IP4_ADDRESS
+    - INTERNAL_IP4_DNS
+    - INTERNAL_IP4_SUBNET
+
+Message 10
+IKE_AUTH     <--------------------------
+  AUTH (Responder authentication)
+  SA (CHILD_SA accepted)
+  TSi, TSr
+  CFG_REPLY
+    - Assigned virtual IP
+    - DNS servers
+    - Split tunnel info
+
+--------------------------------------------------
+IKE SA established
+First CHILD_SA established
+--------------------------------------------------
 ```
 
-**EAP + PSK Example - Packets 3-8**
+**EAP + PSK Example - Packets 3-10**
 
 **Packet 3 - IKE_AUTH (Initiator → Responder)**
 
@@ -2218,6 +2300,32 @@ Decrypted Payloads:
       5e:44:aa:91:3c:99:f1:77:6d:02:ab:45:11:fe:88:90
 ```
 
+**Packet 8 - IKE_AUTH (Responder → Initiator) - EAP Success - EAP authentication complete**
+
+```
+Initiator and Responder SPI from IKE_INIT
+Encrypted
+        |-EAP Success 
+```
+
+**Packet itself**
+
+```
+IKEv2
+  Initiator SPI: a1b2c3d4e5f60718
+  Responder SPI: 1122334455667788
+  Exchange Type: IKE_AUTH
+  Flags: Response
+  Message ID: 3
+  Encrypted
+
+Decrypted Payloads:
+  EAP Payload
+    Code: Success (3)
+```
+
+**Packet 9 - IKE_AUTH (Responder → Initiator) - Regular IKE_AUTH**
+
 ```
 Initiator and Responder SPI from IKE_INIT
 Encrypted
@@ -2282,7 +2390,7 @@ Encrypted and Authenticated Payload
   Integrity Checksum: verified
 ```
 
-**Packet 8 - IKE_AUTH (Responder → Initiator) — FINAL**
+**Packet 10 - IKE_AUTH (Responder → Initiator) — FINAL**
 
 ```
 Initiator and Responder SPI from IKE_INIT
@@ -2336,6 +2444,266 @@ Encrypted and Authenticated Payload
   Padding Length: 6
   Integrity Checksum: verified 
 ```
+
+## Authentication scenarios
+
+```
+===============================================================================
+SITE-TO-SITE (S2S) VPN — AUTHENTICATION FLOWS
+===============================================================================
+
+Goal:
+  - Authenticate two NETWORK DEVICES
+  - Long-lived tunnels
+  - Static peers
+  - No user authentication
+
+------------------------------------------------
+IKEv1 – Main Mode – PSK
+------------------------------------------------
+Purpose:
+  - Simple device authentication
+  - Easy to deploy
+
+Popularity: ⭐⭐⭐⭐ (very common historically)
+
+Problems:
+  - PSK vulnerable to offline cracking
+  - Poor scalability
+  - Key rotation is painful
+
+Status:
+  ❌ Legacy / discouraged today
+
+------------------------------------------------
+IKEv1 – Main Mode – Certificates
+------------------------------------------------
+Flow:
+  Main Mode
+    SA, KE, Ni/Nr
+    CERT, SIG
+
+Purpose:
+  - Strong device authentication
+  - Identity protection
+
+Popularity:
+  ⭐⭐ (used in high-security environments)
+
+Pros:
+  - No offline cracking
+  - Scales well
+  - Strong cryptographic identity
+
+Cons:
+  - PKI overhead
+
+------------------------------------------------
+IKEv2 – PSK
+------------------------------------------------
+Flow:
+  IKE_SA_INIT
+  IKE_AUTH (AUTH, CHILD_SA)
+
+Purpose:
+  - Simple S2S authentication
+
+Popularity:
+  ⭐⭐⭐⭐⭐ (most common in SMB / cloud)
+
+Problems:
+  - Offline cracking possible
+  - Weak if PSK reused
+
+Status:
+  ⚠️ Acceptable only with strong random PSKs
+
+------------------------------------------------
+IKEv2 – Certificates (BEST PRACTICE)
+------------------------------------------------
+Flow:
+  IKE_SA_INIT
+  IKE_AUTH
+    IDi/IDr
+    CERT
+    AUTH
+    CHILD_SA
+
+Purpose:
+  - Strong device-to-device authentication
+
+Popularity:
+  ⭐⭐⭐⭐ (enterprise / cloud / zero-trust)
+
+Why best:
+  ✔ No offline cracking
+  ✔ Scales well
+  ✔ Clean rekey & rotation
+  ✔ Mandatory for high-security environments
+
+BEST CHOICE FOR S2S VPNs
+✔ IKEv2 + Certificates
+
+===============================================================================
+REMOTE-ACCESS (RA) VPN — AUTHENTICATION FLOWS
+===============================================================================
+
+Goal:
+  - Authenticate USERS (and sometimes devices)
+  - Dynamic IPs
+  - Per-user authorization
+  - Virtual IP assignment
+
+------------------------------------------------
+IKEv1 – Aggressive Mode – PSK
+------------------------------------------------
+Flow:
+  Aggressive Mode (3 messages)
+    IDi exposed
+    AUTH (PSK)
+
+Purpose:
+  - Fast RA VPN setup
+
+Popularity:
+  ⭐⭐⭐ (old deployments)
+
+Problems:
+  - Offline PSK cracking
+  - Identity exposed
+  - Very weak security
+
+Status:
+  ❌ Do not use today
+
+------------------------------------------------
+IKEv1 – Aggressive Mode – PSK + XAUTH
+------------------------------------------------
+Flow:
+  Aggressive Mode
+  + XAUTH (username/password)
+
+Purpose:
+  - Device auth (PSK)
+  - User auth (XAUTH)
+
+Popularity:
+  ⭐⭐⭐⭐ (classic Cisco RA VPNs)
+
+Problems:
+  - PSK still crackable offline
+  - XAUTH is vendor-specific
+  - Legacy design
+
+Status:
+  ❌ Legacy / replaced by IKEv2
+
+------------------------------------------------
+IKEv2 – PSK + EAP
+------------------------------------------------
+Flow:
+  IKE_SA_INIT
+  IKE_AUTH
+    IDi
+    EAP (user auth)
+    AUTH
+    CHILD_SA
+    CONFIG
+
+Purpose:
+  - Device authentication via PSK
+  - User authentication via EAP
+
+Popularity:
+  ⭐⭐⭐⭐⭐ (very common)
+
+Security:
+  ⚠️ PSK crackable offline
+  ✔ User auth strong
+
+Used when:
+  - No PKI
+  - Easy onboarding
+
+------------------------------------------------
+IKEv2 – Certificates (device) + EAP (user)
+------------------------------------------------
+Flow:
+  IKE_SA_INIT
+  IKE_AUTH
+    IDi/IDr
+    CERT (device auth)
+    EAP (user auth)
+    AUTH
+    CHILD_SA
+    CONFIG
+
+Purpose:
+  - Device authentication
+  - User authentication
+  - Per-user authorization
+
+Popularity:
+  ⭐⭐⭐⭐ (enterprise standard)
+
+Why best:
+  ✔ No offline cracking
+  ✔ Strong identity binding
+  ✔ Works with MFA
+
+BEST CHOICE FOR RA VPNs
+✔ IKEv2 + Certs + EAP
+
+===============================================================================
+EAP METHODS — WHAT IS ACTUALLY USED
+===============================================================================
+
+Common in IKEv2 RA VPNs:
+
+EAP-MSCHAPv2
+  - Username/password
+  - Very common with Active Directory
+  - ⚠️ Vulnerable if not protected by TLS
+
+EAP-TLS (BEST)
+  - Client certificate
+  - Strong mutual authentication
+  - No passwords
+  - Enterprise gold standard
+
+EAP-TTLS / PEAP
+  - TLS tunnel + inner auth
+  - Username/password inside TLS
+  - Common in Wi-Fi, less in VPN
+
+EAP-MD5
+  - ❌ Weak
+  - No mutual auth
+  - Should not be used
+
+Most popular today:
+  ✔ EAP-MSCHAPv2 (legacy environments)
+  ✔ EAP-TLS (modern / secure environments)
+
+===============================================================================
+ONE-LINE TAKEAWAYS
+===============================================================================
+
+S2S VPN:
+  → Authenticate DEVICES
+  → Best: IKEv2 + Certificates
+
+RA VPN:
+  → Authenticate USERS (and devices)
+  → Best: IKEv2 + Certificates + EAP-TLS
+
+PSK:
+  → Easy
+  → Weak
+  → Legacy unless carefully managed
+```
+
+
 ## IKE scan
 
 **Test Phase 1**
