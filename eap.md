@@ -1,5 +1,40 @@
 ### EAP
 
+- EAP is never used in pure form, it is always encapsulated somewhere...
+
+```
++-------------------------------------------------------------+
+
+|                  [ 1. AUTHENTICATION METHOD ]               |
+|      (The actual credentials - "The Secret Message")        |
+|      Examples: EAP-TLS, EAP-MSCHAPv2, EAP-PEAP, EAP-SIM     |
++------------------------------|------------------------------+
+                               v
++-------------------------------------------------------------+
+
+|                  [ 2. EAP FRAMEWORK ]                       |
+|         (The common language - "The Envelope")              |
+|         RFC 3748: Request, Response, Success, Failure       |
++------------------------------|------------------------------+
+                               v
++-------------------------------------------------------------+
+
+|                  [ 3. CARRIER PROTOCOL ]                    |
+|             (The vehicle - "The Delivery Truck")            |
+|                                                             |
+|  [ LAYER 2 ]       [ LAYER 3 ]       [ LAYER 7 / UDP ]      |
+|    EAPOL      |       PANA      |         RADIUS            |
+|     PPP       |       IKEv2     |        DIAMETER           |
++------------------------------|------------------------------+
+                               v
++-------------------------------------------------------------+
+
+|                  [ 4. PHYSICAL MEDIA ]                      |
+|             (The road - "The Infrastructure")               |
+|          802.3 (Ethernet), 802.11 (Wi-Fi), 5G/LTE           |
++-------------------------------------------------------------+
+```
+
 - EAP existed before 802.1X and was originally created for PPP (Point-to-Point Protocol)
 - Extensible Authentication Protocol (EAP) is not an authentication method by itself
 - It is a framework that allows many authentication methods to be plugged into it
