@@ -4,7 +4,7 @@
 ## Secure Transport Protocols
 
 - [IPSec](/ipsec.html)
-- [TLS/ssl](/ssl.html)
+- [TLS/SSL](/ssl.html)
 - [SSH](/ssh.html)
 
 ## Identity Protocols
