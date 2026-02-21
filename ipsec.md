@@ -2717,7 +2717,9 @@ ike-scan -M -A --id=0000 1.1.1.1
 #### 4.1.1 Transport Mode
 
 - Typically used for host-to-host communication
-- Is practically never used, only when 2 firewalls communicate only with each other
+- Server A ↔ Server B over the internet - No VPN gateways - No IP tunneling - Just encrypted transport
+- Before widespread TLS adoption, this was common in AD environments - Windows 2000 to Windows 2000
+- TLS replaced it
 - It encrypts only the payload (Layer 4 and up), keeping the original IP header intact
 - Adds ESP header after original IP header + ESP trailer + ESP auth
 
@@ -2726,7 +2728,7 @@ ike-scan -M -A --id=0000 1.1.1.1
 | Original IP Header       |  ← Unencrypted (source/dest IPs visible)
 |   (IPv4 or IPv6)       |
 +----------------------------+
-| ESP Header               |  ← Encrypted + Authenticated
+| ESP Header               |  ← Not Encrypted + Authenticated
 |   (SPI, Sequence #)    |
 +----------------------------+
 | Upper‑Layer Data         |  ← Encrypted + Authenticated
@@ -2736,7 +2738,7 @@ ike-scan -M -A --id=0000 1.1.1.1
 |   (Padding, Pad Length,  |
 |    Next Header)          |
 +----------------------------+
-| ESP Auth Trailer (ICV)   |  ← Not encrypted; Integrity Check Value (HMAC) - is used to authenticate (verify integrity and authenticity) - computed as an HMAC, e.g., HMAC‑SHA256) - is calculated over ESP Header, Encrypted Payload, ESP Trailer
+| ESP Auth Trailer (ICV)   |  ← Not encrypted; Integrity Check Value (HMAC) - is used to authenticate (verify integrity and authenticity) - computed as an HMAC, e.g., HMAC‑SHA256 - is calculated over ESP Header, Encrypted Payload, ESP Trailer
 +----------------------------+
 ```
 
@@ -2754,7 +2756,7 @@ ike-scan -M -A --id=0000 1.1.1.1
 | New Outer IP Header      |  ← Unencrypted (gateway IPs)
 |   (IPv4 or IPv6)       |
 +----------------------------+
-| ESP Header               |  ← Encrypted + Authenticated
+| ESP Header               |  ← Not Encrypted + Authenticated
 |   (SPI, Sequence #)    |
 +----------------------------+
 | Original IP Packet       |  ← Encrypted + Authenticated
@@ -2784,10 +2786,112 @@ ike-scan -M -A --id=0000 1.1.1.1
 
 - Separate protocol above IP with encapsulation for data plane
 - Data Integrity, Authentication, Protection from replays
+- AH = integrity + authentication
 - IP 51
 - Does not support encryption
 - Does not support NAT-T
 - Transorm set for authentication header defines only HMAC function, for example `ah-sha-hmac`
+- Not used anywhere
+- AH has two modes just like ESP: Transport mode and Tunnel mode
+- AH header is inserted between IP header and transport headers
+- NAT breaks both AH modes
+
+**AH – Transport Mode**
+
+```
+IP Header | AH Header | TCP/UDP | Data
+```
+
+```
++---------------------------+
+|   IP Header               |
++---------------------------+
+|   AH Header               |
+|     - Next Header         |
+|     - Payload Length      |
+|     - SPI                 |
+|     - Sequence Number     |
+|     - Integrity Check Val |
++---------------------------+
+|   TCP / UDP Header        |
++---------------------------+
+|   Application Data        |
++---------------------------+
+```
+
+**AH – Tunnel Mode**
+
+```
+Outer IP | AH Header | Inner IP | TCP/UDP | Data
+```
+
+```
++---------------------------+
+|   Outer IP Header         |
++---------------------------+
+|   AH Header               |
+|     - Next Header         |
+|     - Payload Length      |
+|     - SPI                 |
+|     - Sequence Number     |
+|     - Integrity Check Val |
++---------------------------+
+|   Inner IP Header         |
++---------------------------+
+|   TCP / UDP Header        |
++---------------------------+
+|   Application Data        |
++---------------------------+
+```
+
+**Processing Order (Receiver)**
+
+- Read SPI
+- Lookup SA
+- Recalculate hash
+- Compare ICV
+- If valid → pass packet up
+- No decryption step exists.
+
+## L2TP over IPSec
+
+- L2TP over IPsec was built into the native Windows VPN client for many years
+- So you had two layers of authentication:
+- Machine-level (IPsec)
+- User-level (PPP)
+- It worked with Active Directory
+- It worked with RADIUS
+- It required no client install
+- User authentication + IP address assignment + policy negotiation
+- PPP is a Layer-2 protocol and IPsec protects IP packets (Layer-3) - PPP cannot run directly over IP
+- So to carry PPP across an IP network, you must
+- Encapsulate PPP inside an IP-based protocol
+- That’s what L2TP does
+- L2TP:
+  - Encapsulates PPP frames
+  - Puts them inside UDP (port 1701)
+  - Which runs over IP
+- So now PPP becomes transportable over IP
+- Then IPsec encrypts that IP packet
+- Stack looks like:
+
+```
+IPsec
+   ↓
+IP
+   ↓
+UDP 1701
+   ↓
+L2TP
+   ↓
+PPP
+   ↓
+User traffic
+```
+
+- Without L2TP, PPP has no way to cross an IP network
+
+## GRE over IPSec
 
 ## Configuration - Cisco
 
