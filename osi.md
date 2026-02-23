@@ -6,8 +6,8 @@
 - ISO also created protocol specifications for individual layers of this reference model independently of the TCP/IP protocol suite, and TCP/IP creators never intended to follow the OSI Reference Model
 - It was published in 1984 by both the ISO, as standard ISO 7498, and the renamed CCITT (now called the Telecommunications Standardization Sector of the International Telecommunication Union or ITU-T) as standard X.200. 
 - Main task: to provide multi-vendor interoperability
-- The OSI model is still used as a reference for teaching and documentation;[21] however, the OSI protocols originally conceived for the model did not gain popularity
-- Protocol Data Unit (PDU) contains a payload, called the service data unit (SDU), along with protocol-related headers or footers.- 
+- The OSI model is still used as a reference for teaching and documentation; however, the OSI protocols originally conceived for the model did not gain popularity
+- Protocol Data Unit (PDU) contains a payload, called the service data unit (SDU), along with protocol-related headers or footers
 
 ## Internet protocol suite
 

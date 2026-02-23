@@ -1,16 +1,18 @@
-
+- [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
 - [Layer 2 Technologies](/l2.html)
 
-## Routing
+## Layer 3
 
 - [Routing concepts](/routing.html)
 - [BGP](/bgp.html)
 - [OSPF](/ospf.html)
+- [FHRP (HSRP / VRRP / GLBP)](fhrp.html)
 
 ## Data Communication Protocols
 
 - [IP](/ip.html)
+- [IPv6](/ipv6.html)
 - [TCP](/tcp.html)
 - [UDP](/udp.html)
 
