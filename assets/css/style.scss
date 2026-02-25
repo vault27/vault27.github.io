@@ -4,6 +4,8 @@
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap');
+
 @font-face {
   font-family: 'PxPlus IBM VGA9';
   src:
@@ -57,33 +59,37 @@ body::before {
 
 /* --------- Title ---------- */
 
-.markdown-body > h1:first-of-type,
-.markdown-body > h1:first-of-type a {
-  font-family: "PxPlus IBM VGA9", monospace;
-  font-weight: 400;
-  font-style: normal;
-  color: #ffb454;
-  font-size: 50px;
-}
-@keyframes blink {
-  0%, 50% {
-    opacity: 1;
-  }
-  50.01%, 100% {
-    opacity: 0;
-  }
-}
-.markdown-body > h1:first-of-type::after {
-  content: "█";
-  animation: blink 1s steps(1) infinite;
-  margin-left: 0.4ch;
+/* VAULT HEADER */
+
+.vault-header {
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 30px;
 }
 
-.site-subtitle {
-  font-family: monospace;
-  font-size: 0.9rem;
-  color: #6aff6a;   // terminal green
-  margin-top: -10px;
+.vault-title {
+  display: block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem;
+  letter-spacing: 6px;
+  text-decoration: none;
+  color: #ffb347;
+  text-shadow:
+    0 0 6px rgba(255,179,71,0.8),
+    0 0 16px rgba(255,140,0,0.6);
+}
+
+.vault-title:hover {
+  text-decoration: none;
+}
+
+.vault-subtitle {
+  margin-top: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: #4cff88;
+  font-size: 1rem;
+  opacity: 0.9;
+  text-shadow: 0 0 6px rgba(76,255,136,0.6);
 }
 
 /* ---------- Lists (dash instead of bullets) ---------- */
