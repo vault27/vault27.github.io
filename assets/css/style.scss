@@ -79,6 +79,13 @@ body::before {
   margin-left: 0.4ch;
 }
 
+.site-subtitle {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #6aff6a;   // terminal green
+  margin-top: -10px;
+}
+
 /* ---------- Lists (dash instead of bullets) ---------- */
 ul {
   list-style: none;
