@@ -63,6 +63,24 @@ body::before {
    VAULT TERMINAL TITLE – CLEAN FIX
 ========================================== */
 
+
+/* ==========================================
+   TERMINAL TITLE – REMOVE LINK BLUE
+========================================== */
+
+h1:first-of-type a,
+h1:first-of-type a:visited,
+h1:first-of-type a:hover,
+h1:first-of-type a:active {
+  color: #4cff88 !important;
+  text-decoration: none !important;
+}
+
+/* Also kill focus outline glow */
+h1:first-of-type a:focus {
+  outline: none !important;
+}
+
 h1:first-of-type {
   font-family: "IBM Plex Mono", monospace;
 
