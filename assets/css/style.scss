@@ -50,7 +50,73 @@ H2 заголовок для блока тексат обычного - прим
 
 /* --------- My overrides ---------- */
 
-/* --------- Body ---------- */
+/* ==========================================
+   MATRIX CRT BACKGROUND
+========================================== */
+
+html, body {
+  background-color: #06110b; /* deep green-black */
+}
+
+/* Main content area */
+.markdown-body {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 100ch;
+
+  background-color: #08160f; /* slightly lighter than body */
+  color: #93a1a1;
+
+  position: relative;
+}
+
+/* CRT overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    /* subtle radial phosphor glow */
+    radial-gradient(
+      ellipse at center,
+      rgba(0, 255, 140, 0.08),
+      rgba(0, 180, 100, 0.04) 35%,
+      transparent 70%
+    ),
+
+    /* scanlines */
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 255, 120, 0.04) 0px,
+      rgba(0, 255, 120, 0.04) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+
+  mix-blend-mode: screen;
+}
+
+/* subtle CRT vignette */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 60%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+}
+
+/* --------- Body AMber---------- 
 
 .markdown-body {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
@@ -61,7 +127,7 @@ H2 заголовок для блока тексат обычного - прим
   max-width: 100ch;
 }
 
-/* Widen content */
+
 .container-lg {
   max-width: 1200px;
 }
@@ -86,6 +152,8 @@ body::before {
 
   mix-blend-mode: screen;
 }
+
+*/
 
 /* --------- Title ---------- */
 
