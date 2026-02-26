@@ -59,37 +59,62 @@ body::before {
 
 /* --------- Title ---------- */
 
-/* VAULT HEADER */
+/* ==========================================
+   VAULT TERMINAL MAIN H1
+========================================== */
 
-.vault-header {
-  text-align: center;
-  margin-top: 40px;
-  margin-bottom: 30px;
-}
+/* Target only first H1 in content */
+main h1:first-of-type,
+.page-content h1:first-of-type {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 1px;
 
-.vault-title {
-  display: block;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 3rem;
-  letter-spacing: 6px;
-  text-decoration: none;
-  color: #ffb347;
-  text-shadow:
-    0 0 6px rgba(255,179,71,0.8),
-    0 0 16px rgba(255,140,0,0.6);
-}
-
-.vault-title:hover {
-  text-decoration: none;
-}
-
-.vault-subtitle {
-  margin-top: 8px;
-  font-family: 'IBM Plex Mono', monospace;
   color: #4cff88;
-  font-size: 1rem;
-  opacity: 0.9;
-  text-shadow: 0 0 6px rgba(76,255,136,0.6);
+
+  position: relative;
+  display: inline-block;
+
+  padding: 18px 0;
+  margin: 40px 0 30px 0;
+
+  text-shadow:
+    0 0 6px rgba(76,255,136,0.7),
+    0 0 14px rgba(76,255,136,0.4);
+}
+
+/* Top line */
+main h1:first-of-type::before,
+.page-content h1:first-of-type::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-top: 1px dashed rgba(76,255,136,0.6);
+}
+
+/* Bottom line + blinking cursor */
+main h1:first-of-type::after,
+.page-content h1:first-of-type::after {
+  content: " █";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+
+  border-bottom: 1px dashed rgba(76,255,136,0.6);
+  width: 100%;
+
+  text-align: right;
+  padding-right: 4px;
+
+  animation: vaultBlink 1s step-start infinite;
+}
+
+/* Cursor blink */
+@keyframes vaultBlink {
+  50% { opacity: 0; }
 }
 
 /* ---------- Lists (dash instead of bullets) ---------- */
