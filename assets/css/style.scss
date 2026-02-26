@@ -59,15 +59,6 @@ body::before {
 
 /* --------- Title ---------- */
 
-/* ==========================================
-   VAULT TERMINAL TITLE – CLEAN FIX
-========================================== */
-
-
-/* ==========================================
-   TERMINAL TITLE – REMOVE LINK BLUE
-========================================== */
-
 h1:first-of-type a,
 h1:first-of-type a:visited,
 h1:first-of-type a:hover,
@@ -124,6 +115,22 @@ h1:first-of-type::after {
   left: 0;
   width: 100%;
   border-bottom: 2px dashed rgba(76,255,136,0.6);
+}
+
+/* ==========================================
+   DASHED TEXT-LENGTH UNDERLINE FOR HEADERS
+========================================== */
+
+/* Remove theme full-width border */
+h1, h2, h3, h4, h5, h6 {
+  border-bottom: none !important;
+}
+
+/* Make underline match text width */
+h2, h3, h4, h5, h6 {
+  display: inline-block;
+  border-bottom: 1px dashed currentColor;
+  padding-bottom: 4px;
 }
 
 /* ---------- Lists (dash instead of bullets) ---------- */
