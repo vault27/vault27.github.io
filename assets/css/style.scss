@@ -60,73 +60,46 @@ body::before {
 /* --------- Title ---------- */
 
 /* ==========================================
-   VAULT TERMINAL FIRST H1
+   VAULT TERMINAL MAIN TITLE
 ========================================== */
 
 h1:first-of-type {
-  font-family: "IBM Plex Mono", monospace !important;
-  font-size: 1.6rem !important;
-  font-weight: 500 !important;
-  letter-spacing: 1px !important;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 3rem;          /* Bigger title */
+  font-weight: 600;
+  letter-spacing: 2px;
 
-  color: #4cff88 !important;
+  color: #4cff88;
 
-  position: relative;
   display: inline-block;
+  position: relative;
 
-  padding: 18px 0;
-  margin: 40px 0 30px 0;
+  padding: 25px 0;
+  margin: 60px 0 40px 0;
 
   text-shadow:
     0 0 6px rgba(76,255,136,0.7),
-    0 0 14px rgba(76,255,136,0.4) !important;
+    0 0 12px rgba(76,255,136,0.4);
 }
 
-/* Top line */
+/* Top dashed line */
 h1:first-of-type::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  border-top: 1px dashed rgba(76,255,136,0.6);
+  border-top: 2px dashed rgba(76,255,136,0.6);
 }
 
-/* Bottom line */
+/* Bottom dashed line */
 h1:first-of-type::after {
   content: "";
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  border-bottom: 1px dashed rgba(76,255,136,0.6);
-}
-
-/* Blinking cursor appended inline */
-h1:first-of-type {
-  animation: none;
-}
-
-h1:first-of-type span,
-h1:first-of-type::marker {
-  all: unset;
-}
-
-h1:first-of-type::after {
-  border-bottom: 1px dashed rgba(76,255,136,0.6);
-}
-
-/* Real blinking cursor */
-h1:first-of-type::after {
-  content: " █";
-  position: static;
-  margin-left: 6px;
-  animation: blink 1s step-start infinite;
-  border: none;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
+  border-bottom: 2px dashed rgba(76,255,136,0.6);
 }
 
 /* ---------- Lists (dash instead of bullets) ---------- */
