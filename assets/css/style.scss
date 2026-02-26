@@ -16,7 +16,7 @@
 }
 
 /* --------- Load the entire theme’s base CSS before my overrides---------- */
-@import "{{ minima }}";
+@import "{{ site.theme }}";
 
 /* --------- My overrides ---------- */
 
