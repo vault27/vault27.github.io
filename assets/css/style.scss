@@ -51,69 +51,48 @@ H2 заголовок для блока тексат обычного - прим
 /* --------- My overrides ---------- */
 
 /* ==========================================
-   MATRIX CRT BACKGROUND
+   MATRIX CRT BACKGROUND (FOR MARKDOWN BODY)
 ========================================== */
 
 html, body {
-  background-color: #06110b; /* deep green-black */
+  background-color: #06110b; /* outer page */
 }
 
-/* Main content area */
+/* Main content container */
 .markdown-body {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.95rem;
   line-height: 1.7;
   max-width: 100ch;
 
-  background-color: #08160f; /* slightly lighter than body */
   color: #93a1a1;
-
   position: relative;
-}
+  z-index: 1;
 
-/* CRT overlay */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+  /* Deep CRT base */
+  background-color: #08160f;
 
-  background:
-    /* subtle radial phosphor glow */
+  /* Layered CRT effects */
+  background-image:
+
+    /* phosphor center glow */
     radial-gradient(
       ellipse at center,
-      rgba(0, 255, 140, 0.08),
-      rgba(0, 180, 100, 0.04) 35%,
-      transparent 70%
+      rgba(0,255,140,0.08),
+      rgba(0,200,120,0.04) 40%,
+      transparent 75%
     ),
 
     /* scanlines */
     repeating-linear-gradient(
       to bottom,
-      rgba(0, 255, 120, 0.04) 0px,
-      rgba(0, 255, 120, 0.04) 1px,
+      rgba(0,255,120,0.05) 0px,
+      rgba(0,255,120,0.05) 1px,
       transparent 2px,
       transparent 4px
     );
 
-  mix-blend-mode: screen;
-}
-
-/* subtle CRT vignette */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-
-  background:
-    radial-gradient(
-      ellipse at center,
-      transparent 60%,
-      rgba(0, 0, 0, 0.55) 100%
-    );
+  background-blend-mode: screen;
 }
 
 /* --------- Body AMber---------- 
