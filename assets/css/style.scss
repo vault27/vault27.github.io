@@ -53,7 +53,7 @@ H2 заголовок для блока тексат обычного - прим
 /* --------- Body ---------- */
 
 .markdown-body {
-  font-family: "PxPlus IBM VGA9", ui-monospace, monospace;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.95rem;
   line-height: 1.7;
   background-color: #2c1a12;
@@ -103,7 +103,7 @@ h1:first-of-type a:focus {
 }
 
 h1:first-of-type {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "PxPlus IBM VGA9", monospace;
 
   /* Responsive but controlled */
   font-size: clamp(1.8rem, 4vw, 3rem);
