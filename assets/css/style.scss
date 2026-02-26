@@ -89,11 +89,13 @@ body::before {
 
 /* --------- Title ---------- */
 
+/* --------- Green:4cff88  ---------- */
+
 h1:first-of-type a,
 h1:first-of-type a:visited,
 h1:first-of-type a:hover,
 h1:first-of-type a:active {
-  color: #4cff88 !important;
+  color: #ffb35c !important;
   text-decoration: none !important;
 }
 
@@ -111,7 +113,7 @@ h1:first-of-type {
   font-weight: 600;
   letter-spacing: 2px;
 
-  color: #4cff88;
+  color: #ffb35c;
 
   display: inline-block;
   position: relative;
@@ -123,8 +125,12 @@ h1:first-of-type {
   margin: 60px 0 40px 0;
 
   text-shadow:
+  0 0 4px rgba(255,179,92,0.6),
+  0 0 10px rgba(255,179,92,0.3);
+
+  /*text-shadow:
     0 0 6px rgba(76,255,136,0.6),
-    0 0 12px rgba(76,255,136,0.3);
+    0 0 12px rgba(76,255,136,0.3);*/
 }
 
 /* Top line */
