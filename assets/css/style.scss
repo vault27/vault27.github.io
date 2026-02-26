@@ -50,52 +50,7 @@ H2 заголовок для блока тексат обычного - прим
 
 /* --------- My overrides ---------- */
 
-/* ==========================================
-   MATRIX CRT BACKGROUND (FOR MARKDOWN BODY)
-========================================== */
-
-html, body {
-  background-color: #06110b; /* outer page */
-}
-
-/* Main content container */
-.markdown-body {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  max-width: 100ch;
-
-  color: #93a1a1;
-  position: relative;
-  z-index: 1;
-
-  /* Deep CRT base */
-  background-color: #08160f;
-
-  /* Layered CRT effects */
-  background-image:
-
-    /* phosphor center glow */
-    radial-gradient(
-      ellipse at center,
-      rgba(0,255,140,0.08),
-      rgba(0,200,120,0.04) 40%,
-      transparent 75%
-    ),
-
-    /* scanlines */
-    repeating-linear-gradient(
-      to bottom,
-      rgba(0,255,120,0.05) 0px,
-      rgba(0,255,120,0.05) 1px,
-      transparent 2px,
-      transparent 4px
-    );
-
-  background-blend-mode: screen;
-}
-
-/* --------- Body AMber---------- 
+/* --------- Body ---------- */
 
 .markdown-body {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
@@ -136,13 +91,11 @@ body::before {
 
 /* --------- Title ---------- */
 
-/* --------- Green:4cff88  ---------- */
-
 h1:first-of-type a,
 h1:first-of-type a:visited,
 h1:first-of-type a:hover,
 h1:first-of-type a:active {
-  color: #ffb35c !important;
+  color: #4cff88 !important;
   text-decoration: none !important;
 }
 
@@ -160,7 +113,7 @@ h1:first-of-type {
   font-weight: 600;
   letter-spacing: 2px;
 
-  color: #ffb35c;
+  color: #4cff88;
 
   display: inline-block;
   position: relative;
@@ -171,13 +124,9 @@ h1:first-of-type {
   padding: 20px 0;
   margin: 60px 0 40px 0;
 
-  text-shadow:
-  0 0 4px rgba(255,179,92,0.6),
-  0 0 10px rgba(255,179,92,0.3);
-
-  /*text-shadow:
+ text-shadow:
     0 0 6px rgba(76,255,136,0.6),
-    0 0 12px rgba(76,255,136,0.3);*/
+    0 0 12px rgba(76,255,136,0.3);
 }
 
 /* Top line */
@@ -198,6 +147,39 @@ h1:first-of-type::after {
   left: 0;
   width: 100%;
   border-bottom: 2px dashed rgba(76,255,136,0.6);
+}
+
+/* ==========================================
+   BLINKING CURSOR FOR TITLE
+========================================== */
+
+/* Make sure title can host another pseudo-element */
+h1:first-of-type {
+  position: relative;
+}
+
+/* Cursor */
+h1:first-of-type span.cursor::after {
+  content: "";
+  display: inline-block;
+  width: 2px;                /* thin cursor */
+  height: 0.9em;             /* slightly shorter than text */
+  background: #4cff88;
+  margin-left: 8px;
+  vertical-align: baseline;
+
+  box-shadow:
+    0 0 4px rgba(76,255,136,0.8),
+    0 0 8px rgba(76,255,136,0.4);
+
+  animation: vault-blink 1.1s steps(1) infinite;
+}
+
+/* Blink animation */
+@keyframes vault-blink {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* ==========================================
