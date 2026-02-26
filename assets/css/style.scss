@@ -60,12 +60,15 @@ body::before {
 /* --------- Title ---------- */
 
 /* ==========================================
-   VAULT TERMINAL MAIN TITLE
+   VAULT TERMINAL TITLE – CLEAN FIX
 ========================================== */
 
 h1:first-of-type {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 3rem;          /* Bigger title */
+
+  /* Responsive but controlled */
+  font-size: clamp(1.8rem, 4vw, 3rem);
+
   font-weight: 600;
   letter-spacing: 2px;
 
@@ -74,15 +77,18 @@ h1:first-of-type {
   display: inline-block;
   position: relative;
 
-  padding: 25px 0;
+  white-space: nowrap;        /* Prevent wrapping */
+  overflow-x: auto;           /* Allow scroll if too long */
+
+  padding: 20px 0;
   margin: 60px 0 40px 0;
 
   text-shadow:
-    0 0 6px rgba(76,255,136,0.7),
-    0 0 12px rgba(76,255,136,0.4);
+    0 0 6px rgba(76,255,136,0.6),
+    0 0 12px rgba(76,255,136,0.3);
 }
 
-/* Top dashed line */
+/* Top line */
 h1:first-of-type::before {
   content: "";
   position: absolute;
@@ -92,7 +98,7 @@ h1:first-of-type::before {
   border-top: 2px dashed rgba(76,255,136,0.6);
 }
 
-/* Bottom dashed line */
+/* Bottom line */
 h1:first-of-type::after {
   content: "";
   position: absolute;
