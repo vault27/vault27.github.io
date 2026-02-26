@@ -60,18 +60,16 @@ body::before {
 /* --------- Title ---------- */
 
 /* ==========================================
-   VAULT TERMINAL MAIN H1
+   VAULT TERMINAL FIRST H1
 ========================================== */
 
-/* Target only first H1 in content */
-main h1:first-of-type,
-.page-content h1:first-of-type {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 1.6rem;
-  font-weight: 500;
-  letter-spacing: 1px;
+h1:first-of-type {
+  font-family: "IBM Plex Mono", monospace !important;
+  font-size: 1.6rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 1px !important;
 
-  color: #4cff88;
+  color: #4cff88 !important;
 
   position: relative;
   display: inline-block;
@@ -81,12 +79,11 @@ main h1:first-of-type,
 
   text-shadow:
     0 0 6px rgba(76,255,136,0.7),
-    0 0 14px rgba(76,255,136,0.4);
+    0 0 14px rgba(76,255,136,0.4) !important;
 }
 
 /* Top line */
-main h1:first-of-type::before,
-.page-content h1:first-of-type::before {
+h1:first-of-type::before {
   content: "";
   position: absolute;
   top: 0;
@@ -95,25 +92,40 @@ main h1:first-of-type::before,
   border-top: 1px dashed rgba(76,255,136,0.6);
 }
 
-/* Bottom line + blinking cursor */
-main h1:first-of-type::after,
-.page-content h1:first-of-type::after {
-  content: " █";
+/* Bottom line */
+h1:first-of-type::after {
+  content: "";
   position: absolute;
   bottom: 0;
-  right: 0;
-
-  border-bottom: 1px dashed rgba(76,255,136,0.6);
+  left: 0;
   width: 100%;
-
-  text-align: right;
-  padding-right: 4px;
-
-  animation: vaultBlink 1s step-start infinite;
+  border-bottom: 1px dashed rgba(76,255,136,0.6);
 }
 
-/* Cursor blink */
-@keyframes vaultBlink {
+/* Blinking cursor appended inline */
+h1:first-of-type {
+  animation: none;
+}
+
+h1:first-of-type span,
+h1:first-of-type::marker {
+  all: unset;
+}
+
+h1:first-of-type::after {
+  border-bottom: 1px dashed rgba(76,255,136,0.6);
+}
+
+/* Real blinking cursor */
+h1:first-of-type::after {
+  content: " █";
+  position: static;
+  margin-left: 6px;
+  animation: blink 1s step-start infinite;
+  border: none;
+}
+
+@keyframes blink {
   50% { opacity: 0; }
 }
 
