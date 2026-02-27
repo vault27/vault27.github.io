@@ -1,5 +1,41 @@
 # Packet forwarding
 
+Taxonomy
+
+```text
+                         PACKET FORWARDING
+                               |
+        -------------------------------------------------
+        |                                               |
+   L2 FORWARDING                                   L3 FORWARDING
+ (Frame Switching)                              (Packet Switching)
+        |                                               |
+   MAC Table (CAM)                               Routing Table (RIB)
+        |                                               |
+   Basic CAM Lookup                           FIB + Adjacency Table
+                                                      |
+                                              Forwarding Method
+                                                      |
+      -----------------------------------------------------------------
+      |                         |                                   |
+ Process Switching         Fast Switching                         CEF
+ (Software / CPU)          (Route Cache)                Cisco Express Forwarding
+      |                         |                                   |
+  Slow Path                Flow-based cache                 Topology-based FIB
+  Per-packet CPU           First packet slow                No per-flow cache
+  Full routing lookup      Next packets fast                Deterministic
+                                                      |
+                                    --------------------------------------------
+                                    |                                          |
+                             Centralized Forwarding                  Distributed Forwarding
+                             (Single RP / CPU)                      (Line cards / ASICs)
+                                    |                                          |
+                              Software CEF                               Hardware CEF
+                                    |                                          |
+                               CPU-driven FIB                           FIB in ASIC / TCAM
+                                                                          Wire-speed lookup
+```
+
 ## Terms
 
 - Packet forwarding - is the data-plane process of receiving a packet/frame on one interface and transmitting it out another interface according to forwarding state programmed by the control plane
@@ -107,7 +143,7 @@ no shutdown
 - Fast switching
 - CEF - Cisco Express Forwarding
 
-**Process switching**
+### Process switching
  
 - Done on CPU
 - It is fallback for CEF - for punted packets, which cannot be processed by CEF
@@ -123,7 +159,7 @@ no shutdown
 - Change TTL + recalculate checksum
 - New Data Link frame is built: new header and trailer, including new FCS
 
-  **Fast switching**
+### Fast switching
 
 - First packet goes through process switching, results are added to fast switching cache or route cache. The cache contains the destination IP address, the next-hop information, and the data-link header information that needs to be added to the packet before forwarding. An entry **per each destination address, not per destination subnet/prefix**. All future packets with the same destination addresses use this data and are switched faster. Also called **route once, forward many times**  
 - Draw backs: first packets are fully processed, cache entries are timed out quickly, if tables are changed, route entries are invalid, load balancing can only occur per destination  
@@ -137,7 +173,76 @@ Router(config)#interface Ethernet 0
 Router(config-if)#no ip route-cache
 ```
 
-**CEF - Cisco Express Forwarding**
+### CEF - Cisco Express Forwarding
+
+**High level picture**
+
+```text
+======================== CEF INTERNAL STRUCTURE ========================
+
+CONTROL PLANE
+-----------------------------------------------------------------------
+
+        Routing Protocols
+                |
+                v
+        +-------------------------+
+        |          RIB            |
+        |-------------------------|
+        | Prefix                  |
+        | Next-Hop IP             |
+        | Metric                  |
+        | Protocol                |
+        +-------------------------+
+                |
+                | Best path installed
+                v
+
+DATA PLANE
+-----------------------------------------------------------------------
+
+        +-------------------------+
+        |           FIB           |
+        |-------------------------|
+        | Prefix                  |
+        | Adjacency Index  ----+--------------------+
+        +-------------------------+                 |
+                                                   |
+                                                   v
+                                        +-------------------------+
+                                        |     ADJACENCY TABLE     |
+                                        |-------------------------|
+                                        | Index (Adj ID)          |
+                                        | Next-Hop IP             |
+                                        | Outgoing Interface      |
+                                        | Destination MAC         |
+                                        | Encapsulation / Rewrite |
+                                        +-------------------------+
+
+Hardware Implementation
+-----------------------------------------------------------------------
+
+        FIB entries programmed into TCAM
+                |
+                v
+        TCAM lookup -> returns Adjacency Index
+                |
+                v
+        ASIC uses adjacency entry to rewrite frame
+
+=========================================================================
+
+Forwarding Flow:
+
+1) Packet arrives
+2) Destination IP lookup in TCAM
+3) TCAM returns FIB entry
+4) FIB entry contains Adjacency Index
+5) Adjacency entry provides full L2 rewrite string
+6) Frame rewritten and forwarded
+
+=========================================================================
+```
 
 - Enabled by default on most platforms
 - Cisco Express Forwarding (CEF) maintains two tables in the data plane
@@ -276,3 +381,35 @@ That needs TCAM.
 - TCAM space is limited
 - Too many: Routes, ACL entries, QoS rules > TCAM exhaustion > New entries cannot be installed > Traffic may be dropped or to software forwarded 
 - TCAM entries are stored in Value, Mask and Result (VMR) format
+- Value - the bits you want to matc - Example (IP prefix):`11000000 10101000 00000001 00000000` - (192.168.1.0)
+- Mask - Defines which bits matter - Mask bit meaning: 1 = compare this bit and 0 = ignore this bit (don't care) - Example for /24:- Mask: `11111111 11111111 11111111 00000000` - So last 8 bits are ignored
+- Result - What action to take if match happens - Example Result: → Forward to next-hop 10.0.0.1 → Use egress port 5 → Apply QoS queue 3 → Drop - TCAM does not just say “match - It immediately returns the associated action
+
+**TCAM tables**
+
+- Different TCAM tables on a switch contain different amount of entries
+- For example, 4094 for VLANs, 32000 for MAC addresses
+- This distribution can be controlled with SDM(Switching DataBase Manager) templates
+- `sdm prefer vlan|advanced`
+- `show sdm prefer` 
+
+## Centralized forwarding
+
+- Pactet arrives to ingress line card
+- Transmitted to forwarding engine on the route processor
+- Forwarding engine forwards packet to egress line card
+
+## Distributed forwarding
+
+- Every line card has its kwn forwarding engine
+- Packet arrives to line card and processed by local engine
+- Then via switch fabric it is transmitted directly to egress line card, bypassing Route Processor
+
+## Statefull switchover
+
+- Router may have 2 router processors for redundancy
+- Statefull switchover is a redundance feature for cisco routers
+- 2 route processors with syncronised configuration
+- If main router processor fails, secondary one immediately takes control
+- In this case routing protocol adjecency flaps and clears routing table
+- Nonstop forwarding (NSF) or nonstop routing (NSR) allows router to maintain CEF entries for a short duration and continue forwarding packets until control plane recovers
