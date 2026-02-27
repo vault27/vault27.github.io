@@ -2,7 +2,7 @@
 
 Taxonomy
 
-```text
+```
                          PACKET FORWARDING
                                |
         -------------------------------------------------
@@ -177,7 +177,7 @@ Router(config-if)#no ip route-cache
 
 **High level picture**
 
-```text
+```
 ======================== CEF INTERNAL STRUCTURE ========================
 
 CONTROL PLANE
