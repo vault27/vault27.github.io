@@ -326,6 +326,15 @@ a:hover::after {
   opacity: 1;
 }
 
+/* =================================
+  Bold text
+================================= */
+
+strong, b {
+  color: #e0a95a;           /* brighter amber */
+  font-weight: 600;         /* not too heavy */
+  letter-spacing: 0.3px;    /* subtle distinction */
+}
 
 
 /* ---------- Lists (dash instead of bullets) ---------- */
@@ -346,12 +355,6 @@ ul li::before {
   font-size: 18px;
   letter-spacing: 0.04em;
 }
-
-strong, b {
-  color: #cfa96a;
-  font-weight: 600;
-}
-
 
 code.highlighter-rouge,
 code.language-plaintext {
