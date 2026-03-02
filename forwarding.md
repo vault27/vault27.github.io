@@ -1,6 +1,21 @@
 # Packet forwarding
 
-**Taxonomy**
+- [Packet forwarding](#packet-forwarding)
+  - [1 Taxonomy](#1-taxonomy)
+  - [2 Terms](#2-terms)
+  - [3 Layer 2 forwarding](#3-layer-2-forwarding)
+  - [4 Layer 3 forwarding](#4-layer-3-forwarding)
+  - [5 Layer 3 forwarding methods](#5-layer-3-forwarding-methods)
+    - [5.1 Process switching](#51-process-switching)
+    - [5.2 Fast switching](#52-fast-switching)
+    - [5.3 CEF - Cisco Express Forwarding](#53-cef---cisco-express-forwarding)
+  - [6 Basic CAM](#6-basic-cam)
+  - [7 TCAM](#7-tcam)
+  - [8 Centralized forwarding](#8-centralized-forwarding)
+  - [9  Distributed forwarding](#9--distributed-forwarding)
+  - [10 Statefull switchover](#10-statefull-switchover)
+
+## 1 Taxonomy
 
 ```
                          PACKET FORWARDING
@@ -36,7 +51,7 @@
                                                                           Wire-speed lookup
 ```
 
-## Terms
+## 2 Terms
 
 - Packet forwarding - is the data-plane process of receiving a packet/frame on one interface and transmitting it out another interface according to forwarding state programmed by the control plane
 - Layer 2 forwarding is the process of forwarding Ethernet frames based on destination MAC address within the same broadcast domain (VLAN)
@@ -84,7 +99,7 @@ Data Plane:
     Forward out interface
 ```
 
-## Layer 2 forwarding
+## 3 Layer 2 forwarding
 
 - Using a MAC address table
 - Used when devices are on the same subnet
@@ -93,7 +108,7 @@ Data Plane:
 - If destination MAC is not in MAC table - flood frame to all ports in the same VLAN (except incoming port)
 - Layer 2 control plane: STP, VTP, VLAN tagging, MAC Learning & Aging, flood control, MAC limits
 
-## Layer 3 forwarding
+## 4 Layer 3 forwarding
 
 - Looking up destination IP in forwarding table (FIB)
 - Choosing outgoing interface
@@ -137,13 +152,13 @@ ip address 10.10.10.1 255.255.255.0
 no shutdown
 ```
 
-## Layer 3 forwarding methods
+## 5 Layer 3 forwarding methods
 
 - Process switching - software switching - slow path
 - Fast switching
 - CEF - Cisco Express Forwarding
 
-### Process switching
+### 5.1 Process switching
  
 - Done on CPU
 - It is fallback for CEF - for punted packets, which cannot be processed by CEF
@@ -159,7 +174,7 @@ no shutdown
 - Change TTL + recalculate checksum
 - New Data Link frame is built: new header and trailer, including new FCS
 
-### Fast switching
+### 5.2 Fast switching
 
 - First packet goes through process switching, results are added to fast switching cache or route cache. The cache contains the destination IP address, the next-hop information, and the data-link header information that needs to be added to the packet before forwarding. An entry **per each destination address, not per destination subnet/prefix**. All future packets with the same destination addresses use this data and are switched faster. Also called **route once, forward many times**  
 - Draw backs: first packets are fully processed, cache entries are timed out quickly, if tables are changed, route entries are invalid, load balancing can only occur per destination  
@@ -173,7 +188,7 @@ Router(config)#interface Ethernet 0
 Router(config-if)#no ip route-cache
 ```
 
-### CEF - Cisco Express Forwarding
+### 5.3 CEF - Cisco Express Forwarding
 
 **Architecture**
 
@@ -308,7 +323,7 @@ Prefix              Next Hop             Interface
 show ipv6 cef
 ```
 
-## Basic CAM
+## 6 Basic CAM
 
 Used for:
 
@@ -362,7 +377,7 @@ That needs TCAM.
 - MAC table is not stored in CPU DRAM
 - It lives inside the ASIC.
 
-## TCAM
+## 7 TCAM
 
 - Ternary content addressable memory
 - Extension of CAM architecture
@@ -417,19 +432,19 @@ That needs TCAM.
 - `sdm prefer vlan|advanced`
 - `show sdm prefer` 
 
-## Centralized forwarding
+## 8 Centralized forwarding
 
 - Pactet arrives to ingress line card
 - Transmitted to forwarding engine on the route processor
 - Forwarding engine forwards packet to egress line card
 
-## Distributed forwarding
+## 9  Distributed forwarding
 
 - Every line card has its own forwarding engine
 - Packet arrives to line card and processed by local engine
 - Then via switch fabric it is transmitted directly to egress line card, bypassing Route Processor
 
-## Statefull switchover
+## 10 Statefull switchover
 
 - Router may have 2 router processors for redundancy
 - Statefull switchover is a redundance feature for cisco routers
