@@ -256,15 +256,41 @@ h1, h2, h3, h4, h5, h6 {
   color: #3cdc78;
 }
 
-/* Text-width dashed underline */
-h1, h2, h3, h4, h5, h6 {
-  border: none !important;
-  display: inline;
-  background-image: linear-gradient(currentColor, currentColor);
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  background-size: 100% 2px;
-  padding-bottom: 4px;
+/* ===============================
+   SUBTLE CRT HEADER FLICKER
+================================ */
+
+@keyframes crt-flicker {
+  0%   { opacity: 1; }
+  2%   { opacity: 0.96; }
+  4%   { opacity: 1; }
+  8%   { opacity: 0.98; }
+  70%  { opacity: 1; }
+  100% { opacity: 0.99; }
+}
+
+h1, h2, h3 {
+  animation: crt-flicker 6s infinite;
+}
+
+@keyframes phosphor-glow {
+  0%, 100% { text-shadow: 0 0 6px currentColor; }
+  50%      { text-shadow: 0 0 10px currentColor; }
+}
+
+h1 {
+  animation: crt-flicker 6s infinite,
+             phosphor-glow 4s ease-in-out infinite;
+}
+
+@keyframes phosphor-glow {
+  0%, 100% { text-shadow: 0 0 6px currentColor; }
+  50%      { text-shadow: 0 0 10px currentColor; }
+}
+
+h1 {
+  animation: crt-flicker 6s infinite,
+             phosphor-glow 4s ease-in-out infinite;
 }
 
 /* ---------- Lists (dash instead of bullets) ---------- */
