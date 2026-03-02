@@ -314,21 +314,6 @@ ul li::before {
   letter-spacing: 0.04em;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: "JetBrains Mono", monospace;
-  margin-top: 2.2rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.3rem;
- }
-
-/* Individual heading colors */
-h1 { color: #b58900; border-color: #b58900; }
-h2 { color: #7ec07c; border-color: #7ec07c; }
-h3 { color: #6fb3d2; border-color: #6fb3d2; }
-h4 { color: #5fb3a2; border-color: #5fb3a2; }
-h5 { color: #93a1a1; border-color: #586e75; }
-h6 { color: #839496; border-color: #586e75; }
-
 strong, b {
   color: #cfa96a;
   font-weight: 600;
