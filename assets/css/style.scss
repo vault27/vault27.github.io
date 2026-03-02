@@ -294,10 +294,13 @@ h3 { color: #6fb3d2; border-color: #6fb3d2; }
 h4 { color: #5fb3a2; border-color: #5fb3a2; }
 h5 { color: #93a1a1; border-color: #586e75; }
 h6 { color: #839496; border-color: #586e75; }
+
 strong, b {
   color: #cfa96a;
   font-weight: 600;
 }
+
+
 code.highlighter-rouge,
 code.language-plaintext {
     font-family: "Fira Code", monospace;  /* nice coding font */
@@ -336,11 +339,11 @@ code.language-plaintext {
     white-space: pre;           /* preserve all spaces and indentation */
     tab-size: 4;                /* optional: tabs width */
     display: block;
-  border-top: 1px dashed rgba(255,179,92,.7);
-  border-bottom: 1px dashed rgba(255,179,92,.7);
-  border-left: 1px dotted rgba(255,179,92,.6);
-  border-right: 1px dotted rgba(255,179,92,.6);
- }
+  
+border-top: 2px dashed rgba(76, 255, 136, 0.8);
+border-bottom: 2px dashed rgba(76, 255, 136, 0.8);
+border-left: 2px solid rgba(76, 255, 136, 0.5);
+border-right: 2px solid rgba(76, 255, 136, 0.5);
 
 /* FONT GOES HERE */
 .highlight pre code {
