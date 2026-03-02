@@ -293,6 +293,41 @@ h1 {
              phosphor-glow 4s ease-in-out infinite;
 }
 
+/* =================================
+   RETRO TERMINAL LINK DESIGN
+================================= */
+
+a {
+  color: #e0a95a;
+  text-decoration: none;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+/* subtle dashed underline */
+a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+/* hover effect */
+a:hover {
+  color: #4cff88; /* switch to phosphor green */
+}
+
+a:hover::after {
+  background: #4cff88;
+  opacity: 1;
+}
+
+
+
 /* ---------- Lists (dash instead of bullets) ---------- */
 ul {
   list-style: none;
