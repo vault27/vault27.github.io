@@ -257,17 +257,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Text-width dashed underline */
-h1::after,
-h2::after,
-h3::after,
-h4::after,
-h5::after,
-h6::after {
-  content: "";
-  display: block;
-  width: fit-content;
-  border-bottom: 2px dashed currentColor;
-  margin-top: 6px;
+h1, h2, h3, h4, h5, h6 {
+  border: none !important;
+  display: inline;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 2px;
+  padding-bottom: 4px;
 }
 
 /* ---------- Lists (dash instead of bullets) ---------- */
