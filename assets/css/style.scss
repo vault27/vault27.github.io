@@ -245,54 +245,29 @@ h1:first-of-type span.cursor::after {
   100% { opacity: 1; }
 }
 
-/* ==========================================
-   DASHED TEXT-LENGTH UNDERLINE FOR HEADERS
-========================================== */
-
-/* Remove theme full-width border */
-h1, h2, h3, h4, h5, h6 {
-  border-bottom: none !important;
-}
-
-/* Make underline match text width */
-h2, h3, h4, h5, h6 {
-  display: inline-block;
-  border-bottom: 1px dashed currentColor;
-  padding-bottom: 4px;
-}
-
 /* ===============================
    HEADER HIERARCHY SYSTEM
 ================================ */
 
-/* H1 stays your current bright green */
-
-h2 {
+/* Remove theme borders completely */
+h1, h2, h3, h4, h5, h6 {
+  border: none !important;
+  position: relative;
   color: #3cdc78;
-  font-weight: 600;
-  letter-spacing: 1px;
 }
 
-h3 {
-  color: #35c06a;
-  font-weight: 600;
-}
-
-h4 {
-  color: #c6924a;
-  font-weight: 600;
-}
-
-h5 {
-  color: #b57c32;
-  font-weight: 500;
-}
-
-h6 {
-  color: #8e6230;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+/* Text-width dashed underline */
+h1::after,
+h2::after,
+h3::after,
+h4::after,
+h5::after,
+h6::after {
+  content: "";
+  display: block;
+  width: fit-content;
+  border-bottom: 2px dashed currentColor;
+  margin-top: 6px;
 }
 
 /* ---------- Lists (dash instead of bullets) ---------- */
