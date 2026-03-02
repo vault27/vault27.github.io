@@ -1,19 +1,20 @@
-# Packet forwarding
+# Packet forwarding<!-- omit from toc -->
 
-- [Packet forwarding](#packet-forwarding)
-  - [1 Taxonomy](#1-taxonomy)
-  - [2 Terms](#2-terms)
-  - [3 Layer 2 forwarding](#3-layer-2-forwarding)
-  - [4 Layer 3 forwarding](#4-layer-3-forwarding)
-  - [5 Layer 3 forwarding methods](#5-layer-3-forwarding-methods)
-    - [5.1 Process switching](#51-process-switching)
-    - [5.2 Fast switching](#52-fast-switching)
-    - [5.3 CEF - Cisco Express Forwarding](#53-cef---cisco-express-forwarding)
-  - [6 Basic CAM](#6-basic-cam)
-  - [7 TCAM](#7-tcam)
-  - [8 Centralized forwarding](#8-centralized-forwarding)
-  - [9  Distributed forwarding](#9--distributed-forwarding)
-  - [10 Statefull switchover](#10-statefull-switchover)
+**Table of contents**
+
+- [1 Taxonomy](#1-taxonomy)
+- [2 Terms](#2-terms)
+- [3 Layer 2 forwarding](#3-layer-2-forwarding)
+- [4 Layer 3 forwarding](#4-layer-3-forwarding)
+- [5 Layer 3 forwarding methods](#5-layer-3-forwarding-methods)
+  - [5.1 Process switching](#51-process-switching)
+  - [5.2 Fast switching](#52-fast-switching)
+  - [5.3 CEF - Cisco Express Forwarding](#53-cef---cisco-express-forwarding)
+- [6 Basic CAM](#6-basic-cam)
+- [7 TCAM](#7-tcam)
+- [8 Centralized forwarding](#8-centralized-forwarding)
+- [9  Distributed forwarding](#9--distributed-forwarding)
+- [10 Statefull switchover](#10-statefull-switchover)
 
 ## 1 Taxonomy
 
