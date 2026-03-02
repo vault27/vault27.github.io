@@ -313,13 +313,15 @@ code.language-plaintext {
 }
 
 /* Full code block styling */
+
 .language-plaintext.highlighter-rouge .highlight pre {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     background-color: #0f2a1c;   /* Solarized Dark */
     color: #2bff88;
     padding: 14px 18px;
     border-radius: 6px;
-     /* CRT depth + glow */
+     
+  /* CRT depth + glow */
   box-shadow:
     inset 0 0 18px rgba(43, 255, 136, 0.08),
     inset 0 0 1px rgba(120, 255, 190, 0.35),
@@ -331,6 +333,7 @@ code.language-plaintext {
       rgba(255,255,255,0.025) 50%,
       transparent 50%
     );
+
   background-size: 100% 4px;
     font-size: 0.95em;
     line-height: 1.5;
@@ -344,6 +347,8 @@ border-top: 2px dashed rgba(76, 255, 136, 0.8);
 border-bottom: 2px dashed rgba(76, 255, 136, 0.8);
 border-left: 2px solid rgba(76, 255, 136, 0.5);
 border-right: 2px solid rgba(76, 255, 136, 0.5);
+
+}
 
 /* FONT GOES HERE */
 .highlight pre code {
