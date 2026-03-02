@@ -1,6 +1,6 @@
 # Packet forwarding
 
-Taxonomy
+**Taxonomy**
 
 ```
                          PACKET FORWARDING
@@ -50,8 +50,8 @@ Taxonomy
   - SR-MPLS → Uses MPLS labels as segments
   - SRv6 → Uses IPv6 Segment Routing Header (SRH)
 - Routing runs on CPU
-- Forwarding runs in hardware (ASIC / NPU)
-- So forwarding must be extremely fast.
+- Forwarding runs in hardware (ASIC / NPU) in advanced devices, in simple devices it runs on CPU
+- So forwarding must be extremely fast
 - That’s why vendors separate: Control plane and Data plane
 - Routing = thinking
 - Forwarding = doing
@@ -137,7 +137,7 @@ ip address 10.10.10.1 255.255.255.0
 no shutdown
 ```
 
-## Forwarding methods
+## Layer 3 forwarding methods
 
 - Process switching - software switching - slow path
 - Fast switching
@@ -175,7 +175,7 @@ Router(config-if)#no ip route-cache
 
 ### CEF - Cisco Express Forwarding
 
-**High level picture**
+**Architecture**
 
 ```
 ======================== CEF INTERNAL STRUCTURE ========================
@@ -244,6 +244,25 @@ Forwarding Flow:
 =========================================================================
 ```
 
+**Example**
+
+```
+RIB:
+  10.10.0.0/16 -> 192.168.1.1
+
+FIB:
+  10.10.0.0/16 -> Adj ID 42
+
+Adjacency Table:
+  ID 42:
+     Next-Hop IP: 192.168.1.1
+     Out Int: Gi0/0
+     Dest MAC: 00:11:22:33:44:55
+     Rewrite string: <prebuilt L2 header>
+```
+
+- So forwarding never consults the RIB
+- It directly jumps via index
 - Enabled by default on most platforms
 - Cisco Express Forwarding (CEF) maintains two tables in the data plane
 - Preconstruct the Layer 2 frame headers and egress interface information for each next hop, and keep them ready in an adjacency table stored in the router’s memory 
@@ -254,7 +273,7 @@ Forwarding Flow:
 - After the FIB and adjacency table are created, the routing table is not used anymore
 - Routing Information Base (RIB) — it is the master copy of routing information from which the FIB and other structures are populated, but it is not necessarily used to route packets itself
 - RIBs for different routing protocols are different case
-- CEF is implemented in software - CPU
+- CEF maybe implemented in software - CPU
 - High end routers use specialized circuits (specifically, Ternary Content Addressable Memory [TCAM]) to store the FIB contents and perform even faster lookups + ASICs + NPUs
 
 **Activation**
@@ -280,6 +299,11 @@ Prefix              Next Hop             Interface
 10.0.0.4/32         10.0.9.2             FastEthernet0/1
 10.0.0.5/32         10.0.9.13            FastEthernet0/0
 10.0.9.0/30         attached             FastEthernet0/1
+
+- Attached: The prefix is on a directly connected network, and the router knows how to reach it
+- Receive: The router is the destination for these packets (e.g., interface IP, broadcast address, or loopback)
+- Drop: Packets are discarded, commonly seen with 0.0.0.0/0 (Null0) or when features are not supported
+- Punt: Though not in your list, this often appears alongside these, indicating packets are sent to the CPU for processing
 
 show ipv6 cef
 ```
@@ -381,7 +405,7 @@ That needs TCAM.
 - TCAM space is limited
 - Too many: Routes, ACL entries, QoS rules > TCAM exhaustion > New entries cannot be installed > Traffic may be dropped or to software forwarded 
 - TCAM entries are stored in Value, Mask and Result (VMR) format
-- Value - the bits you want to matc - Example (IP prefix):`11000000 10101000 00000001 00000000` - (192.168.1.0)
+- Value - the bits you want to match - Example (IP prefix):`11000000 10101000 00000001 00000000` - (192.168.1.0)
 - Mask - Defines which bits matter - Mask bit meaning: 1 = compare this bit and 0 = ignore this bit (don't care) - Example for /24:- Mask: `11111111 11111111 11111111 00000000` - So last 8 bits are ignored
 - Result - What action to take if match happens - Example Result: → Forward to next-hop 10.0.0.1 → Use egress port 5 → Apply QoS queue 3 → Drop - TCAM does not just say “match - It immediately returns the associated action
 
@@ -401,7 +425,7 @@ That needs TCAM.
 
 ## Distributed forwarding
 
-- Every line card has its kwn forwarding engine
+- Every line card has its own forwarding engine
 - Packet arrives to line card and processed by local engine
 - Then via switch fabric it is transmitted directly to egress line card, bypassing Route Processor
 
