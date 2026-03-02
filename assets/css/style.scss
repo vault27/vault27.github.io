@@ -358,11 +358,4 @@ border-right: 2px solid rgba(76, 255, 136, 0.5);
     display: inline-block;
     min-width: 100%;  /* prevents clipping of lines */
     background: none; /* remove background so outer <pre> shows */
-}
-
-/* Optional: syntax highlighting inside code block */
-.language-plaintext.highlighter-rouge .highlight .k { color: #268bd2; }
-.language-plaintext.highlighter-rouge .highlight .c { color: #586e75; }
-.language-plaintext.highlighter-rouge .highlight .s { color: #2aa198; }
-.language-plaintext.highlighter-rouge .highlight .n { color: #b58900; }
-.language-plaintext.highlighter-rouge .highlight .o { color: #cb4b16; }
+  }
