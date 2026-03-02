@@ -51,7 +51,7 @@ H2 заголовок для блока тексат обычного - прим
 /* --------- My overrides ---------- */
 
 /* --------- Body ---------- */
-
+/*
 .markdown-body {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.95rem;
@@ -85,6 +85,76 @@ body::before {
     );
 
   mix-blend-mode: screen;
+}
+*/
+
+/* ==========================================
+   RETRO AMBER CRT THEME
+========================================== */
+
+html, body {
+  background-color: #1a0f08; /* deeper tube glass */
+}
+
+/* Main content */
+.markdown-body {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 100ch;
+
+  position: relative;
+  z-index: 1;
+
+  /* Dark amber base */
+  background-color: #20130b;
+
+  /* Warm readable amber text */
+  color: #ffcc88;
+}
+
+/* CRT overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+
+    /* phosphor center glow */
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 170, 80, 0.18),
+      rgba(255, 120, 40, 0.07) 45%,
+      transparent 75%
+    ),
+
+    /* subtle scanlines */
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 180, 100, 0.04) 0px,
+      rgba(255, 180, 100, 0.04) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+
+  mix-blend-mode: screen;
+}
+
+/* Vignette for curved monitor look */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 60%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
 }
 
 /* --------- Title ---------- */
