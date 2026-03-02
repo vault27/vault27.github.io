@@ -347,30 +347,6 @@ border-top: 2px dashed rgba(76, 255, 136, 0.8);
 border-bottom: 2px dashed rgba(76, 255, 136, 0.8);
 border-left: 2px dashed rgba(76, 255, 136, 0.5);
 border-right: 2px dashed rgba(76, 255, 136, 0.5);
-position: relative;
-}
-
-.language-plaintext.highlighter-rouge .highlight pre::before,
-.language-plaintext.highlighter-rouge .highlight pre::after {
-  content: "";
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 2px solid #4cff88;
-}
-
-.language-plaintext.highlighter-rouge .highlight pre::before {
-  top: -2px;
-  left: -2px;
-  border-right: none;
-  border-bottom: none;
-}
-
-.language-plaintext.highlighter-rouge .highlight pre::after {
-  bottom: -2px;
-  right: -2px;
-  border-left: none;
-  border-top: none;
 }
 
 /* FONT GOES HERE */
