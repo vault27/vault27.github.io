@@ -1,6 +1,6 @@
-# IPSec Complete Guideg<!-- omit from toc -->
+# IPSec Complete Guide<!-- omit from toc -->
 
-## Table of contentsg<!-- omit from toc -->
+## Table of contents<!-- omit from toc -->
 
 - [1 Introduction](#1-introduction)
 - [2 Terms](#2-terms)
@@ -30,25 +30,25 @@
     - [3.2.2 IKEv2 Certificates](#322-ikev2-certificates)
     - [3.2.3 EAP](#323-eap)
 - [4 Authentication scenarios](#4-authentication-scenarios)
-- [Recommended IKE settings](#recommended-ike-settings)
-- [IKE scan](#ike-scan)
-- [4 IPSec protocols](#4-ipsec-protocols)
-  - [4.1 ESP](#41-esp)
-    - [4.1.1 Transport Mode](#411-transport-mode)
-    - [4.1.2 Tunnel mode](#412-tunnel-mode)
-  - [4.2 AH](#42-ah)
-- [5 L2TP over IPSec](#5-l2tp-over-ipsec)
-- [6 GRE over IPSec](#6-gre-over-ipsec)
-- [7 Configuration - Cisco](#7-configuration---cisco)
-  - [7.1 IPSec + VTI + IKEv2 example](#71-ipsec--vti--ikev2-example)
-  - [7.2 IPSec with GRE via Crypto Map](#72-ipsec-with-gre-via-crypto-map)
-  - [7.3 IPSec with Crypto Map](#73-ipsec-with-crypto-map)
-  - [7.4 IPSec + GRE - IPSec profile](#74-ipsec--gre---ipsec-profile)
-- [8 Troubleshooting](#8-troubleshooting)
-- [9 Debug](#9-debug)
-- [10 IPSec VPN solutions](#10-ipsec-vpn-solutions)
-- [11 IPSec tunnels and MTU](#11-ipsec-tunnels-and-mtu)
-- [12 Curiosity questions](#12-curiosity-questions)
+- [5 Recommended IKE settings](#5-recommended-ike-settings)
+- [6 IKE scan](#6-ike-scan)
+- [7 IPSec protocols](#7-ipsec-protocols)
+  - [7.1 ESP](#71-esp)
+    - [7.1.1 Transport Mode](#711-transport-mode)
+    - [7.1.2 Tunnel mode](#712-tunnel-mode)
+  - [7.2 AH](#72-ah)
+- [8 L2TP over IPSec](#8-l2tp-over-ipsec)
+- [9 GRE over IPSec](#9-gre-over-ipsec)
+- [10 Configuration - Cisco](#10-configuration---cisco)
+  - [10.1 IPSec + VTI + IKEv2 example](#101-ipsec--vti--ikev2-example)
+  - [10.2 IPSec with GRE via Crypto Map](#102-ipsec-with-gre-via-crypto-map)
+  - [10.3 IPSec with Crypto Map](#103-ipsec-with-crypto-map)
+  - [10.4 IPSec + GRE - IPSec profile](#104-ipsec--gre---ipsec-profile)
+- [11 Troubleshooting](#11-troubleshooting)
+- [12 Debug](#12-debug)
+- [13 IPSec VPN solutions](#13-ipsec-vpn-solutions)
+- [14 IPSec tunnels and MTU](#14-ipsec-tunnels-and-mtu)
+- [15 Curiosity questions](#15-curiosity-questions)
 
 
 ## 1 Introduction
@@ -205,11 +205,19 @@ AH  → Integrity / Authentication
 - Two nodes can build multiple IPsec tunnels using the same physical interfaces and even the same IP addresses
 - IPSec identifies tunnels by `SPI (Security Parameter Index) + destination IP + protocol (ESP/AH)`
 - In IKEv1 `Multiple independent IKE tunnels between the same IP pair are usually NOT supported`
-- Both nodes use UDP port 500, so no multiplexing
+- Both nodes use UDP port 500, but Initiator and Responder SPIs are used for multiplexing/demultiplexing
+- Some vendors may not support multiple IKEv1 tunnels between the same IPs
+- Usually, 1 IKE tunnel and many IPSec tunnels are used
+- Real-world cases for 2 completely seaprate IKE and IPSec SAs between 2 nodes:
+  - Different authentication methods
+  - Different crypto domains
+  - Different VRFs
+  - Migration scenarios
+  - Strong policy separation requirements
 
 ## 2 Terms
   
-IPSec has several new terms, which are used everywhere in protocol descriptions. These terms are:
+IPSec has several terms, which are used everywhere in protocol descriptions. These terms are:
 
 - SPI
 - Transform set
@@ -2708,7 +2716,7 @@ PSK:
   → Legacy unless carefully managed
 ```
 
-## Recommended IKE settings
+## 5 Recommended IKE settings
 
 - Phase 1
   - IKE version - IKEv2
@@ -2728,7 +2736,7 @@ PSK:
   - PFS - Yes
   - S2S and RA are the same
   
-## IKE scan
+## 6 IKE scan
 
 **Test Phase 1**
 
@@ -2741,13 +2749,13 @@ ike-scan -M -A --id=0000 1.1.1.1
 - P - show PSK hash
 ```
 
-## 4 IPSec protocols
+## 7 IPSec protocols
 
 - There are 2 possible IPSec protocols: ESP and AH
 - Each of these protocols has 2 possible modes: Tunnel and Transport
 - `IPSec protocol and its mode are negotiated during Phase 2 in IKEv1 and IKE_AUTH in IKEv2`
 
-### 4.1 ESP
+### 7.1 ESP
 
 - Separate IP protocol for Data Plane
 - IP protocol number 50
@@ -2755,7 +2763,7 @@ ike-scan -M -A --id=0000 1.1.1.1
 - Supports encryption and NAT-T
 - `ESP mode: tunnel or transport mode`
 
-#### 4.1.1 Transport Mode
+#### 7.1.1 Transport Mode
 
 - Typically used for host-to-host communication
 - Server A ↔ Server B over the internet - No VPN gateways - No IP tunneling - Just encrypted transport
@@ -2783,7 +2791,7 @@ ike-scan -M -A --id=0000 1.1.1.1
 +----------------------------+
 ```
 
-#### 4.1.2 Tunnel mode
+#### 7.1.2 Tunnel mode
 
 - Tunnel mode - encrypts the entire original packet - adds a new set of IP headers
 - Required parametres for Tunnel mode:
@@ -2823,7 +2831,7 @@ ike-scan -M -A --id=0000 1.1.1.1
 - Verifies ICV (if authentication is used)
 - Decrypts payload only using the key
 
-### 4.2 AH
+### 7.2 AH
 
 - Separate protocol above IP with encapsulation for data plane
 - Data Integrity, Authentication, Protection from replays
@@ -2894,7 +2902,7 @@ Outer IP | AH Header | Inner IP | TCP/UDP | Data
 - If valid → pass packet up
 - No decryption step exists.
 
-## 5 L2TP over IPSec
+## 8 L2TP over IPSec
 
 - L2TP over IPsec was built into the native Windows VPN client for many years
 - So you had two layers of authentication:
@@ -2932,9 +2940,9 @@ User traffic
 
 - Without L2TP, PPP has no way to cross an IP network
 
-## 6 GRE over IPSec
+## 9 GRE over IPSec
 
-## 7 Configuration - Cisco
+## 10 Configuration - Cisco
 
 Three possible ways to configure IPSec tunnel on Cisco Routers:
 
@@ -2971,7 +2979,7 @@ Three possible ways to configure IPSec tunnel on Cisco Routers:
 - They are commonly misconfigured
 - Consume excessive amount of TCAM
 
-### 7.1 IPSec + VTI + IKEv2 example
+### 10.1 IPSec + VTI + IKEv2 example
 
 `Tunnel` (vrf, bandwidth, ip, mss, mtu, load interval, bfd, source, mode, path mtu discovery, destination, **ipsec profile**) > `ipsec profile` (idle, **transform-set**, pfs group, **ike-v2-profile**) > `ike-v2-profile` (identity, authentication, **keyring**, lifetime, dpd), `transform set`(encryption, hash, mode) > `keyring` (address, key)  
   
@@ -3077,7 +3085,7 @@ crypto ikev2 proposal CorpIPSEC-ikev2-proposal
  group 19 14 5 2
 ```
 
-### 7.2 IPSec with GRE via Crypto Map
+### 10.2 IPSec with GRE via Crypto Map
 
 IKEv1 - Can be IKEv2
 
@@ -3091,7 +3099,7 @@ GRE Tunnel
             └─ Keyring / PSK
 ```
 
-### 7.3 IPSec with Crypto Map
+### 10.3 IPSec with Crypto Map
 
 IKEv1 - Can be IKEv2
 
@@ -3105,7 +3113,7 @@ Interface
             └─ Keyring / PSK
 ```
 
-### 7.4 IPSec + GRE - IPSec profile
+### 10.4 IPSec + GRE - IPSec profile
 
 IKEv2 - can be IKEv1
 
@@ -3120,7 +3128,7 @@ IKEv2 Policy
   └─ Proposal
 ```
 
-## 8 Troubleshooting
+## 11 Troubleshooting
 
 **Show status of all Tunnel interfaces**
 
@@ -3151,7 +3159,7 @@ Router#show logging | inc changed
 20995088: Feb 13 2024 01:00:02.035 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel15, changed state to down
 20995111: Feb 13 2024 01:01:35.759 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel102, changed state to up
 ```
-## 9 Debug
+## 12 Debug
 
 ```
 Debug crypto condition peer ipv4 140.238.149.242
@@ -3159,7 +3167,7 @@ Debug crypto ikev2
 Debug crypto ipsec
 ```
 
-## 10 IPSec VPN solutions
+## 13 IPSec VPN solutions
 
 - Site-to-site - Multivendor
 - DMVPN - Cisco
@@ -3167,9 +3175,9 @@ Debug crypto ipsec
 - FlexVPN - Cisco
 - Remote Access VPN
 
-## 11 IPSec tunnels and MTU
+## 14 IPSec tunnels and MTU
 
-## 12 Curiosity questions
+## 15 Curiosity questions
 
 Why 2 Tunnels?
 
