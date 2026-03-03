@@ -298,32 +298,14 @@ h1 {
 ================================= */
 
 a {
-  color: #52e38c;
+  color: #d98f3a;   /* burnished copper */
   text-decoration: none;
-  position: relative;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
 }
 
-/* thin terminal underline */
-a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -2px;
-  width: 100%;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.7;
-}
-
-/* hover = brighter phosphor */
 a:hover {
-  color: #4cff88;
-  text-shadow: 0 0 6px rgba(76, 255, 136, 0.4);
-}
-
-a:hover::after {
-  opacity: 1;
+  color: #f2b766;   /* warm highlight */
+  text-shadow: 0 0 6px rgba(242, 183, 102, 0.4);
 }
 
 /* =================================
