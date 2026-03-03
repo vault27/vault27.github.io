@@ -1,21 +1,55 @@
-# IPSec Complete Guide
+# IPSec Complete Guideg<!-- omit from toc -->
 
-## Table of contents
+## Table of contentsg<!-- omit from toc -->
 
-- [1. Introduction](#1-introduction)
-- [2. SPI](#2-spi)
-- [3. SA](#3-sa)
-    - [3.1 Phase 1 - IKE SA](#31-phase-1---ike-sa)
-    - [3.2 Phase 2 - IPSec SA](#32-phase-2---ipsec-sa)
-    - [3.3 Manual and Dynamic SAs](#33-manual-and-dynamic-sas)
-- [4. Transform Set](#4-transform-set)
-- [5. Traffic Selectors](#5-traffic-selectors)
-- [6. IKEv1](#6-ikev1)
-    - [6.1 Workflow](#61-workflow)
-    - [6.2 Phase 1](#62-phase-1)
-        - [6.2.1 IKE identiry](#621-ike-identity)
-        - [6.2.2 Main Mode](#622-main-mode)
-        - [6.2.3 Aggressive Mode](#623-aggressive-mode)
+- [1 Introduction](#1-introduction)
+- [2 Terms](#2-terms)
+  - [2.1 SPI](#21-spi)
+  - [2.2 SA](#22-sa)
+    - [2.3.1 Phase 1 - IKE SA](#231-phase-1---ike-sa)
+    - [2.3.2 Phase 2 - IPSec SA](#232-phase-2---ipsec-sa)
+    - [2.3.3 Manual and Dynamic SAs](#233-manual-and-dynamic-sas)
+  - [2.3 Transform set](#23-transform-set)
+  - [2.4 Traffic Selectors](#24-traffic-selectors)
+  - [2.5 Vendor IDs](#25-vendor-ids)
+  - [2.6 IKE identity](#26-ike-identity)
+- [3 Key management protocols](#3-key-management-protocols)
+  - [3.1 IKE v1](#31-ike-v1)
+    - [3.1.1 Workflow](#311-workflow)
+    - [3.1.2 Phase 1](#312-phase-1)
+    - [3.1.3 Main Mode](#313-main-mode)
+    - [3.1.4 Aggressive Mode](#314-aggressive-mode)
+    - [3.1.5 Phase 2](#315-phase-2)
+    - [3.1.6 Xauth](#316-xauth)
+    - [3.1.7 Mode-Config Phase](#317-mode-config-phase)
+    - [3.1.8 Keepalives](#318-keepalives)
+    - [3.1.9 DPD](#319-dpd)
+    - [3.1.10 NAT-T](#3110-nat-t)
+  - [3.2 IKEv2](#32-ikev2)
+    - [3.2.1 IKEv2 PSK](#321-ikev2-psk)
+    - [3.2.2 IKEv2 Certificates](#322-ikev2-certificates)
+    - [3.2.3 EAP](#323-eap)
+- [4 Authentication scenarios](#4-authentication-scenarios)
+- [Recommended IKE settings](#recommended-ike-settings)
+- [IKE scan](#ike-scan)
+- [4 IPSec protocols](#4-ipsec-protocols)
+  - [4.1 ESP](#41-esp)
+    - [4.1.1 Transport Mode](#411-transport-mode)
+    - [4.1.2 Tunnel mode](#412-tunnel-mode)
+  - [4.2 AH](#42-ah)
+- [5 L2TP over IPSec](#5-l2tp-over-ipsec)
+- [6 GRE over IPSec](#6-gre-over-ipsec)
+- [7 Configuration - Cisco](#7-configuration---cisco)
+  - [7.1 IPSec + VTI + IKEv2 example](#71-ipsec--vti--ikev2-example)
+  - [7.2 IPSec with GRE via Crypto Map](#72-ipsec-with-gre-via-crypto-map)
+  - [7.3 IPSec with Crypto Map](#73-ipsec-with-crypto-map)
+  - [7.4 IPSec + GRE - IPSec profile](#74-ipsec--gre---ipsec-profile)
+- [8 Troubleshooting](#8-troubleshooting)
+- [9 Debug](#9-debug)
+- [10 IPSec VPN solutions](#10-ipsec-vpn-solutions)
+- [11 IPSec tunnels and MTU](#11-ipsec-tunnels-and-mtu)
+- [12 Curiosity questions](#12-curiosity-questions)
+
 
 ## 1 Introduction
 
@@ -165,6 +199,13 @@ AH  → Integrity / Authentication
 - XAUTH (IKEv1, non-RFC standard)
 - IKEv1 Mode Config - No RFC
 - Vendor RA extensions
+
+**Communications**
+
+- Two nodes can build multiple IPsec tunnels using the same physical interfaces and even the same IP addresses
+- IPSec identifies tunnels by `SPI (Security Parameter Index) + destination IP + protocol (ESP/AH)`
+- In IKEv1 `Multiple independent IKE tunnels between the same IP pair are usually NOT supported`
+- Both nodes use UDP port 500, so no multiplexing
 
 ## 2 Terms
   
@@ -709,7 +750,7 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - aggressive mode(3 messages) 
 
 
-#### 6.2.2 Main Mode
+#### 3.1.3 Main Mode
 
 - `6 messages`
 - IKE Identities and Authentication Hash are protected and sent encrypted only > no one can see it
@@ -995,7 +1036,7 @@ Responder logic:
 6. Accept peer
 ```
 
-#### 6.2.3 Aggressive Mode
+#### 3.1.4 Aggressive Mode
 
 - `3 messages instead of 6 in Main Mode`
 - Aggressive mode was created to reduce load on links and CPU
@@ -1279,7 +1320,7 @@ After PSK compromise, attacker can:
   - Credential harvesting
   - MFA fatigue (later setups)
 
-### 6.3 Phase 2
+#### 3.1.5 Phase 2
 
 - There is only one mode - `quick` in Phase 2, `3 packets`
 - It’s called Quick Mode because IKEv1 Phase 2 is deliberately short, lightweight, and fast compared to Phase 1 — both in message count and in cryptographic work: no identity, no DH exchange, only 3 messages
@@ -1388,7 +1429,7 @@ Encrypted Payloads (inside IKE SA):
 - ESP traffic starting immediately after them
 - UDP/500 or 4500
 
-### 6.4 Xauth
+#### 3.1.6 Xauth
 
 - XAuth (Extended Authentication) is an optional extra authentication step used only with IKEv1, mainly to authenticate individual users (not just devices)
 - XAuth is an extension to IKEv1 Phase 1, and it happens `after Phase 1 but before Phase 2`
@@ -1402,14 +1443,14 @@ Encrypted Payloads (inside IKE SA):
 - If successful → proceed to Phase 2 (Quick Mode) to negotiate IPsec SAs
 - `IKEv2 replaced XAuth with EAP` (Extensible Authentication Protocol) for user-level auth
 
-### 6.5 Mode-Config Phase
+#### 3.1.7 Mode-Config Phase
 
 - Assign IP, DNS, WINS, Split tunnel
 - `Happens after XAuth`
 - Not used in IKEv2
 - In IKEv2 it is called Configuration Payloads (CP) inside the IKE_AUTH exchange
 
-### 6.6 Keepalives
+#### 3.1.8 Keepalives
 
 - There is no single, clean, mandatory mechanism
 - Two kinds of “keepalives” in IKEv1
@@ -1417,7 +1458,7 @@ Encrypted Payloads (inside IKE SA):
   - DPD / liveness checks (often incorrectly called keepalives)
 - No automatic keepalives at all in pure IKEv1 without NAT-T and without DPD
 
-### 6.7 DPD
+#### 3.1.9 DPD
 
 - Dead Peer Detection
 - Detect dead peers
@@ -1458,7 +1499,7 @@ ISAKMP: INFORMATIONAL, DPD Reply
     Payloads: NONE
 ```
 
-### 6.8 NAT-T
+#### 3.1.10 NAT-T
 
 ```
 +----------------+-----------+-------------+------------+------------------------+---------+-------------+----------+
@@ -1591,7 +1632,7 @@ Initiator > CREATE_CHILD_SA > Responder - Optional
 Responder > CREATE_CHILD_SA > Initiator - Optional
 ```
 
-### IKEv2 PSK
+#### 3.2.1 IKEv2 PSK
 
 **Packet 1 - INIT_SA**  
 
@@ -1869,7 +1910,7 @@ Encrypted and Authenticated
   Integrity Checksum: verified
 ```
 
-### IKEv2 Certificates
+#### 3.2.2 IKEv2 Certificates
 
 - Certs auth is more secure then PSK
 - Certs completely kill offline cracking
@@ -2029,7 +2070,7 @@ Exactly the same data for PSK and certs:
 
 `None of that appears in packets`
 
-### EAP
+#### 3.2.3 EAP
 
 - EAP allows to use additional authentication in addition to PSK or Certs: username/password or additional cert
 - Used for RA VPN
@@ -2455,7 +2496,7 @@ Encrypted and Authenticated Payload
   Integrity Checksum: verified 
 ```
 
-## Authentication scenarios
+## 4 Authentication scenarios
 
 ```
 ===============================================================================
@@ -2853,7 +2894,7 @@ Outer IP | AH Header | Inner IP | TCP/UDP | Data
 - If valid → pass packet up
 - No decryption step exists.
 
-## L2TP over IPSec
+## 5 L2TP over IPSec
 
 - L2TP over IPsec was built into the native Windows VPN client for many years
 - So you had two layers of authentication:
@@ -2891,9 +2932,9 @@ User traffic
 
 - Without L2TP, PPP has no way to cross an IP network
 
-## GRE over IPSec
+## 6 GRE over IPSec
 
-## Configuration - Cisco
+## 7 Configuration - Cisco
 
 Three possible ways to configure IPSec tunnel on Cisco Routers:
 
@@ -2930,7 +2971,7 @@ Three possible ways to configure IPSec tunnel on Cisco Routers:
 - They are commonly misconfigured
 - Consume excessive amount of TCAM
 
-### IPSec + VTI + IKEv2 example
+### 7.1 IPSec + VTI + IKEv2 example
 
 `Tunnel` (vrf, bandwidth, ip, mss, mtu, load interval, bfd, source, mode, path mtu discovery, destination, **ipsec profile**) > `ipsec profile` (idle, **transform-set**, pfs group, **ike-v2-profile**) > `ike-v2-profile` (identity, authentication, **keyring**, lifetime, dpd), `transform set`(encryption, hash, mode) > `keyring` (address, key)  
   
@@ -2946,7 +2987,7 @@ IKEv2 Policy
   └─ Proposal             (IKE SA parameters)
 ```
 
-#### Tunnel
+**Tunnel**
 
 ```
 interface Tunnel12
@@ -2970,7 +3011,7 @@ interface Tunnel12
 end
 ```
 
-#### IPSec Profile
+**IPSec Profile**
 
 ```
 crypto ipsec profile IPSEC-profile
@@ -2980,7 +3021,7 @@ crypto ipsec profile IPSEC-profile
  set ikev2-profile CorpIPSEC-Prisma-ikev2-profile
 ```
 
-#### Transform set
+**Transform set**
 
 Phase 2 options
 
@@ -2989,7 +3030,7 @@ crypto ipsec transform-set IPSEC esp-aes 256 esp-sha256-hmac
  mode tunnel
 ```
 
-#### IKE v2 Profile
+**IKE v2 Profile**
 
 Phase 1 options
 
@@ -3003,7 +3044,7 @@ crypto ikev2 profile IPSEC-profile
  dpd 10 3 periodic
 ```
 
-#### Keyring
+**Keyring**
 
 ```
 crypto ikev2 keyring CorpIPSEC-vpn-keyring
@@ -3012,7 +3053,7 @@ crypto ikev2 keyring CorpIPSEC-vpn-keyring
   pre-shared-key CY5R2TugteXEGBv6
 ```
 
-#### IKE-v2 Policy
+**IKE-v2 Policy**
 
 ```
 crypto ikev2 policy remote-ikev2-policy 
@@ -3025,7 +3066,7 @@ crypto ikev2 policy remote-ikev2-policy
  proposal oci_ikev2-proposal
 ```
 
-#### IKE Proposal
+**IKE Proposal**
 
 Phase 1 options
 
@@ -3036,7 +3077,9 @@ crypto ikev2 proposal CorpIPSEC-ikev2-proposal
  group 19 14 5 2
 ```
 
-### IPSec with GRE via Crypto Maps example - IKEv1 - Can be IKEv2
+### 7.2 IPSec with GRE via Crypto Map
+
+IKEv1 - Can be IKEv2
 
 ```
 GRE Tunnel
@@ -3048,7 +3091,9 @@ GRE Tunnel
             └─ Keyring / PSK
 ```
 
-### Pure IPSec with Crypto Maps - IKEv1 - Can be IKEv2
+### 7.3 IPSec with Crypto Map
+
+IKEv1 - Can be IKEv2
 
 ```
 Interface
@@ -3060,7 +3105,9 @@ Interface
             └─ Keyring / PSK
 ```
 
-### IPSec + GRE - no Crypto Maps - IPSec profile - IKEv2 - can be IKEv1
+### 7.4 IPSec + GRE - IPSec profile
+
+IKEv2 - can be IKEv1
 
 ```
 GRE Tunnel
@@ -3073,7 +3120,7 @@ IKEv2 Policy
   └─ Proposal
 ```
 
-## Troubleshooting
+## 8 Troubleshooting
 
 **Show status of all Tunnel interfaces**
 
@@ -3104,7 +3151,7 @@ Router#show logging | inc changed
 20995088: Feb 13 2024 01:00:02.035 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel15, changed state to down
 20995111: Feb 13 2024 01:01:35.759 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel102, changed state to up
 ```
-## Debug
+## 9 Debug
 
 ```
 Debug crypto condition peer ipv4 140.238.149.242
@@ -3112,7 +3159,7 @@ Debug crypto ikev2
 Debug crypto ipsec
 ```
 
-## IPSec VPN solutions
+## 10 IPSec VPN solutions
 
 - Site-to-site - Multivendor
 - DMVPN - Cisco
@@ -3120,9 +3167,9 @@ Debug crypto ipsec
 - FlexVPN - Cisco
 - Remote Access VPN
 
-## IPSec tunnels and MTU
+## 11 IPSec tunnels and MTU
 
-## Curiosity questions
+## 12 Curiosity questions
 
 Why 2 Tunnels?
 
