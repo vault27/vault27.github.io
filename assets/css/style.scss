@@ -156,64 +156,118 @@ body::after {
     );
 }
 
-/* --------- Title ---------- */
+/* ==========================================
+   VAULT-27 TITLE SYSTEM
+========================================== */
 
-h1:first-of-type a,
-h1:first-of-type a:visited,
-h1:first-of-type a:hover,
-h1:first-of-type a:active {
-  color: #4cff88 !important;
-  text-decoration: none !important;
-}
-
-/* Also kill focus outline glow */
-h1:first-of-type a:focus {
-  outline: none !important;
-}
-
+/* --- MAIN TITLE --- */
 h1:first-of-type {
   font-family: "PxPlus IBM VGA9", monospace;
-
-  /* Responsive but controlled */
-  font-size: clamp(1.8rem, 4vw, 3rem);
-
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
 
   color: #4cff88;
 
   display: inline-block;
   position: relative;
 
-  white-space: nowrap;        /* Prevent wrapping */
-  overflow-x: auto;           /* Allow scroll if too long */
+  white-space: nowrap;
+  overflow-x: auto;
 
-  padding: 20px 0;
-  margin: 60px 0 40px 0;
+  padding: 28px 0;
+  margin: 70px 0 20px 0;
 
- text-shadow:
-    0 0 6px rgba(76,255,136,0.6),
-    0 0 12px rgba(76,255,136,0.3);
+  text-shadow:
+    0 0 4px rgba(76,255,136,0.5),
+    0 0 8px rgba(76,255,136,0.2);
 }
 
-/* Top line */
+/* Remove link styling from title */
+h1:first-of-type a,
+h1:first-of-type a:visited,
+h1:first-of-type a:hover,
+h1:first-of-type a:active {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+h1:first-of-type a:focus {
+  outline: none !important;
+}
+
+/* --- TOP LINE --- */
 h1:first-of-type::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  border-top: 2px dashed rgba(76,255,136,0.6);
+  border-top: 2px solid rgba(76,255,136,0.5);
 }
 
-/* Bottom line */
+/* --- BOTTOM LINE --- */
 h1:first-of-type::after {
   content: "";
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  border-bottom: 2px dashed rgba(76,255,136,0.6);
+  border-bottom: 2px solid rgba(76,255,136,0.5);
+}
+
+
+/* ==========================================
+   BLINKING CURSOR (ONLY ANIMATION LEFT)
+========================================== */
+
+h1:first-of-type .cursor::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 0.75em;
+  background: #4cff88;
+  margin-left: 10px;
+  position: relative;
+  top: 0.08em;
+
+  box-shadow:
+    0 0 6px rgba(76,255,136,0.8),
+    0 0 12px rgba(76,255,136,0.4);
+
+  animation: vault-blink 1s steps(1) infinite;
+}
+
+@keyframes vault-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+
+/* ==========================================
+   VAULT STRIP (UNDER TITLE)
+========================================== */
+
+.vault-strip {
+  font-family: "PxPlus IBM VGA9", monospace;
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  margin-bottom: 60px;
+  color: rgba(76,255,136,0.85);
+}
+
+.vault-strip span {
+  margin-right: 18px;
+  opacity: 0.9;
+}
+
+.vault-strip span::before {
+  content: "[ ";
+}
+
+.vault-strip span::after {
+  content: " ]";
 }
 
 /* ==========================================
