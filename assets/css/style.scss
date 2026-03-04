@@ -360,13 +360,26 @@ ul > li::before {
 
 code.highlighter-rouge,
 code.language-plaintext {
-    font-family: "Fira Code", monospace;  /* nice coding font */
-    background-color: #fffb8f;            /* bright yellow background */
-    color: #b00000;                       /* strong red text */
-    padding: 2px 6px;                     /* small padding for readability */
-    border-radius: 4px;                    /* subtle rounding */
-    font-weight: bold;                     /* optional, makes it pop */
-    box-shadow: 0 0 2px rgba(0,0,0,0.3);  /* small shadow for contrast */
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+
+  font-size: 0.92em;
+  letter-spacing: 0.5px;
+
+  color: #7dffb3;                    /* softer phosphor */
+  background-color: #0c1f17;          /* darker than code blocks */
+
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  border: 1px solid rgba(76, 255, 136, 0.35);
+
+  box-shadow:
+    inset 0 0 6px rgba(76,255,136,0.08),
+    0 0 4px rgba(76,255,136,0.15);
+
+  text-shadow: 0 0 2px rgba(76,255,136,0.4);
+
+  white-space: nowrap;
 }
 
 /* Full code block styling */
