@@ -320,17 +320,37 @@ strong, b {
   letter-spacing: 0.3px;    /* subtle distinction */
 }
 
+/* ===============================
+   GLOBAL TERMINAL LIST STYLE
+   (Markdown UL)
+================================ */
 
-/* ---------- Lists (dash instead of bullets) ---------- */
+/* Remove default bullets */
 ul {
   list-style: none;
-  padding-left: 1.2rem;
+  padding-left: 0;
+  margin-left: 0;
 }
 
-ul li::before {
-  content: "– ";
-  color: #5fb3a2;
-  margin-left: -1.2rem;
+/* Top-level list items */
+ul > li {
+  position: relative;
+  padding-left: 1.8rem;
+  margin: 0.6rem 0;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  color: #9fd9b3;   /* soft phosphor green */
+  letter-spacing: 0.5px;
+}
+
+/* Arrow symbol */
+ul > li::before {
+  content: ">";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #4cff88;   /* brighter green */
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(76, 255, 136, 0.35);
 }
 
 /* VT323 ONLY for code blocks */
