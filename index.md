@@ -24,26 +24,21 @@ A taxonomy of network engineering knowledge
 - [TLS/SSL](/ssl.html)
 - [SSH](/ssh.html)
 
-## Identity Protocols
 
-[Evolution of Authentication Protocols](/auth.html)
 
-**Authentication Protocols**
+## Authentication Protocols
 
+- [Evolution of Authentication Protocols](/auth.html)
 - [EAP](/eap.html)
 - [Kerberos](/kerberos.html)
 - [NTLM](/ntlm.html)
 
-**AAA (Authentication, Authorization, Accounting)**
+## AAA (Authentication, Authorization, Accounting)
 
 - [RADIUS](/radius.html)
 - [TACACS+](/tacacs.html)
 
-**Federation / Authorization**
 
-- [OAuth](oauth.html)
-- [SAML](/saml.html)
-
-**Directory Service**
+## Directory Service
 
 - [LDAP](/ldap.html)
