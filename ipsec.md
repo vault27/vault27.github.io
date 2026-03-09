@@ -3096,13 +3096,15 @@ Transport Layer Security
 
 **IPsec overhead**
 
-| Component       | Size (bytes) | Notes                                 |
-|-----------------|-------------|---------------------------------------|
-| ESP header       | 20–32       | Depending on algorithm (AES, SHA, etc.) |
-| ESP trailer      | 2–255       | For padding to block boundary         |
-| ESP auth (HMAC)  | 12–16       | For integrity check                   |
-| IP header (outer)| 20          | IPv4 standard                         |
-| UDP (for NAT-T)  | 8           | Only if NAT traversal is used         |
+```
+| Component        | Size (bytes) | Notes                                 |
+|------------------|--------------|---------------------------------------|
+| ESP header       | 20–32        | Depending on algorithm (AES, SHA, etc.) |
+| ESP trailer      | 2–255        | For padding to block boundary         |
+| ESP auth (HMAC)  | 12–16        | For integrity check                   |
+| IP header (outer)| 20           | IPv4 standard                         |
+| UDP (for NAT-T)  | 8            | Only if NAT traversal is used         |
+```
 
 - Typical overhead: ~50–60 bytes without NAT-T, ~70–80 bytes with NAT-T
 - Implication: If your interface MTU = 1500, the maximum payload that will pass without fragmentation is ~1440 bytes
