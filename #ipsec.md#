@@ -1,55 +1,21 @@
-# IPSec Complete Guide<!-- omit from toc -->
+# IPSec Complete Guide
 
-## Table of contents<!-- omit from toc -->
+## Table of contents
 
-- [1 Introduction](#1-introduction)
-- [2 Terms](#2-terms)
-  - [2.1 SPI](#21-spi)
-  - [2.2 SA](#22-sa)
-    - [2.3.1 Phase 1 - IKE SA](#231-phase-1---ike-sa)
-    - [2.3.2 Phase 2 - IPSec SA](#232-phase-2---ipsec-sa)
-    - [2.3.3 Manual and Dynamic SAs](#233-manual-and-dynamic-sas)
-  - [2.3 Transform set](#23-transform-set)
-  - [2.4 Traffic Selectors](#24-traffic-selectors)
-  - [2.5 Vendor IDs](#25-vendor-ids)
-  - [2.6 IKE identity](#26-ike-identity)
-- [3 Key management protocols](#3-key-management-protocols)
-  - [3.1 IKE v1](#31-ike-v1)
-    - [3.1.1 Workflow](#311-workflow)
-    - [3.1.2 Phase 1](#312-phase-1)
-    - [3.1.3 Main Mode](#313-main-mode)
-    - [3.1.4 Aggressive Mode](#314-aggressive-mode)
-    - [3.1.5 Phase 2](#315-phase-2)
-    - [3.1.6 Xauth](#316-xauth)
-    - [3.1.7 Mode-Config Phase](#317-mode-config-phase)
-    - [3.1.8 Keepalives](#318-keepalives)
-    - [3.1.9 DPD](#319-dpd)
-    - [3.1.10 NAT-T](#3110-nat-t)
-  - [3.2 IKEv2](#32-ikev2)
-    - [3.2.1 IKEv2 PSK](#321-ikev2-psk)
-    - [3.2.2 IKEv2 Certificates](#322-ikev2-certificates)
-    - [3.2.3 EAP](#323-eap)
-- [4 Authentication scenarios](#4-authentication-scenarios)
-- [5 Recommended IKE settings](#5-recommended-ike-settings)
-- [6 IKE scan](#6-ike-scan)
-- [7 IPSec protocols](#7-ipsec-protocols)
-  - [7.1 ESP](#71-esp)
-    - [7.1.1 Transport Mode](#711-transport-mode)
-    - [7.1.2 Tunnel mode](#712-tunnel-mode)
-  - [7.2 AH](#72-ah)
-- [8 L2TP over IPSec](#8-l2tp-over-ipsec)
-- [9 GRE over IPSec](#9-gre-over-ipsec)
-- [10 IPSec tunnels and MTU](#10-ipsec-tunnels-and-mtu)
-- [10 Configuration - Cisco](#10-configuration---cisco)
-  - [10.1 IPSec + VTI + IKEv2 example](#101-ipsec--vti--ikev2-example)
-  - [10.2 IPSec with GRE via Crypto Map](#102-ipsec-with-gre-via-crypto-map)
-  - [10.3 IPSec with Crypto Map](#103-ipsec-with-crypto-map)
-  - [10.4 IPSec + GRE - IPSec profile](#104-ipsec--gre---ipsec-profile)
-- [11 Troubleshooting](#11-troubleshooting)
-- [12 Debug](#12-debug)
-- [13 IPSec VPN solutions](#13-ipsec-vpn-solutions)
-- [15 Curiosity questions](#15-curiosity-questions)
-
+- [1. Introduction](#1-introduction)
+- [2. SPI](#2-spi)
+- [3. SA](#3-sa)
+    - [3.1 Phase 1 - IKE SA](#31-phase-1---ike-sa)
+    - [3.2 Phase 2 - IPSec SA](#32-phase-2---ipsec-sa)
+    - [3.3 Manual and Dynamic SAs](#33-manual-and-dynamic-sas)
+- [4. Transform Set](#4-transform-set)
+- [5. Traffic Selectors](#5-traffic-selectors)
+- [6. IKEv1](#6-ikev1)
+    - [6.1 Workflow](#61-workflow)
+    - [6.2 Phase 1](#62-phase-1)
+        - [6.2.1 IKE identiry](#621-ike-identity)
+        - [6.2.2 Main Mode](#622-main-mode)
+        - [6.2.3 Aggressive Mode](#623-aggressive-mode)
 
 ## 1 Introduction
 
@@ -63,21 +29,15 @@
 - All communications inside both tunnels are encrypted and authenticated
 - Routing protocols that rely on multicast or broadcast (e.g., OSPF, EIGRP) cannot run directly over classic IPsec tunnels
 - To support such protocols, a GRE tunnel is built first, and IPsec is used to encrypt the GRE traffic
-
-IPSec consists of:
-    - Key management protocol
-      - IKEv1
-      - IKEv2
-    - IPSec Protocols
-      - ESP
-        - Tunnel Mode
-        - Transport Mode
-    - AH(obsolete)
-        - Tunnel Mode
-        - Transport Mode
+- IPSec consists of 3 protocols:
+    - ESP - data plane
+    - AH(obsolete) - data plane
+    - IKE v1 or v2 - control plane
 
 **Why it was invented?**
+As per RITM1089053:
 
+After the Workspace ONE UEM application upgrade, the profile page on the Admin Console is no longer accessible. Upon analyzing the logs, the vendor identified issues with the server P53PAJAWDS03.3p.adx.ctcx. Therefore, they recommend disabling this problematic device services server from the network pool mdm.cantire.com and routing traffic exclusively to the server P53PAJAWDS04.3p.adx.ctcx, as DS04 is functioning correctly with respect to MTS profile accessibility. Once the routing is updated, we can validate whether the issue is resolved and test the profile page accessibility.
 - To add security to IP networking itself
 - Original Internet had no built-in security
 - IP provides no: Encryption, Authentication, Integrity protection, Anti-replay protection
@@ -200,24 +160,9 @@ AH  → Integrity / Authentication
 - IKEv1 Mode Config - No RFC
 - Vendor RA extensions
 
-**Communications**
-
-- Two nodes can build multiple IPsec tunnels using the same physical interfaces and even the same IP addresses
-- IPSec identifies tunnels by `SPI (Security Parameter Index) + destination IP + protocol (ESP/AH)`
-- In IKEv1 `Multiple independent IKE tunnels between the same IP pair are usually NOT supported`
-- Both nodes use UDP port 500, but Initiator and Responder SPIs are used for multiplexing/demultiplexing
-- Some vendors may not support multiple IKEv1 tunnels between the same IPs
-- Usually, 1 IKE tunnel and many IPSec tunnels are used
-- Real-world cases for 2 completely seaprate IKE and IPSec SAs between 2 nodes:
-  - Different authentication methods
-  - Different crypto domains
-  - Different VRFs
-  - Migration scenarios
-  - Strong policy separation requirements
-
-## 2 Terms
+**Terms**  
   
-IPSec has several terms, which are used everywhere in protocol descriptions. These terms are:
+IPSec has several new terms, which are used everywhere in protocol descriptions. These terms are:
 
 - SPI
 - Transform set
@@ -226,7 +171,7 @@ IPSec has several terms, which are used everywhere in protocol descriptions. The
 
 Below is their meaning and description
 
-### 2.1 SPI
+## 2 SPI
 
 - SPI stands for `Security Parameters Index`
 - `There are two types of SPI`: IKE SPI used in Phase 1 IKEv1, IKE_SA_INIT in IKEv2 and IPSec SPI used used in Phase 2 IKEv1, IKE_AUTH IKEv2
@@ -250,7 +195,7 @@ Below is their meaning and description
 - The ESP/AH header in data packets uses the Phase 2 SPI as the first field to indicate which SA/key to use
 - For every new Phase 2 tunnel - because of different traffic selectors - new pairs of SPI are generated by both sides
 
-### 2.2 SA
+## 3 SA
 
 - SA - Security association - `has 2 meanings`
     - Meaning 1 - it is a set of cryptographic options that are negotiated between devices that are establishing an IPSec relationship
@@ -260,7 +205,7 @@ Below is their meaning and description
 - Each IPSec connection to 1 peer has minimum 3 SAs in router's memory: 1 SA for Phase 1 tunnel (bidectional, used for inbound and outbound traffic) and 2 SAs for Phase 2 tunnel: one for Inbound traffic and one for Outbound
 - Each IPSec connection to a peer may have more than 2 Phase 2 SAs, it depends on the amount of traffic selectors, for each traffic selector another pair of SAs for Phase 2 is created
 
-#### 2.3.1 Phase 1 - IKE SA
+### 3.1 Phase 1 - IKE SA
 
 **As a set of options**
 
@@ -417,7 +362,7 @@ Session-id: 3, Status: UP-ACTIVE
   Child SAs: 1 active
 ```
 
-#### 2.3.2 Phase 2 - IPSec SA 
+### 3.2 Phase 2 - IPSec SA 
 
 **As a set of options during negotiations**
 
@@ -456,7 +401,7 @@ IPsec SA (inbound)
 └── Traffic selector
 ```
 
-#### 2.3.3 Manual and Dynamic SAs
+### 3.3 Manual and Dynamic SAs
 
 **Manual SA**
 
@@ -478,7 +423,7 @@ IPsec SA (inbound)
 - The IKE configuration defines the algorithms and keys used to establish the secure IKE connection with the peer security gateway
 - This connection is then used to dynamically agree upon keys and other data used by the dynamic IPsec SA. The IKE SA is negotiated first and then used to protect the negotiations that determine the dynamic IPsec SAs
 
-### 2.3 Transform set
+## 4 Transform set
 
 - A transform set is a combination of one or more transforms used to build an IPsec Security Association (SA) during Phase 2 (Quick Mode / Child SA) negotiation or IKE Security Assosiation during Phase 1
 - Each transform describes one specific aspect of how IPsec protects the traffic
@@ -491,7 +436,7 @@ IPsec SA (inbound)
 - ESP(Phase 2) transform set includes encryption + integrity transforms
 - AH (Phase 2) - integrity only  
 
-### 2.4 Traffic Selectors
+## 5 Traffic Selectors
 
 - These are parametres, used during negotiations during Phase 2
 - In Palo Alto terms it is called Proxy ID
@@ -546,7 +491,7 @@ interface: GigabitEthernet0/0
         Status: ACTIVE
 ```
 
-### 2.5 Vendor IDs
+## 6 Vendor IDs
 
 - In IKEv1, a Vendor ID (VID) is just bytes
 - IKEv1 Phase 1 Message 1 Main Mode capture with lots of Vendor IDs, exactly like you’d see from a Cisco RA VPN headend in the 2000s
@@ -619,7 +564,87 @@ Vendor ID
     - Fragmentation → RFC-defined
     - Cookies → standardized DoS protection
 
-### 2.6 IKE identity
+## 6 IKE v1
+
+- IKEv1 was designed by the IETF IPsec work group in the mid-1990s and standardized in 1998 as RFC 2409
+- First appeared in Research & open-source Unix IPsec stacks, then in Cisco IOS, Checkpoint, Juniper
+- IKE v1 goals: 
+    - Authenticate peers
+    - Negotiate cryptographic parameters
+    - Establish shared secret keys
+    - Create and manage IPsec Security Associations (SAs) + IKE SA
+    - Provide Perfect Forward Secrecy (PFS)
+    - Detect peer liveness
+    - Provides identity protection (in main mode)
+- IKE v1 uses UDP port 500 or UDP port 4500 in case of NAT-T technology
+- IKEv1 uses two phases to authenticate peers `once` and securely negotiate traffic protection many times
+- Phase 1 — Build a secure control channel
+- Phase 2 - Negotiate parametres for Data traffic encryption via secure Control Channel
+- Phase 1 can work in 2 modes: main and aggressive
+    - 9 messages in total if main mode is used in Phase 1
+    - 6 messages in total if aggressive mode is used in Phase 1
+- IKEv1 was developed, combining ideas from three earlier protocols:
+    - ISAKMP – framework for messages and SA management, how packets are formatted (headers, payload types), a generic state machine for SA negotiation, but not how keys are exchanged
+    - Oakley – Diffie-Hellman key exchange and math, key derivation techniques, DH groups
+    - SKEME – identity protection, rekeying, multiple SAs, negotiate algorithms, separation of key exchange from authentication, multiple authentication styles
+- There is IKE traffic, when everything is established and data flows normally - keepalives via port UDP/500, if NAT-T is enabled then UDP/4500 is used
+- In the IPsec/IKE world, the “initiator” is the peer that first sends an IKE packet to start the negotiation
+- The responder replies. This role is independent of who sends actual data over ESP later
+- PFS in IKEv1 = `Perform a new DH exchange during Phase 2`. It does not mean “ephemeral DH” in the modern TLS sense
+
+### 6.1 Workflow
+
+- IKE Phase 1 — Establish a secure channel (IKE SA) - starts with UDP/500, may switch to UDP/4500
+    - `Main mode` - 6 messages
+    - `Aggressive mode` - 3 messages
+    - SA negotiation - Agree on crypto parametres - transform sets
+    - DH key exchange
+    - Authentication - encrypted already
+    - NAT-T negotiation
+    - DPD negotiation
+    - IKE SA - one for inbound and outbound - IKE SA is bidirectional
+    - Local SPI → The SPI that your router uses when sending ISAKMP messages
+    - Remote SPI → The SPI your router expects in incoming ISAKMP messages from the peer
+- XAuth
+- Config mode
+- IKE Phase 2 — Negotiate IPsec SAs (ESP or AH) - `Quick mode` - UDP/500 or UDP4500
+    - Negotiate 2 IPsec SAs - inbound and outbound - crypto parametres the same - keys are different
+    - Exchange traffic selectors (Proxy-ID) - should be the same
+    - `Outbound SPI` - The SPI my router inserts into ESP packets I send
+    - `Inbound SPI` - The SPI my router expects to see in ESP packets I receive
+    - Transform sets - negotiate crypto parametres
+- ESP/AH encapsulation — Actual data traffic encryption/authentication using the negotiated keys - IP/50(ESP) or UDP/4500 or IP/51(AH) - Destination SPI is in header
+
+### 6.2 Phase 1
+
+**Concepts**
+
+- During traffic capture you cannot see Phase 2 negotiation, only Phase 1 as ISAKMP protocol, everything else is encrypted
+- Phase 1 SA is called ISAKMP SA or IKE SA
+- The Phase 1 keys are long-lived and tied to identity/authentication
+- IKE SA and IPSec SAs must be cryptographically independent
+- Phase 1 establishes an ISAKMP(Internet Security Association and Key Management Protocol) SA, which is a secure channel through which the IPsec SA negotiation can take place
+- Phase 1 workflow: `Crypto negotiations > DH exchange > Authentication > IKE communications between routers `
+- The ISAKMP header has its own SPI pair
+- These SPIs identify the IKE SA
+- IKE SA is bidirectional
+
+**Negotiations - The following crypto parametres are negotiated during Phase 1**
+
+- Hashing - md5 or sha - used inside HMAC for authentication and integrity of every IKE packet
+- Authentication - Preshared Keys or certificates
+- Group - Diffie Helman group - algorithm which is used to establish shared secret keys
+- Encryption
+- Lifetime - 24 hours default - don't have to match  
+   
+To easy remember this we can use first letters of these parametres: `HAGEL`
+
+**IKE Phase 1 can be established via**
+
+- main mode(6 messages)  
+- aggressive mode(3 messages) 
+
+#### 6.2.1 IKE identity
 
 - IKE Identity is a `Value` which is sent by both Initiator and Responder to each other during `Authentication` Stage of Phase 1 in IKEv1 and during the IKE_AUTH exchange in IKEv2
 - IKE Identity is `mandatory` for use in both IKE versions, Site-to-Site VPNs and RA VPNs
@@ -675,90 +700,7 @@ Vendor ID
 - EAP is used in addition to, not instead of, PSK or certificates
 - Generic or anonymous client IKE IDs are commonly used
 
-## 3 Key management protocols
-
-### 3.1 IKE v1
-
-- IKEv1 was designed by the IETF IPsec work group in the mid-1990s and standardized in 1998 as RFC 2409
-- First appeared in Research & open-source Unix IPsec stacks, then in Cisco IOS, Checkpoint, Juniper
-- IKE v1 goals: 
-    - Authenticate peers
-    - Negotiate cryptographic parameters
-    - Establish shared secret keys
-    - Create and manage IPsec Security Associations (SAs) + IKE SA
-    - Provide Perfect Forward Secrecy (PFS)
-    - Detect peer liveness
-    - Provides identity protection (in main mode)
-- IKE v1 uses UDP port 500 or UDP port 4500 in case of NAT-T technology
-- IKEv1 uses two phases to authenticate peers `once` and securely negotiate traffic protection many times
-- Phase 1 — Build a secure control channel
-- Phase 2 - Negotiate parametres for Data traffic encryption via secure Control Channel
-- Phase 1 can work in 2 modes: main and aggressive
-    - 9 messages in total if main mode is used in Phase 1
-    - 6 messages in total if aggressive mode is used in Phase 1
-- IKEv1 was developed, combining ideas from three earlier protocols:
-    - ISAKMP – framework for messages and SA management, how packets are formatted (headers, payload types), a generic state machine for SA negotiation, but not how keys are exchanged
-    - Oakley – Diffie-Hellman key exchange and math, key derivation techniques, DH groups
-    - SKEME – identity protection, rekeying, multiple SAs, negotiate algorithms, separation of key exchange from authentication, multiple authentication styles
-- There is IKE traffic, when everything is established and data flows normally - keepalives via port UDP/500, if NAT-T is enabled then UDP/4500 is used
-- In the IPsec/IKE world, the “initiator” is the peer that first sends an IKE packet to start the negotiation
-- The responder replies. This role is independent of who sends actual data over ESP later
-- PFS in IKEv1 = `Perform a new DH exchange during Phase 2`. It does not mean “ephemeral DH” in the modern TLS sense
-
-#### 3.1.1 Workflow
-
-- IKE Phase 1 — Establish a secure channel (IKE SA) - starts with UDP/500, may switch to UDP/4500
-    - `Main mode` - 6 messages
-    - `Aggressive mode` - 3 messages
-    - SA negotiation - Agree on crypto parametres - transform sets
-    - DH key exchange
-    - Authentication - encrypted already
-    - NAT-T negotiation
-    - DPD negotiation
-    - IKE SA - one for inbound and outbound - IKE SA is bidirectional
-    - Local SPI → The SPI that your router uses when sending ISAKMP messages
-    - Remote SPI → The SPI your router expects in incoming ISAKMP messages from the peer
-- XAuth
-- Config mode
-- IKE Phase 2 — Negotiate IPsec SAs (ESP or AH) - `Quick mode` - UDP/500 or UDP4500
-    - Negotiate 2 IPsec SAs - inbound and outbound - crypto parametres the same - keys are different
-    - Exchange traffic selectors (Proxy-ID) - should be the same
-    - `Outbound SPI` - The SPI my router inserts into ESP packets I send
-    - `Inbound SPI` - The SPI my router expects to see in ESP packets I receive
-    - Transform sets - negotiate crypto parametres
-- ESP/AH encapsulation — Actual data traffic encryption/authentication using the negotiated keys - IP/50(ESP) or UDP/4500 or IP/51(AH) - Destination SPI is in header
-
-#### 3.1.2 Phase 1
-
-**Concepts**
-
-- During traffic capture you cannot see Phase 2 negotiation, only Phase 1 as ISAKMP protocol, everything else is encrypted
-- Phase 1 SA is called ISAKMP SA or IKE SA
-- The Phase 1 keys are long-lived and tied to identity/authentication
-- IKE SA and IPSec SAs must be cryptographically independent
-- Phase 1 establishes an ISAKMP(Internet Security Association and Key Management Protocol) SA, which is a secure channel through which the IPsec SA negotiation can take place
-- Phase 1 workflow: `Crypto negotiations > DH exchange > Authentication > IKE communications between routers `
-- The ISAKMP header has its own SPI pair
-- These SPIs identify the IKE SA
-- IKE SA is bidirectional
-
-**Negotiations - The following crypto parametres are negotiated during Phase 1**
-
-- Hashing - md5 or sha - used inside HMAC for authentication and integrity of every IKE packet
-- Authentication - Preshared Keys or certificates
-- Group - Diffie Helman group - algorithm which is used to establish shared secret keys
-- Encryption
-- Lifetime - 24 hours default - don't have to match  
-   
-To easy remember this we can use first letters of these parametres: `HAGEL`
-
-**IKE Phase 1 can be established via**
-
-- main mode(6 messages)  
-- aggressive mode(3 messages) 
-
-
-#### 3.1.3 Main Mode
+#### 6.2.2 Main Mode
 
 - `6 messages`
 - IKE Identities and Authentication Hash are protected and sent encrypted only > no one can see it
@@ -1044,7 +986,7 @@ Responder logic:
 6. Accept peer
 ```
 
-#### 3.1.4 Aggressive Mode
+#### 6.2.3 Aggressive Mode
 
 - `3 messages instead of 6 in Main Mode`
 - Aggressive mode was created to reduce load on links and CPU
@@ -1328,7 +1270,7 @@ After PSK compromise, attacker can:
   - Credential harvesting
   - MFA fatigue (later setups)
 
-#### 3.1.5 Phase 2
+### 6.3 Phase 2
 
 - There is only one mode - `quick` in Phase 2, `3 packets`
 - It’s called Quick Mode because IKEv1 Phase 2 is deliberately short, lightweight, and fast compared to Phase 1 — both in message count and in cryptographic work: no identity, no DH exchange, only 3 messages
@@ -1350,7 +1292,7 @@ crypto map VPN 10 ipsec-isakmp
 **Phase 2 has 3 packets only**
 
 ```
-Initiator → Responder : SA, Nonce, traffic selectors, SPI, key exchange - optional, protocol - ESP/AH,
+Initiator → Responder : SA, Nonce, traffic selectors, SPI, key exchange - optional
 Responder → Initiator : SA, Nonce, SPI, key exchange - optional
 Initiator → Responder : HASH (ack)
 ```
@@ -1437,7 +1379,7 @@ Encrypted Payloads (inside IKE SA):
 - ESP traffic starting immediately after them
 - UDP/500 or 4500
 
-#### 3.1.6 Xauth
+### 6.4 Xauth
 
 - XAuth (Extended Authentication) is an optional extra authentication step used only with IKEv1, mainly to authenticate individual users (not just devices)
 - XAuth is an extension to IKEv1 Phase 1, and it happens `after Phase 1 but before Phase 2`
@@ -1451,14 +1393,14 @@ Encrypted Payloads (inside IKE SA):
 - If successful → proceed to Phase 2 (Quick Mode) to negotiate IPsec SAs
 - `IKEv2 replaced XAuth with EAP` (Extensible Authentication Protocol) for user-level auth
 
-#### 3.1.7 Mode-Config Phase
+### 6.5 Mode-Config Phase
 
 - Assign IP, DNS, WINS, Split tunnel
 - `Happens after XAuth`
 - Not used in IKEv2
 - In IKEv2 it is called Configuration Payloads (CP) inside the IKE_AUTH exchange
 
-#### 3.1.8 Keepalives
+### 6.6 Keepalives
 
 - There is no single, clean, mandatory mechanism
 - Two kinds of “keepalives” in IKEv1
@@ -1466,7 +1408,7 @@ Encrypted Payloads (inside IKE SA):
   - DPD / liveness checks (often incorrectly called keepalives)
 - No automatic keepalives at all in pure IKEv1 without NAT-T and without DPD
 
-#### 3.1.9 DPD
+### 6.7 DPD
 
 - Dead Peer Detection
 - Detect dead peers
@@ -1507,7 +1449,7 @@ ISAKMP: INFORMATIONAL, DPD Reply
     Payloads: NONE
 ```
 
-#### 3.1.10 NAT-T
+### 6.8 NAT-T
 
 ```
 +----------------+-----------+-------------+------------+------------------------+---------+-------------+----------+
@@ -1565,11 +1507,10 @@ If only ONE peer supports NAT-T
 - Traffic stays UDP/500 + ESP
 - Tunnel will fail if a real NAT is present
 
-### 3.2 IKEv2
+## 7 IKEv2
 
 - `IKEv2 achieves Main-Mode-level security with Aggressive-Mode-level efficiency`
 - `4 messages instead of 6 or 9 in IKEv1`
-- IKEv2 is a completely new protocol, not a revised one
 - IKEv2 removed ISAKMP entirely and defined its own message format
 - Consist of request/response pairs, called exchages: `IKE_SA_INIT, IKE_AUTH`
 - In IKEv2 there is no Main Mode or Aggressive Mode
@@ -1581,8 +1522,8 @@ PRF:       HMAC-SHA256    (stronger key derivation)
 ```
 
 - IKEv2 has:
-    - IKE SPI (used in both IKE_SA_INIT and IKE_AUTH) - 2 SPI numbers for Initiator and Responder
-    - ESP/AH SPI for CHILD_SA (used only in ESP/AH traffic) - 2 SPI numbers as well
+    - IKE SPI (used in both IKE_SA_INIT and IKE_AUTH)
+    - ESP/AH SPI for CHILD_SA (used only in ESP/AH traffic)
 - IKEv2 does not have phases: 1 and 2
 - No Vendor IDs, which are used in IKEv1 for NAT-T, XAUTH.....
 - One child Ipsec SA is created by default in IKE_AUTH message
@@ -1596,9 +1537,6 @@ PRF:       HMAC-SHA256    (stronger key derivation)
 - In IKEv2 Mode-Config phase is called Configuration Payloads (CP) inside the IKE_AUTH exchange
 - Next generation encryption support: AES-GCM, ECDH, etc...
 - Assymetric authentication support: one peer uses cert and other one uses password
-- Built-in AntiDDoS protection
-- NAT-T is embeded
-- DPD is built in and mandatory
 
 **Anti-DDoS**
 
@@ -1640,7 +1578,7 @@ Initiator > CREATE_CHILD_SA > Responder - Optional
 Responder > CREATE_CHILD_SA > Initiator - Optional
 ```
 
-#### 3.2.1 IKEv2 PSK
+### IKEv2 PSK Example
 
 **Packet 1 - INIT_SA**  
 
@@ -1719,14 +1657,11 @@ Responder sends second  IKE_SA_INIT packet, which includes:
 
 ```
 Initiator, Responder SPI
-SA
- |-Chosen Proposal 
-                 |-Transforms (Encryption, Integrity, PRF, DH Group) 
+Chosen proposal
 DH public part
 Nonce
-NAT-T hashes
+Cookie if AntiDDoS is used +*
 ```
-
 **Packet Itself**
 
 ```
@@ -1780,963 +1715,37 @@ Notify
     8e:44:21:...
 ```
 
-**Packet 3 - INIT_AUTH**
-
-Initiator sends first IKE_AUTH Encrypted Packet, which includes:
-
-```
-Initiator, Reponder SPI from IKE_INIT
-Encrypted
-        |-Initiator ID
-        |-Auth method
-        |-Auth Hash
-        |-SA
-           |-Proposal
-                    |-SPI - for traffic it will RECEIVE
-                    |-Transform for Encryption
-                    |-Transform for Packet Authentication and Integrity
-        |-Traffic Selector for Initiator
-        |-Traffic Selector for Responder
-```
-
-**Packet itself**
+**Initiator sends IKE_AUTH - Encrypted! - ID, SPIs, Auth type, ESP proposal(to create IPSEC SA, the same what is done in Phase 2 in IKEv1), traffic selectors**
 
 ```
 Internet Key Exchange Version 2
-  Initiator SPI: a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload: Encrypted and Authenticated (46)
-  Version: 2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags: 0x08 (Initiator)
-  Message ID: 1
-  Length: 348
+  Initiator SPI:  a1b2c3d4e5f60708
+  Responder SPI:  1122334455667788
+  Next payload:   Encrypted
+  Exchange type:  IKE_AUTH (35)
+  Flags:          Initiator, Encrypted
 
-Encrypted and Authenticated
-  Initialization Vector:
-    7e:19:aa:03:...
-  Encrypted Data:
-    Identification - Initiator
-      ID Type: ID_USER_FQDN (3)
-      Identification Data: user1
-
-    Authentication
-      Authentication Method: Shared Key Message Integrity Code
-      Authentication Data:
-        6f:92:11:88:...
-
-    Security Association (Child SA)
-      Proposal Number: 1
-      Protocol ID: ESP (3)
-      SPI Size: 4
-      SPI: 1a2b3c4d
-      Transform: AES-CBC-256
-      Transform: HMAC-SHA2-256-128
-
-    Traffic Selector - Initiator
-      Number of TSs: 1
-      TS Type: IPv4 Address Range
-      Start Address: 0.0.0.0
-      End Address: 255.255.255.255
-      Start Port: 0
-      End Port: 65535
-
-    Traffic Selector - Responder
-      Number of TSs: 1
-      TS Type: IPv4 Address Range
-      Start Address: 0.0.0.0
-      End Address: 255.255.255.255
-      Start Port: 0
-      End Port: 65535
-
-  Padding Length: 3
-  Integrity Checksum: verified
+  Encrypted payload contents:
+    IDi             → "CN=vpn-client.example.com"
+    AUTH            → HMAC or RSA signature
+    SA (for CHILD_SA)
+      ESP proposal (AES-GCM-128, no integrity)
+    TSi             → 192.168.10.0/24
+    TSr             → 10.10.10.0/24
 ```
 
-**Packet 4**
+**Responder sends sends IKE_AUTH - Encrypted! - SPIs, ID, Auth, ESP proposal accepted, traffic selectors**
 
-Responder sends reply to IKE_AUTH message, which includes:
+**EAP**
 
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-Responder ID
-        |-Auth Method
-        |-Auth Hash
-        |-SA
-           |-Proposal
-                    |-SPI - which it wants to get inbound
-                    |-Encryption Transform
-                    |-Integrity transform - if not AEAD cipher is used
-        |-Traffic selector initiator
-        |-Traffic selector responder
-```
-
-**Packet itself**
-
-```
-Internet Key Exchange Version 2
-  Initiator SPI: a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload: Encrypted and Authenticated (46)
-  Version: 2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags: 0x20 (Response)
-  Message ID: 1
-  Length: 466
-
-Encrypted and Authenticated
-  Initialization Vector
-  Decrypted Data:
-
-    Identification - Responder
-      ID Type: ID_FQDN
-      Identification Data: vpn.example.com
-
-    Authentication
-      Authentication Method: Shared Key Message Integrity Code
-      Authentication Data: AUTH_r
-
-    Security Association (CHILD_SA)
-      Proposal 1: ESP
-        SPI: 0x1122EEFF        ← Responder inbound ESP SPI
-        Encryption Algorithm: AES-GCM-256
-        Integrity Algorithm: NONE
-        ESN: No
-
-    Traffic Selector - Initiator
-      TS Type: IPv4
-      Start Address: 10.0.0.10
-      End Address: 10.0.0.10
-
-    Traffic Selector - Responder
-      TS Type: IPv4
-      Start Address: 0.0.0.0
-      End Address: 255.255.255.255
-
-  Padding
-  Integrity Checksum: verified
-```
-
-#### 3.2.2 IKEv2 Certificates
-
-- Certs auth is more secure then PSK
-- Certs completely kill offline cracking
-- Because the attack surface disappears
-- If an attacker captures one IKE exchange, he can do bruteforce attack to AUTH payload (MAC)
-- What attacker does not have:
-    - Private key
-    - Any shared secret
-    - Any value that can be guessed
-- Private keys are not guessable
-- Certs completely eliminate PSK dictionary attacks, capture now - crack later attacks
-
-What does NOT change:
-
-- Number of messages (still 4 in the basic flow)
-- IKE_SA_INIT packets (frames 1 & 2)
-- DH, nonces, NAT detection, SPIs
-- CHILD_SA negotiation
-- Traffic selectors
-- Encryption of IKE_AUTH
-
-What DOES change:
-
-- New payloads appear
-- AUTH payload content changes: Digital Signature instead of MAC
-- Certificate validation happens off-wire
-
-**What actually changes on the wire**
-
-```
-PSK:
-  ID + AUTH(MAC)
-
-CERT:
-  ID + CERT + AUTH(SIGN)
-```
-
-`Everything else is identical`  
-
-Packet 3 — IKE_AUTH (Initiator → Responder) - Changes:
-
-- Certificated added as a payload - initiator’s public certificate
-- Usually full chain (leaf + intermediates)
-- Public key only (never private key)
-- CERTREQ is added - optional
-- CERTREQ means “please send me a certificate issued by one of these CAs”
-- It’s about CA selection, not authentication itself
-- CERTREQ payload says: “If you send me a certificate, it must chain up to one of these Certificate Authorities.”
-- It contains: `Certificate encoding (X.509), One or more CA Distinguished Names`
-- AUTH payload (CHANGED): HMAC of PSK and other fields > Signature: Same data(As for HMAC) is signed - Proves possession of private key
-
-**Packet 3 Example with cert instead of PSK**
-
-```
-Internet Key Exchange Version 2
-  Initiator SPI: a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload: Encrypted and Authenticated (46)
-  Version: 2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags: 0x08 (Initiator)
-  Message ID: 1
-  Length: 652
-
-Encrypted and Authenticated
-  Initialization Vector:
-    7a:3c:91:8f:2d:11:aa:6e:43:90:cd:1f:82:54:9a:01
-  Decrypted Data:
-    Identification - Initiator
-      Next Payload: Certificate (37)
-      ID Type: ID_FQDN (2)
-      Identification Data: user@vpn.example.com
-
-    Certificate
-      Next Payload: Certificate Request (38)
-      Certificate Encoding: X.509 Certificate - Signature (4)
-      Certificate Data:
-        -----BEGIN CERTIFICATE-----
-        MIIDqTCCApGgAwIBAgIUVn6n...
-        ...base64 omitted...
-        -----END CERTIFICATE-----
-
-    Certificate Request
-      Next Payload: Authentication (39)
-      Certificate Encoding: X.509 Certificate - Signature (4)
-      Certification Authority:
-        CN=User-CA,O=Example Corp,C=US
-
-    Authentication
-      Next Payload: Security Association (33)
-      Authentication Method: Digital Signature (14)
-      Authentication Data:
-        30:45:02:21:00:9c:81:5a:3e:7f:2b:19:ae:
-        6f:44:32:aa:91:cd:2e:55:1f:8b:3c:01:
-        02:20:6d:9e:43:bb:91:ca:fe:12:7a:cc:
-        9f:48:8e:91:0b:11:82:77:41:9e:aa:2d
-
-    Security Association
-      Next Payload: Traffic Selector - Initiator (44)
-      Proposal Number: 1
-      Protocol ID: ESP (3)
-      SPI Size: 4
-      SPI: 0xAABBCCDD
-      Transforms:
-        Transform Type: Encryption Algorithm (ENCR)
-          Transform ID: AES-GCM-256 (20)
-        Transform Type: Extended Sequence Numbers (ESN)
-          Transform ID: No ESN (0)
-
-    Traffic Selector - Initiator
-      Next Payload: Traffic Selector - Responder (45)
-      Number of TSs: 1
-      TS Type: IPv4 (7)
-      IP Protocol ID: Any (0)
-      Start Port: 0
-      End Port: 65535
-      Start Address: 10.0.0.10
-      End Address: 10.0.0.10
-
-    Traffic Selector - Responder
-      Next Payload: None (0)
-      Number of TSs: 1
-      TS Type: IPv4 (7)
-      IP Protocol ID: Any (0)
-      Start Port: 0
-      End Port: 65535
-      Start Address: 0.0.0.0
-      End Address: 255.255.255.255
-
-  Padding Length: 6
-  Padding: 00 00 00 00 00 00
-  Integrity Checksum: verified
-```
-
-Packet 4 — IKE_AUTH (Responder → Initiator)
-
-- The same as for PSK, But
-- Sends its certificate
-- Signs AUTH with its private key - Signature instead of PSK
-
-**What AUTH actually signs (important)**  
-
-Exactly the same data for PSK and certs:
-
-- IKE_SA_INIT messages (entire payloads)
-- ID payload
-- SA payload (if present)
-- TS payloads (if present)
-
-**What happens off-wire (but matters)**
-
-- Verifies certificate chain
-- Checks CA trust
-- Checks validity period
-- Checks revocation (CRL / OCSP)
-- Matches ID to certificate identity
-
-`None of that appears in packets`
-
-#### 3.2.3 EAP
-
-- EAP allows to use additional authentication in addition to PSK or Certs: username/password or additional cert
-- Used for RA VPN
-- In IKEv1 it called XAUTH
-- 8 messages in total, instead of 4
-- `When EAP is used, messages 1–2 unchanged, 3–4 modified, and extra messages 5-8 are added`
 - EAP happens inside the IKE_AUTH exchange, after
   - IKE_SA_INIT is complete
   - DH keys are established
   - The IKE SA is encrypted
-- All EAP messages are encrypted on the wire
-
-**Work flow**
-
-- Messages 1-2: IKE_SA_INIT - regular
-- Message 3 - empy IKE_AUTH request with Initiator ID - it means I want EAP
-- Messages 4-8 - EAP authentication process
-- Messages 9-10 - Regular IKE_Auth exchange: Authentication, CHILD_SA creation, Traffic selectors + Configuration Request/Reply (IP, GW, DNS...)
-- `EAP packets are  between IKE_SA_INIT and IKE_AUTH regular packets, but technically EAP authentication is performed within the IKE_AUTH exchange.`
-- Auth and CHILD_SA  happen only after EAP
-
-Terms
-
-- i - Initiator part
-- r - Responder part
-- SA - Security Assosiation
-- KE - Key Exchange (Diffie-Hellman public value) - DH group (must match SA) - DH public number (g^x mod p, EC point, etc.)
-- N - Nonce (random number)
-- ID - IKE Identity
-- TS - Traffic Selector
-
-```
-Initiator                                Responder
----------                                ----------
-
-Message 1
-IKE_SA_INIT  -------------------------->
-  SAi, KEi, Ni
-  (crypto negotiation, DH, NAT-D)
-
-Message 2
-IKE_SA_INIT  <--------------------------
-  SAr, KEr, Nr
-  (IKE SA keys derived)
-
---------------------------------------------------
-IKE_AUTH exchange begins (all messages encrypted)
---------------------------------------------------
-
-Message 3
-IKE_AUTH     -------------------------->
-  IDi
-  (no AUTH payload)
-  (implicitly indicates EAP will be used)
-
-Message 4
-IKE_AUTH     <--------------------------
-  IDr
-  EAP-Request
-
-Message 5
-IKE_AUTH     -------------------------->
-  EAP-Response
-
-Message 6
-IKE_AUTH     <--------------------------
-  EAP-Request
-
-Message 7
-IKE_AUTH     -------------------------->
-  EAP-Response
-
-Message 8
-IKE_AUTH     <--------------------------
-  EAP-Success
-  (EAP authentication complete)
-
---------------------------------------------------
-Final authentication and CHILD_SA creation
-(still part of the same IKE_AUTH exchange)
---------------------------------------------------
-
-Message 9
-IKE_AUTH     -------------------------->
-  AUTH (Initiator authentication)
-  SA (CHILD_SA proposal)
-  TSi, TSr
-  CFG_REQUEST
-    - INTERNAL_IP4_ADDRESS
-    - INTERNAL_IP4_DNS
-    - INTERNAL_IP4_SUBNET
-
-Message 10
-IKE_AUTH     <--------------------------
-  AUTH (Responder authentication)
-  SA (CHILD_SA accepted)
-  TSi, TSr
-  CFG_REPLY
-    - Assigned virtual IP
-    - DNS servers
-    - Split tunnel info
-
---------------------------------------------------
-IKE SA established
-First CHILD_SA established
---------------------------------------------------
-```
-
-**EAP + PSK Example - Packets 3-10**
-
-**Packet 3 - IKE_AUTH (Initiator → Responder)**
-
-`No Auth here like in regular packet 3 without EAP, No SA Proposals, No Traffic selectors - this means that Client wants EAP`
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-Initiator ID
-        |-Configuration Request
-```
-
-**Packet itself**
-
-```
-Internet Key Exchange Version 2
-  Initiator SPI: 0xa1b2c3d4e5f60718
-  Responder SPI: 0x1122334455667788
-  Next Payload: Encrypted and Authenticated (46)
-  Version: 2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags: 0x08 (Initiator)
-  Message ID: 1
-  Length: 296
-
-Encrypted and Authenticated Payload
-  Decrypted Data:
-    Identification - Initiator
-      ID Type: ID_FQDN (2)
-      Identification Data: user1@example.com
-
-    Configuration Payload
-      Configuration Type: CFG_REQUEST (1)
-      Attribute:
-        INTERNAL_IP4_ADDRESS
-
-  Padding Length: 6
-  Integrity Checksum: verified
-```
-
-**Packet 4 - IKE_AUTH (Responder → Initiator) - EAP Request**
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-Responder ID
-        |-EAP Request
-```
-
-**Packet itself**
-
-```
-Internet Key Exchange Version 2
-  Initiator SPI: 0xa1b2c3d4e5f60718
-  Responder SPI: 0x1122334455667788
-  Next Payload: Encrypted and Authenticated (46)
-  Version: 2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags: 0x20 (Response)
-  Message ID: 1
-  Length: 308
-
-Encrypted and Authenticated Payload
-  Decrypted Data:
-    Identification - Responder
-      ID Type: ID_FQDN (2)
-      Identification Data: vpn.example.com
-
-    EAP Payload
-      Code: Request (1)
-      Identifier: 1
-      Type: Identity (1)
-
-  Padding Length: 5
-  Integrity Checksum: verified
-```
-
-**Packet 5 - IKE_AUTH (Initiator → Responder) - EAP Identity from Client - Username**
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-EAP ID
-```
-
-**Packet itself**
-
-```
-Internet Key Exchange Version 2
-  Initiator SPI: 0xa1b2c3d4e5f60718
-  Responder SPI: 0x1122334455667788
-  Next Payload: Encrypted and Authenticated (46)
-  Version: 2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags: 0x08 (Initiator)
-  Message ID: 2
-  Length: 284
-
-Encrypted and Authenticated Payload
-  Decrypted Data:
-    EAP Payload
-      Code: Response (2)
-      Identifier: 1
-      Type: Identity (1)
-      Identity: user1@example.com
-
-  Padding Length: 7
-  Integrity Checksum: verified
-```
-
-**Username is now known**
-
-**Packet 6 - IKE_AUTH (Responder → Initiator) - EAP authentication challenge**
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-EAP Challenge
-`   
-```
-
-**Packet itself**
-
-```
-IKEv2
-  Initiator SPI: a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Exchange Type: IKE_AUTH
-  Flags: Response
-  Message ID: 2
-  Encrypted
-
-Decrypted Payloads:
-  EAP Payload
-    Code: Request (1)
-    Identifier: 2
-    Type: MD5-Challenge (4)
-    Value-Size: 16
-    Challenge:
-      9f:83:21:ab:7c:44:9e:12:3d:aa:09:be:77:01:fe:22
-```
-
-**Packet 7 - IKE_AUTH (Initiator → Responder) - Auth challenge**
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-EAP Challenge 
-```
-
-**Packet itself**
-
-```
-IKEv2
-  Initiator SPI: a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Exchange Type: IKE_AUTH
-  Flags: Initiator
-  Message ID: 3
-  Encrypted
-
-Decrypted Payloads:
-  EAP Payload
-    Code: Response (2)
-    Identifier: 2
-    Type: MD5-Challenge (4)
-    Value-Size: 16
-    Response:
-      5e:44:aa:91:3c:99:f1:77:6d:02:ab:45:11:fe:88:90
-```
-
-**Packet 8 - IKE_AUTH (Responder → Initiator) - EAP Success - EAP authentication complete**
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-EAP Success 
-```
-
-**Packet itself**
-
-```
-IKEv2
-  Initiator SPI: a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Exchange Type: IKE_AUTH
-  Flags: Response
-  Message ID: 3
-  Encrypted
-
-Decrypted Payloads:
-  EAP Payload
-    Code: Success (3)
-```
-
-**Packet 9 - IKE_AUTH (Responder → Initiator) - Regular IKE_AUTH**
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-Auth method
-        |-Auth Hash
-        |-SA
-           |-Proposal
-             |-SPI
-             |-Protocol: ESP
-             |-Encryption transform
-             |-Integrity transform
-        |-Traffic selector - Initiator
-        |-Traffic Selector - Responder
-```
-
-**Key points**
-
-- FIRST time AUTH appears
-- PSK proves IKE identity
-- CHILD_SA proposed
-
-**Packet itself**
-
-```
-Internet Key Exchange Version 2
-  Initiator SPI:  a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload:  Encrypted and Authenticated (46)
-  Version:       2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags:         0x08 (Initiator)
-  Message ID:    3
-  Length:        412
-
-Encrypted and Authenticated Payload
-  Decrypted Data:
-    Authentication
-      Authentication Method: Shared Key Message Integrity Code
-      Authentication Data:
-        8b:19:fa:44:...
-
-    Security Association
-      Proposal #1
-        Protocol ID: ESP (3)
-        SPI: 0x1001a2b3
-        Transforms:
-          ENCR_AES_CBC (256)
-          INTEG_HMAC_SHA2_256
-          ESN disabled
-
-    Traffic Selector - Initiator
-      TS Type: TS_IPV4_ADDR_RANGE
-      Start Address: 0.0.0.0
-      End Address: 255.255.255.255
-
-    Traffic Selector - Responder
-      TS Type: TS_IPV4_ADDR_RANGE
-      Start Address: 10.0.0.0
-      End Address: 10.0.0.255
-
-  Padding Length: 4
-  Integrity Checksum: verified
-```
-
-**Packet 10 - IKE_AUTH (Responder → Initiator) — FINAL**
-
-```
-Initiator and Responder SPI from IKE_INIT
-Encrypted
-        |-Auth method
-        |-Auth Hash
-        |-SA
-           |-Proposal
-             |-SPI
-             |-Protocol: ESP
-             |-Encryption transform
-             |-Integrity transform
-        |-Configuration payload: IP, Gateway, DNS...
-```
-
-**Packet itself**
-
-```
-Internet Key Exchange Version 2
-  Initiator SPI:  a1b2c3d4e5f60718
-  Responder SPI: 1122334455667788
-  Next Payload:  Encrypted and Authenticated (46)
-  Version:       2.0
-  Exchange Type: IKE_AUTH (35)
-  Flags:         0x20 (Response)
-  Message ID:    3
-  Length:        398
-
-Encrypted and Authenticated Payload
-  Decrypted Data:
-    Authentication
-      Authentication Method: Shared Key Message Integrity Code
-      Authentication Data:
-        4c:77:19:aa:...
-
-    Security Association
-      Proposal #1
-        Protocol ID: ESP (3)
-        SPI: 0x2009fabc
-        Transforms:
-          ENCR_AES_CBC (256)
-          INTEG_HMAC_SHA2_256
-          ESN disabled
-
-    Configuration Payload
-      Configuration Type: CFG_REPLY (2)
-      Attributes:
-        INTERNAL_IP4_ADDRESS: 10.0.0.25
-        INTERNAL_IP4_DNS: 10.0.0.10
-
-  Padding Length: 6
-  Integrity Checksum: verified 
-```
-
-## 4 Authentication scenarios
-
-```
-===============================================================================
-SITE-TO-SITE (S2S) VPN — AUTHENTICATION FLOWS
-===============================================================================
-
-Goal:
-  - Authenticate two NETWORK DEVICES
-  - Long-lived tunnels
-  - Static peers
-  - No user authentication
-
-------------------------------------------------
-IKEv1 – Main Mode – PSK
-------------------------------------------------
-Purpose:
-  - Simple device authentication
-  - Easy to deploy
-
-Popularity: ⭐⭐⭐⭐ (very common historically)
-
-Problems:
-  - PSK vulnerable to offline cracking - not only aggressive mode is vulnerable to PSK offline bruteforce - https://www.kb.cert.org/vuls/id/857035/ - IKEv2 is not vulnerable
-  - Poor scalability
-  - Key rotation is painful
-
-Status:
-  ❌ Legacy / discouraged today
-
-------------------------------------------------
-IKEv1 – Main Mode – Certificates
-------------------------------------------------
-Purpose:
-  - Strong device authentication
-  - Identity protection
-
-Popularity:
-  ⭐⭐ (used in high-security environments)
-
-Pros:
-  - No offline cracking
-  - Scales well
-  - Strong cryptographic identity
-
-Cons:
-  - PKI overhead
-
-------------------------------------------------
-IKEv2 – PSK
-------------------------------------------------
-Purpose:
-  - Simple S2S authentication
-
-Popularity:
-  ⭐⭐⭐⭐⭐ (most common in SMB / cloud)
-
-Problems:
-  - Weak if PSK reused
-
-Status:
-  ⚠️ Acceptable only with strong random PSKs
-
-------------------------------------------------
-IKEv2 – Certificates (BEST PRACTICE)
-------------------------------------------------
-Purpose:
-  - Strong device-to-device authentication
-
-Popularity:
-  ⭐⭐⭐⭐ (enterprise / cloud / zero-trust)
-
-Why best:
-  ✔ No offline cracking
-  ✔ Scales well
-  ✔ Clean rekey & rotation
-  ✔ Mandatory for high-security environments
-
-BEST CHOICE FOR S2S VPNs
-✔ IKEv2 + Certificates
-
-===============================================================================
-REMOTE-ACCESS (RA) VPN — AUTHENTICATION FLOWS
-===============================================================================
-
-Goal:
-  - Authenticate USERS (and sometimes devices)
-  - Dynamic IPs
-  - Per-user authorization
-  - Virtual IP assignment
-
-------------------------------------------------
-IKEv1 – Aggressive Mode – PSK
-------------------------------------------------
-Purpose:
-  - Fast RA VPN setup
-
-Popularity:
-  ⭐⭐⭐ (old deployments)
-
-Problems:
-  - Offline PSK cracking
-  - Identity exposed
-  - Very weak security
-
-Status:
-  ❌ Do not use today
-
-------------------------------------------------
-IKEv1 – Aggressive Mode – PSK + XAUTH
-------------------------------------------------
-Purpose:
-  - Device auth (PSK)
-  - User auth (XAUTH)
-
-Popularity:
-  ⭐⭐⭐⭐ (classic Cisco RA VPNs)
-
-Problems:
-  - PSK still crackable offline
-  - XAUTH is vendor-specific
-  - Legacy design
-
-Status:
-  ❌ Legacy / replaced by IKEv2
-
-------------------------------------------------
-IKEv2 – PSK + EAP
-------------------------------------------------
-Purpose:
-  - Device authentication via PSK
-  - User authentication via EAP
-
-Popularity:
-  ⭐⭐⭐⭐⭐ (very common)
-
-Security:
-  ⚠️ PSK crackable offline
-  ✔ User auth strong
-
-Used when:
-  - No PKI
-  - Easy onboarding
-
-------------------------------------------------
-IKEv2 – Certificates (device) + EAP (user)
-------------------------------------------------
-Purpose:
-  - Device authentication
-  - User authentication
-  - Per-user authorization
-
-Popularity:
-  ⭐⭐⭐⭐ (enterprise standard)
-
-Why best:
-  ✔ No offline cracking
-  ✔ Strong identity binding
-  ✔ Works with MFA
-
-BEST CHOICE FOR RA VPNs
-✔ IKEv2 + Certs + EAP
-
-===============================================================================
-EAP METHODS — WHAT IS ACTUALLY USED
-===============================================================================
-
-Common in IKEv2 RA VPNs:
-
-EAP-MSCHAPv2
-  - Username/password
-  - Very common with Active Directory
-  - ⚠️ Vulnerable if not protected by TLS
-
-EAP-TLS (BEST)
-  - Client certificate
-  - Strong mutual authentication
-  - No passwords
-  - Enterprise gold standard
-
-EAP-TTLS / PEAP
-  - TLS tunnel + inner auth
-  - Username/password inside TLS
-  - Common in Wi-Fi, less in VPN
-
-EAP-MD5
-  - ❌ Weak
-  - No mutual auth
-  - Should not be used
-
-Most popular today:
-  ✔ EAP-MSCHAPv2 (legacy environments)
-  ✔ EAP-TLS (modern / secure environments)
-
-===============================================================================
-ONE-LINE TAKEAWAYS
-===============================================================================
-
-S2S VPN:
-  → Authenticate DEVICES
-  → Best: IKEv2 + Certificates
-
-RA VPN:
-  → Authenticate USERS (and devices)
-  → Best: IKEv2 + Certificates + EAP-TLS
-
-PSK:
-  → Easy
-  → Weak
-  → Legacy unless carefully managed
-```
-
-## 5 Recommended IKE settings
-
-- Phase 1
-  - IKE version - IKEv2
-  - Lifetime - S2S: 8 hours (28800 seconds) or 86400 seconds (24 hours) - IKEv2 handles rekeying much more gracefully - So aggressive lifetimes are safer in IKEv2 than IKEv1 - RA VPN: 8–24 hours - Avoid reauthentication prompts
-  - Encryption Algorithms - AES-256-GCM
-  - Integrity Algorithms - if not AEAD - SHA2-256
-  - PRF Algorithms for IKEv2 - SHA2-256
-  - DH group numbers - 14: minimum - 19: perfect
-  - DPD time out seconds - 10
-  - DPD retry - 5 for S2S - 3 for RA
-- Phase 2
-  - Life time - 3600 seconds (1 hour)
-  - Encryption Algorithms - AES-256-GCM-16
-  - Integrity Algorithms - HMAC-SHA2-256 - if not AEAD
-  - DH Group numbers - 14: minimum - 19: perfect
-  - Lifetime seconds - 
-  - PFS - Yes
-  - S2S and RA are the same
-  
-## 6 IKE scan
+- All EAP messages are encrypted on the wire.
+- `EAP starts in message 4 when Responder request EAP auth - it is added to message 4`
+- 
+## IKE scan
 
 **Test Phase 1**
 
@@ -2749,50 +1758,15 @@ ike-scan -M -A --id=0000 1.1.1.1
 - P - show PSK hash
 ```
 
-## 7 IPSec protocols
-
-- There are 2 possible IPSec protocols: ESP and AH
-- Each of these protocols has 2 possible modes: Tunnel and Transport
-- `IPSec protocol and its mode are negotiated during Phase 2 in IKEv1 and IKE_AUTH in IKEv2`
-
-### 7.1 ESP
+## ESP
 
 - Separate IP protocol for Data Plane
+- Confidentiality, authentication, replay protection
 - IP protocol number 50
-- Provides Confidentiality, authentication, replay protection
 - Supports encryption and NAT-T
-- `ESP mode: tunnel or transport mode`
-
-#### 7.1.1 Transport Mode
-
-- Typically used for host-to-host communication
-- Server A ↔ Server B over the internet - No VPN gateways - No IP tunneling - Just encrypted transport
-- Before widespread TLS adoption, this was common in AD environments - Windows 2000 to Windows 2000
-- TLS replaced it
-- It encrypts only the payload (Layer 4 and up), keeping the original IP header intact
-- Adds ESP header after original IP header + ESP trailer + ESP auth
-
-```
-+----------------------------+
-| Original IP Header       |  ← Unencrypted (source/dest IPs visible)
-|   (IPv4 or IPv6)       |
-+----------------------------+
-| ESP Header               |  ← Not Encrypted + Authenticated
-|   (SPI, Sequence #)    |
-+----------------------------+
-| Upper‑Layer Data         |  ← Encrypted + Authenticated
-|   (e.g., TCP, UDP)     |
-+----------------------------+
-| ESP Trailer              |  ← Encrypted + Authenticated
-|   (Padding, Pad Length,  |
-|    Next Header)          |
-+----------------------------+
-| ESP Auth Trailer (ICV)   |  ← Not encrypted; Integrity Check Value (HMAC) - is used to authenticate (verify integrity and authenticity) - computed as an HMAC, e.g., HMAC‑SHA256 - is calculated over ESP Header, Encrypted Payload, ESP Trailer
-+----------------------------+
-```
-
-#### 7.1.2 Tunnel mode
-
+- ESP mode: tunnel or transport mode
+- Transport mode - adds ESP header after original IP header + ESP trailer + ESP auth
+- Transport mode is practically never used, only when 2 firewalls communicate only with each other
 - Tunnel mode - encrypts the entire original packet - adds a new set of IP headers
 - Required parametres for Tunnel mode:
     - Symmetric cipher
@@ -2800,346 +1774,31 @@ ike-scan -M -A --id=0000 1.1.1.1
     - DH group
     - Lifetime
 
-```
-+----------------------------+
-| New Outer IP Header      |  ← Unencrypted (gateway IPs)
-|   (IPv4 or IPv6)       |
-+----------------------------+
-| ESP Header               |  ← Not Encrypted + Authenticated
-|   (SPI, Sequence #)    |
-+----------------------------+
-| Original IP Packet       |  ← Encrypted + Authenticated
-|   [IP Header +          |
-|    Upper‑Layer Data]    |
-+----------------------------+
-| ESP Trailer              |  ← Encrypted + Authenticated
-|   (Padding, Pad Length,  |
-|    Next Header)          |
-+----------------------------+
-| ESP Auth Trailer (ICV)   |  ← Not encrypted; Integrity Check Value (HMAC)
-+----------------------------+
-```
-
 **Data flow in practice**
 
 - Router receives an ESP packet
 - Reads SPI from the ESP header
-- Looks up SAD based on SPI to find:
+- Looks up SAD to find:
     - Encryption key
     - Integrity key
     - Mode, lifetime, etc.
 - Verifies ICV (if authentication is used)
 - Decrypts payload only using the key
 
-### 7.2 AH
+Packets layout:
+
+<img width="1151" alt="image" src="https://github.com/philipp-ov/foundation/assets/116812447/dd8e9064-7dde-478f-906f-48ef43077b04">
+
+## AH
 
 - Separate protocol above IP with encapsulation for data plane
 - Data Integrity, Authentication, Protection from replays
-- `It authenticates the packets, not the peers`
-- Peers are authenticated via IKE
+- IP 51
 - Does not support encryption
-- AH is incompatible with NAT because it authenticates immutable IP header fields
-- Transform set for authentication header defines only HMAC function, for example `ah-sha-hmac`
-- Not used anywhere
-- AH has two modes just like ESP: Transport mode and Tunnel mode
-- Transport mode is used for `Host-to-host security`
-- Tunnel mode is used for `Gateway-to-gateway VPN - Secure communication between networks`
+- Does not support NAT-T
+- Transorm set for authentication header defines only HMAC function, for example `ah-sha-hmac`
 
-**AH – Transport Mode**
-
-- Protects host-to-host traffic without encapsulation
-- Transport mode calculates HMAC based on `Immutable IP header fields, AH header, Entire IP payload` and shared secret symmetric key derived during IKE, then  puts result to field `Integrity Check Value (ICV)`
-- Supported HMAC algorithms: `HMAC-MD5-96, HMAC-SHA1-96, HMAC-SHA2-256-128, HMAC-SHA2-384-192, HMAC-SHA2-512-256`
-- Realistic Use Case (Historical): `Secure Router-to-Router Routing Protocols, Secure Server-to-Server Communication`
-
-```
-IP Header | AH Header | TCP/UDP | Data
-```
-
-```
-+---------------------------+
-|   IP Header               |
-+---------------------------+
-|   AH Header               |
-|     - Next Header         |
-|     - Payload Length      |
-|     - SPI                 |
-|     - Sequence Number     |
-|     - Integrity Check Val |
-+---------------------------+
-|   TCP / UDP Header        |
-+---------------------------+
-|   Application Data        |
-+---------------------------+
-```
-
-**AH – Tunnel Mode**
-
-- Protects `entire original IP packet` with encapsulation
-- Tunnel mode calculates HMAC based on `Immutable or predictable fields of the OUTER IP header + AH header (with ICV field set to zero) + Entire INNER IP packet` and shared secret symmetric key derived during IKE, then  puts result to field `Integrity Check Value (ICV)`
-- IP 51 is used for new IP packet
-- Supported HMAC algorithms: `HMAC-MD5-96, HMAC-SHA1-96, HMAC-SHA2-256-128, HMAC-SHA2-384-192, HMAC-SHA2-512-256`
-- Realistic Use Case (Historical): `Government / Military Networks
-
-```
-Outer IP | AH Header | Inner IP | TCP/UDP | Data
-```
-
-```
-+---------------------------+
-|   Outer IP Header         |
-+---------------------------+
-|   AH Header               |
-|     - Next Header         |
-|     - Payload Length      |
-|     - SPI                 |
-|     - Sequence Number     |
-|     - Integrity Check Val |
-+---------------------------+
-|   Inner IP Header         |
-+---------------------------+
-|   TCP / UDP Header        |
-+---------------------------+
-|   Application Data        |
-+---------------------------+
-```
-
-**Processing Order (Receiver)**
-
-- Read SPI
-- Lookup SA
-- Verify sequence number (anti-replay)
-- Recalculate hash
-- Compare ICV
-- If valid → pass packet up
-- No decryption step exists.
-
-## 8 L2TP over IPSec
-
-- L2TP - layer-2 tunneling protocol
-- Original purpose: tunnel PPP over IP networks for ISPs
-- Today: mainly VPNs (L2TP over IPsec)
-- Advanced: L2TPv3 for generic Layer 2 tunneling in carrier networks
-- Originally, L2TP evolved from L2F (Cisco) and PPTP (Microsoft) to allow ISPs to tunnel PPP sessions from customers to a central server
-- Example: A DSL provider could send a customer’s PPP session over the Internet to a BRAS (Broadband Remote Access Server)
-- This allows authentication, accounting, and IP assignment at the ISP, even though the customer is on a remote IP network
-- Used for client VPNs
-- Some carriers use L2TP (or L2TPv3) to tunnel Layer 2 frames across IP/MPLS networks
-- `L2TPv3 can encapsulate Ethernet, Frame Relay, ATM, not just PPP`
-- L2TP provides encapsulation of PPP to UDP
-- L2TP over IPsec was built into the native Windows VPN client for many years
-- So you had two layers of authentication:
-- Machine-level (IPsec)
-- User-level (PPP)
-- It worked with Active Directory
-- It worked with RADIUS
-- It required no client install
-- User authentication + IP address assignment + policy negotiation
-- PPP is a Layer-2 protocol and IPsec protects IP packets (Layer-3) - PPP cannot run directly over IP
-- So to carry PPP across an IP network, you must Encapsulate PPP inside an IP-based protocol
-- That’s what L2TP does
-- L2TP:
-  - Encapsulates PPP frames
-  - Puts them inside UDP (port 1701)
-  - Which runs over IP
-- So now PPP becomes transportable over IP
-- Then IPsec encrypts that IP packet
-- Without L2TP, PPP has no way to cross an IP network
-- We cannot use PPP above UDP directly because:
-  - L2TP adds a tunnel ID and session ID
-  - L2TP allows multiple PPP sessions over a single UDP/IP tunnel
-  - L2TP defines control messages (like starting/ending sessions, managing tunnels). PPP itself has no concept of tunneling over IP
-  - Standardization & Interoperability: Using L2TP over UDP/IP became a standard for VPNs, so vendors could interoperate reliably
-
-**Stack looks like:**
-
-```
-IPsec
-   ↓
-IP
-   ↓
-UDP 1701
-   ↓
-L2TP
-   ↓
-PPP
-   ↓
-User traffic
-```
-
-**Before decryption, the packet on the wire would look like:**
-
-```
-Ethernet
-Outer IP (IPsec peers)
-ESP
-Encrypted Payload
-```
-
-**After Wireshark decrypts ESP, it reveals:**
-
-```
-Ethernet
-Outer IP
-UDP 1701
-L2TP
-PPP
-Inner IP
-TCP/UDP
-Application
-```
-
-**Packet example**
-
-```
-Internet Protocol Version 4
-    Version: 4
-    Header Length: 20 bytes
-    Differentiated Services Field: 0x00
-    Total Length: 1460
-    Identification: 0x1c46
-    Flags: 0x4000 (Don't Fragment)
-    Fragment Offset: 0
-    Time to Live: 63
-    Protocol: UDP (17)
-    Header Checksum: 0x8b12
-    Source Address: 192.0.2.10
-    Destination Address: 198.51.100.20
-
-User Datagram Protocol
-    Source Port: 1701
-    Destination Port: 1701
-    Length: 1440
-    Checksum: 0x3c7a
-
-Layer 2 Tunneling Protocol
-    Flags and Version: 0xc802
-        Type: Data Message
-        Length present
-        Sequence present
-        Offset absent
-        Version: L2TPv2
-    Length: 1432
-    Tunnel ID: 0x0003
-    Session ID: 0x0001
-    Ns: 142
-    Nr: 95
-
-Point-to-Point Protocol
-    Address: 0xff
-    Control: 0x03
-    Protocol: 0x0021 (IPv4)
-
-Internet Protocol Version 4
-    Version: 4
-    Header Length: 20 bytes
-    Differentiated Services Field: 0x00
-    Total Length: 1400
-    Identification: 0x5c11
-    Flags: 0x4000
-    Fragment Offset: 0
-    Time to Live: 64
-    Protocol: TCP (6)
-    Header Checksum: 0xa811
-    Source Address: 10.10.10.5
-    Destination Address: 8.8.8.8
-
-Transmission Control Protocol
-    Source Port: 51532
-    Destination Port: 443
-    Sequence Number: 148221
-    Acknowledgment Number: 892211
-    Header Length: 32 bytes
-    Flags: 0x018 (PSH, ACK)
-    Window Size: 64240
-    Checksum: 0x1f9a
-    Urgent Pointer: 0
-    Options: (12 bytes)
-
-Transport Layer Security
-    TLSv1.3 Record Layer
-        Content Type: Application Data
-        Version: TLS 1.2
-        Length: 1300
-```
-
-## 9 GRE over IPSec
-
-- IPsec alone cannot natively send multicast to multiple endpoints without setting up separate Security Associations (SAs) for each receiver
-- When you combine GRE + IPsec, the stack is:
-
-```
-[IPsec ESP Header]
-    └─ [GRE Header]
-         └─ [Original Multicast IP Packet]
-```
-
-- Now, IPsec sees only unicast GRE packets between the two tunnel endpoints
-- GRE handles encapsulating the multicast traffic into unicast tunnels
-- For two routers talking OSPF over IPsec, GRE isn’t strictly necessary
-- GRE is mostly needed when you want one tunnel to carry multicast traffic to multiple endpoints efficiently
-- OSPF can run directly over IPsec, but it’s practical only for simple point-to-point site-to-site tunnels
-
-## 10 IPSec tunnels and MTU
-
-- MTU (Maximum Transmission Unit) is the largest packet size a network interface can transmit
-- Standard Ethernet MTU = 1500 bytes.
-- IPsec adds headers:
-  - ESP header (20–32 bytes)
-  - ESP trailer + padding (variable, up to 256 bytes depending on block size)
-  - AH header (if used)
-- Result: effective MTU for payload is smaller
-- If you ignore this:
-- Packets larger than the path MTU may be dropped
-- TCP may fragment or experience black hole issues if DF (Don’t Fragment) is set
-- VPN throughput suffers, intermittent connectivity, strange retransmissions
-
-**IPsec overhead**
-
-| Component       | Size (bytes) | Notes                                 |
-|-----------------|-------------|---------------------------------------|
-| ESP header       | 20–32       | Depending on algorithm (AES, SHA, etc.) |
-| ESP trailer      | 2–255       | For padding to block boundary         |
-| ESP auth (HMAC)  | 12–16       | For integrity check                   |
-| IP header (outer)| 20          | IPv4 standard                         |
-| UDP (for NAT-T)  | 8           | Only if NAT traversal is used         |
-
-- Typical overhead: ~50–60 bytes without NAT-T, ~70–80 bytes with NAT-T
-- Implication: If your interface MTU = 1500, the maximum payload that will pass without fragmentation is ~1440 bytes
-
-**Path MTU Discovery (PMTUD)**
-
-- IPsec relies on PMTUD to detect the maximum packet size that can traverse the path
-- Problem: PMTUD often fails with firewalls/NAT that block ICMP “fragmentation needed” messages
-- Result: large packets are dropped silently → “black hole” problem
-
-**Best Practices for MTU in IPsec**
-
-- Reduce MTU on tunnel interface ≈ 1400–1420
-- ip tcp adjust-mss ensures TCP sessions automatically reduce segment size, preventing fragmentation
-- If NAT traversal is used, add UDP/4500 encapsulation overhead (~28 bytes)
-- Use ping with DF set to test path MTU: `ping 10.2.2.1 df-bit size 1400`
-- Gradually adjust MTU until it succeeds without fragmentation
-- Use Wireshark to verify ESP packets and sizes
-- Document MTU and MSS in your network design
-- Force all TCP sessions going through the VPN to use a smaller MSS, so they never exceed the IPsec MTU - TCP MSS clamping
-- Done on firewall or VPN gateway
-- Example:
-
-```
-interface outside
- ip access-group VPN_MSS in
-!
-ip access-list extended VPN_MSS
- permit tcp any any mss 1360
-```
-What this does:
-
-- When a TCP SYN packet enters the firewall/VPN, the gateway modifies the MSS field in the TCP header if it’s larger than 1360
-- Client sees the smaller MSS, and all future TCP segments are small enough to fit inside the IPsec tunnel without fragmentation
-- Works even if clients don’t know the real MTU of the tunnel
-
-## 10 Configuration - Cisco
+## Configuration - Cisco
 
 Three possible ways to configure IPSec tunnel on Cisco Routers:
 
@@ -3176,7 +1835,7 @@ Three possible ways to configure IPSec tunnel on Cisco Routers:
 - They are commonly misconfigured
 - Consume excessive amount of TCAM
 
-### 10.1 IPSec + VTI + IKEv2 example
+### IPSec + VTI + IKEv2 example
 
 `Tunnel` (vrf, bandwidth, ip, mss, mtu, load interval, bfd, source, mode, path mtu discovery, destination, **ipsec profile**) > `ipsec profile` (idle, **transform-set**, pfs group, **ike-v2-profile**) > `ike-v2-profile` (identity, authentication, **keyring**, lifetime, dpd), `transform set`(encryption, hash, mode) > `keyring` (address, key)  
   
@@ -3192,7 +1851,7 @@ IKEv2 Policy
   └─ Proposal             (IKE SA parameters)
 ```
 
-**Tunnel**
+#### Tunnel
 
 ```
 interface Tunnel12
@@ -3216,7 +1875,7 @@ interface Tunnel12
 end
 ```
 
-**IPSec Profile**
+#### IPSec Profile
 
 ```
 crypto ipsec profile IPSEC-profile
@@ -3226,7 +1885,7 @@ crypto ipsec profile IPSEC-profile
  set ikev2-profile CorpIPSEC-Prisma-ikev2-profile
 ```
 
-**Transform set**
+#### Transform set
 
 Phase 2 options
 
@@ -3235,7 +1894,7 @@ crypto ipsec transform-set IPSEC esp-aes 256 esp-sha256-hmac
  mode tunnel
 ```
 
-**IKE v2 Profile**
+#### IKE v2 Profile
 
 Phase 1 options
 
@@ -3249,7 +1908,7 @@ crypto ikev2 profile IPSEC-profile
  dpd 10 3 periodic
 ```
 
-**Keyring**
+#### Keyring
 
 ```
 crypto ikev2 keyring CorpIPSEC-vpn-keyring
@@ -3258,7 +1917,7 @@ crypto ikev2 keyring CorpIPSEC-vpn-keyring
   pre-shared-key CY5R2TugteXEGBv6
 ```
 
-**IKE-v2 Policy**
+#### IKE-v2 Policy
 
 ```
 crypto ikev2 policy remote-ikev2-policy 
@@ -3271,7 +1930,7 @@ crypto ikev2 policy remote-ikev2-policy
  proposal oci_ikev2-proposal
 ```
 
-**IKE Proposal**
+#### IKE Proposal
 
 Phase 1 options
 
@@ -3282,9 +1941,7 @@ crypto ikev2 proposal CorpIPSEC-ikev2-proposal
  group 19 14 5 2
 ```
 
-### 10.2 IPSec with GRE via Crypto Map
-
-IKEv1 - Can be IKEv2
+### IPSec with GRE via Crypto Maps example - IKEv1 - Can be IKEv2
 
 ```
 GRE Tunnel
@@ -3296,9 +1953,7 @@ GRE Tunnel
             └─ Keyring / PSK
 ```
 
-### 10.3 IPSec with Crypto Map
-
-IKEv1 - Can be IKEv2
+### Pure IPSec with Crypto Maps - IKEv1 - Can be IKEv2
 
 ```
 Interface
@@ -3310,9 +1965,7 @@ Interface
             └─ Keyring / PSK
 ```
 
-### 10.4 IPSec + GRE - IPSec profile
-
-IKEv2 - can be IKEv1
+### IPSec + GRE - no Crypto Maps - IPSec profile - IKEv2 - can be IKEv1
 
 ```
 GRE Tunnel
@@ -3325,7 +1978,7 @@ IKEv2 Policy
   └─ Proposal
 ```
 
-## 11 Troubleshooting
+## Troubleshooting
 
 **Show status of all Tunnel interfaces**
 
@@ -3356,7 +2009,7 @@ Router#show logging | inc changed
 20995088: Feb 13 2024 01:00:02.035 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel15, changed state to down
 20995111: Feb 13 2024 01:01:35.759 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel102, changed state to up
 ```
-## 12 Debug
+## Debug
 
 ```
 Debug crypto condition peer ipv4 140.238.149.242
@@ -3364,7 +2017,7 @@ Debug crypto ikev2
 Debug crypto ipsec
 ```
 
-## 13 IPSec VPN solutions
+## IPSec VPN solutions
 
 - Site-to-site - Multivendor
 - DMVPN - Cisco
@@ -3372,9 +2025,9 @@ Debug crypto ipsec
 - FlexVPN - Cisco
 - Remote Access VPN
 
+## IPSec tunnels and MTU
 
-
-## 15 Curiosity questions
+## Curiosity questions
 
 Why 2 Tunnels?
 
