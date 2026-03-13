@@ -30,8 +30,7 @@
     - [3.2.2 IKEv2 Certificates](#322-ikev2-certificates)
     - [3.2.3 EAP](#323-eap)
 - [4 Authentication scenarios](#4-authentication-scenarios)
-- [5 Recommended IKE settings](#5-recommended-ike-settings)
-- [6 IKE scan](#6-ike-scan)
+- [6 IKE Security](#6-ike-security)
 - [7 IPSec protocols](#7-ipsec-protocols)
   - [7.1 ESP](#71-esp)
     - [7.1.1 Transport Mode](#711-transport-mode)
@@ -45,10 +44,7 @@
   - [10.2 IPSec with GRE via Crypto Map](#102-ipsec-with-gre-via-crypto-map)
   - [10.3 IPSec with Crypto Map](#103-ipsec-with-crypto-map)
   - [10.4 IPSec + GRE - IPSec profile](#104-ipsec--gre---ipsec-profile)
-- [11 Troubleshooting](#11-troubleshooting)
-- [12 Debug](#12-debug)
-- [13 IPSec VPN solutions](#13-ipsec-vpn-solutions)
-- [15 Curiosity questions](#15-curiosity-questions)
+- [12 Design](#12-design)
 
 
 ## 1 Introduction
@@ -214,6 +210,131 @@ AH  → Integrity / Authentication
   - Different VRFs
   - Migration scenarios
   - Strong policy separation requirements
+
+**Architectures, deployments, solutions**
+
+```
+IPsec Ecosystem
+│
+├─ Core IPsec Modes
+│  │
+│  ├─ ESP Transport Mode
+│  │   └─ Host-to-Host encryption
+│  │
+│  └─ ESP Tunnel Mode
+│      └─ Gateway-to-Gateway VPN
+│
+├─ Basic IPsec VPN Architectures
+│  │
+│  ├─ Site-to-Site VPN
+│  │   ├─ Hub-and-Spoke
+│  │   ├─ Full Mesh
+│  │   └─ Dual-Hub Redundant
+│  │
+│  ├─ Remote Access VPN
+│  │   ├─ IKEv1 + XAUTH
+│  │   ├─ IKEv2 + EAP
+│  │   └─ L2TP/IPsec client VPN
+│  │
+│  └─ Host-to-Host IPsec
+│
+├─ Tunneling Protocols Combined with IPsec
+│  │
+│  ├─ L2TP over IPsec
+│  │   └─ PPP features (authentication, IP assignment)
+│  │
+│  ├─ GRE over IPsec
+│  │   ├─ routing protocols
+│  │   ├─ multicast traffic
+│  │   └─ dynamic routing over VPN
+│  │
+│  ├─ IPIP over IPsec (rare)
+│  │
+│  └─ VTI (Virtual Tunnel Interface)
+│      └─ route-based IPsec VPN
+│
+├─ Scalable VPN Architectures
+│  │
+│  ├─ DMVPN
+│  │   ├─ GRE
+│  │   ├─ NHRP
+│  │   └─ IPsec encryption
+│  │
+│  ├─ FlexVPN
+│  │   └─ IKEv2 framework for scalable VPNs
+│  │
+│  ├─ GETVPN
+│  │   └─ group encryption without tunnels
+│  │
+│  └─ ADVPN
+│      └─ auto-discovered spoke-to-spoke tunnels
+│
+├─ Modern Enterprise Deployments
+│  │
+│  ├─ Cloud VPN
+│  │   ├─ On-prem → Cloud
+│  │   ├─ Cloud → Cloud
+│  │   └─ Hybrid networks
+│  │
+│  ├─ SD-WAN overlays
+│  │   └─ IPsec tunnels between edges
+│  │
+│  └─ Datacenter encryption
+│      └─ server-to-server IPsec
+│
+└─ Rare / Historical Uses
+   │
+   ├─ AH-based VPN
+   ├─ Mobile IP with IPsec
+   └─ IPsec protecting routing protocols
+```
+
+**Core IPsec Deployment Models**
+
+```
+Site-to-Site VPN (Gateway-to-Gateway)
+Remote Access VPN (Client-to-Gateway)
+Host-to-Host IPsec
+```
+
+**IPsec + Tunneling Protocol Combinations**
+
+```
+L2TP over IPsec
+GRE over IPsec
+IPIP over IPsec (rare)
+VTI (Virtual Tunnel Interface) IPsec
+```
+
+**Dynamic / Scalable VPN Architectures**
+
+```
+DMVPN (Dynamic Multipoint VPN)
+FlexVPN (modern Cisco IKEv2 framework)
+GETVPN (Group Encrypted Transport VPN)
+ADVPN (Auto Discovery VPN – Fortinet)
+SD-WAN IPsec overlays
+```
+
+**Remote Access Variants**
+
+```
+IKEv1 + XAUTH
+IKEv2 + EAP
+SSL/IPsec hybrid VPN clients
+L2TP/IPsec Remote Access
+```
+
+**Transport Mode Uses**
+
+```
+Host-to-Host ESP Transport Mode
+L2TP over IPsec (ESP Transport)
+iSCSI over IPsec
+Server-to-server encryption
+```
+
+Transport mode is rare except for L2TP/IPsec
 
 ## 2 Terms
   
@@ -2716,29 +2837,10 @@ PSK:
   → Legacy unless carefully managed
 ```
 
-## 5 Recommended IKE settings
+## 6 IKE Security
 
-- Phase 1
-  - IKE version - IKEv2
-  - Lifetime - S2S: 8 hours (28800 seconds) or 86400 seconds (24 hours) - IKEv2 handles rekeying much more gracefully - So aggressive lifetimes are safer in IKEv2 than IKEv1 - RA VPN: 8–24 hours - Avoid reauthentication prompts
-  - Encryption Algorithms - AES-256-GCM
-  - Integrity Algorithms - if not AEAD - SHA2-256
-  - PRF Algorithms for IKEv2 - SHA2-256
-  - DH group numbers - 14: minimum - 19: perfect
-  - DPD time out seconds - 10
-  - DPD retry - 5 for S2S - 3 for RA
-- Phase 2
-  - Life time - 3600 seconds (1 hour)
-  - Encryption Algorithms - AES-256-GCM-16
-  - Integrity Algorithms - HMAC-SHA2-256 - if not AEAD
-  - DH Group numbers - 14: minimum - 19: perfect
-  - Lifetime seconds - 
-  - PFS - Yes
-  - S2S and RA are the same
-  
-## 6 IKE scan
-
-**Test Phase 1**
+- IKEv1 Aggressive Mode + PSK authentication is vulnerable to PSK offiline bruteforce
+- Using ike-scan tool we get PSK hash
 
 ```
 ike-scan -M -A --id=0000 1.1.1.1
@@ -2747,6 +2849,34 @@ ike-scan -M -A --id=0000 1.1.1.1
 -A - aggressive
 --id - IKE identity
 - P - show PSK hash
+
+Starting ike-scan 1.9.5 with 1 hosts (http://www.nta-monitor.com/tools/ike-scan/)
+1.1.1.1  Main Mode Handshake returned
+    HDR=(CKY-R=2d3f8a8c4d1c2e21) 
+    SA=(Enc=AES Hash=SHA1 Auth=PSK Group=2:modp1024 LifeType=Seconds LifeDuration=28800)
+    VID=4048b7d56ebce88525e7de7f00d6c2d3 (Dead Peer Detection)
+    VID=12f5f28c457168a9702d9fe274cc0100 (NAT-T RFC 3947)
+    VID=afcad71368a1f1c96b8696fc77570100 (Cisco Unity)
+
+1.1.1.1  Aggressive Mode Handshake returned
+    HDR=(CKY-R=89ac45f0f13a9b3e)
+    SA=(Enc=AES Hash=SHA1 Auth=PSK Group=2:modp1024 LifeType=Seconds LifeDuration=28800)
+    ID(Type=ID_KEY_ID, Value="vpn-group")
+    Hash=fa7a0c9a6caa5b8e9e2c7d2c8d5c3d9c
+
+Ending ike-scan: 1 hosts scanned in 0.113 seconds (8.85 hosts/sec). 1 returned handshake; 1 returned notify.
+```
+
+Using ike-scan with aggressive mode we get:
+
+- PSK hash
+- Crypto parametres
+- Server IKE ID
+
+Show full HASH:
+
+```
+root@kali:~# ike-scan -M -A --id=0000 11.11.11.11 -P
 ```
 
 ## 7 IPSec protocols
@@ -3327,57 +3457,51 @@ IKEv2 Policy
   └─ Proposal
 ```
 
-## 11 Troubleshooting
+## 12 Design
 
-**Show status of all Tunnel interfaces**
-
-```
-router#show ip int br
-Interface              IP-Address      OK? Method Status                Protocol
-
-Tunnel0                10.125.6.1      YES NVRAM  up                    up      
-Tunnel1                10.125.6.5      YES NVRAM  up                    up      
-Tunnel3                unassigned      YES unset  administratively down down    
-Tunnel4                10.125.6.9      YES NVRAM  up                    down    
-Tunnel5                10.125.6.13     YES NVRAM  up                    down    
-```
-
-**Flapping tunnels on Cisco**
-
-```
-Router#show logging | inc changed
-20995065: Feb 13 2024 00:59:36.794 EST: %LINK-3-UPDOWN: Interface TenGigabitEthernet0/1/0, changed state to down
-20995067: Feb 13 2024 00:59:37.794 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface TenGigabitEthernet0/1/0, changed state to down
-20995068: Feb 13 2024 00:59:36.794 EST: %LINK-3-UPDOWN: SIP0/1: Interface TenGigabitEthernet0/1/0, changed state to down
-20995078: Feb 13 2024 00:59:58.197 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel1, changed state to down
-20995079: Feb 13 2024 00:59:58.845 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel102, changed state to down
-20995084: Feb 13 2024 01:00:00.167 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel0, changed state to down
-20995085: Feb 13 2024 01:00:00.787 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel16, changed state to down
-20995086: Feb 13 2024 01:00:01.385 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel11, changed state to down
-20995087: Feb 13 2024 01:00:01.765 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel12, changed state to down
-20995088: Feb 13 2024 01:00:02.035 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel15, changed state to down
-20995111: Feb 13 2024 01:01:35.759 EST: %LINEPROTO-5-UPDOWN: Line protocol on Interface Tunnel102, changed state to up
-```
-## 12 Debug
+- Use IKEv2 Whenever Possible
+- Avoid IKEv1 Aggressive Mode
+- Use Strong Cryptographyi
+- Enable Perfect Forward Secrecy
+- Account for IPsec Overhead (MTU Design)i
+- Avoid single-point VPN gateways: Active/Passive firewall clustering, Active/Active VPN gateways, Multiple tunnels with routing failover
+- Use Route-Based VPNs
+- Use Dynamic Routing Across VPN
+- Avoid Large Proxy-ID Lists
+- Design for Redundancy
+    - Two ISPs if possible
+    - Separate physical paths
+    - Dynamic routing failover
 
 ```
-Debug crypto condition peer ipv4 140.238.149.242
-Debug crypto ikev2
-Debug crypto ipsec
+Branch
+   | \
+   |  \
+VPN1  VPN2
+   |     |
+DC1   DC2
 ```
 
-## 13 IPSec VPN solutions
+- Prefer certificates over pre-shared keys in RA
+- Integrate Multi-Factor Authentication in RA
 
-- Site-to-site - Multivendor
-- DMVPN - Cisco
-- GET-VPN - Cisco
-- FlexVPN - Cisco
-- Remote Access VPN
+**Recommended IKE settings**
 
-
-
-## 15 Curiosity questions
-
-Why 2 Tunnels?
-
+- Phase 1
+  - IKE version - IKEv2
+  - Lifetime - S2S: 8 hours (28800 seconds) or 86400 seconds (24 hours) - IKEv2 handles rekeying much more gracefully - So aggressive lifetimes are safer in IKEv2 than IKEv1 - RA VPN: 8–24 hours - Avoid reauthentication prompts
+  - Encryption Algorithms - AES-256-GCM
+  - Integrity Algorithms - if not AEAD - SHA2-256
+  - PRF Algorithms for IKEv2 - SHA2-256
+  - DH group numbers - 14: minimum - 19: perfect
+  - DPD time out seconds - 10
+  - DPD retry - 5 for S2S - 3 for RA
+- Phase 2
+  - Life time - 3600 seconds (1 hour)
+  - Encryption Algorithms - AES-256-GCM-16
+  - Integrity Algorithms - HMAC-SHA2-256 - if not AEAD
+  - DH Group numbers - 14: minimum - 19: perfect
+  - Lifetime seconds - 
+  - PFS - Yes
+  - S2S and RA are the same
 
