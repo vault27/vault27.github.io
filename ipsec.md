@@ -1,4 +1,4 @@
-# show IPSec protocol details<!-- omit from toc -->
+###### show IPSec protocol details<!-- omit from toc -->
 
 ## Table of contents<!-- omit from toc -->
 
@@ -60,25 +60,13 @@
 - Routing protocols that rely on multicast or broadcast (e.g., OSPF, EIGRP) cannot run directly over classic IPsec tunnels
 - To support such protocols, a GRE tunnel is built first, and IPsec is used to encrypt the GRE traffic
 
-IPSec consists of:
-    - Key management protocol
-      - IKEv1
-      - IKEv2
-    - IPSec Protocols
-      - ESP
-        - Tunnel Mode
-        - Transport Mode
-    - AH(obsolete)
-        - Tunnel Mode
-        - Transport Mode
-
 **Why it was invented?**
 
 - To add security to IP networking itself
 - Original Internet had no built-in security
 - IP provides no: Encryption, Authentication, Integrity protection, Anti-replay protection
 - Anyone on the path could: Read packets, Modify packets, Spoof IP addresses, Inject traffic
-- Security at higher layers was not enough: Every application   had to implement its own security, traffic like routing, management, or custom protocols remained exposed
+- Security at higher layers was not enough: Every application had to implement its own security
 - IPsec enabled: Site-to-site VPNs, Remote-access VPNs, Secure inter-datacenter links
 
 **Who and when invented it?**
@@ -89,11 +77,11 @@ IPSec consists of:
 
 **What is required to establish a secure channel over an untrusted network?**
 
-- Peers must securely exchange cryptographic keys for encryption and packet authentication in a way that prevents any third party from learning those keys - Diffie Hellman algorithm is used for this
+- Peers must securely exchange cryptographic keys for encryption and packet authentication in a way that prevents any third party from learning those keys - Diffie Hellman algorithm is used for this, also possible: RSA key transposrt, key distribution centre
 - Peers must mutually authenticate each other, so that each side can verify the identity of the other - preshared keys, login/passwords, certificates, MFA are used for this
-- Peers must negotiate the cryptographic algorithms that will be used to encrypt and decrypt data - transmission protocol itself is used for negotiation, symmetric encryption algorithms  are used: 3DES, AES...
-- Peers must negotiate the algorithms that will be used to provide integrity and authentication for each packet - transmission protocol itself is used for negotiation, HMAC algorithms are for authentication of each packet and its integrity: 
-- After the secure session is established, peers exchange data packets that are encrypted and authenticated using the negotiated algorithms and derived keys.
+- Peers must negotiate the cryptographic algorithms that will be used to encrypt and decrypt data -  symmetric encryption algorithms are used: 3DES, AES...
+- Peers must negotiate the algorithms that will be used to provide integrity and authentication for each packet - HMAC algorithms are for authentication of each packet and its integrity
+- After the secure session is established, peers exchange data packets that are encrypted and authenticated using the negotiated algorithms and derived keys
 
 **IPSec goals**
 
@@ -108,7 +96,7 @@ IPSec consists of:
 - Traffic protection policy enforcement - Define which traffic is protected and how
 - Secure transport over untrusted networks
 
-**High level diagram**
+**Architecture**
 
 ```
 IPsec Framework
@@ -211,7 +199,7 @@ AH  → Integrity / Authentication
   - Migration scenarios
   - Strong policy separation requirements
 
-**Architectures, deployments, solutions**
+**Deployments**
 
 ```
 IPsec Ecosystem
@@ -289,53 +277,6 @@ IPsec Ecosystem
    └─ IPsec protecting routing protocols
 ```
 
-**Core IPsec Deployment Models**
-
-```
-Site-to-Site VPN (Gateway-to-Gateway)
-Remote Access VPN (Client-to-Gateway)
-Host-to-Host IPsec
-```
-
-**IPsec + Tunneling Protocol Combinations**
-
-```
-L2TP over IPsec
-GRE over IPsec
-IPIP over IPsec (rare)
-VTI (Virtual Tunnel Interface) IPsec
-```
-
-**Dynamic / Scalable VPN Architectures**
-
-```
-DMVPN (Dynamic Multipoint VPN)
-FlexVPN (modern Cisco IKEv2 framework)
-GETVPN (Group Encrypted Transport VPN)
-ADVPN (Auto Discovery VPN – Fortinet)
-SD-WAN IPsec overlays
-```
-
-**Remote Access Variants**
-
-```
-IKEv1 + XAUTH
-IKEv2 + EAP
-SSL/IPsec hybrid VPN clients
-L2TP/IPsec Remote Access
-```
-
-**Transport Mode Uses**
-
-```
-Host-to-Host ESP Transport Mode
-L2TP over IPsec (ESP Transport)
-iSCSI over IPsec
-Server-to-server encryption
-```
-
-Transport mode is rare except for L2TP/IPsec
-
 ## 2 Terms
   
 IPSec has several terms, which are used everywhere in protocol descriptions. These terms are:
@@ -350,10 +291,30 @@ Below is their meaning and description
 ### 2.1 SPI
 
 - SPI stands for `Security Parameters Index`
-- `There are two types of SPI`: IKE SPI used in Phase 1 IKEv1, IKE_SA_INIT in IKEv2 and IPSec SPI used used in Phase 2 IKEv1, IKE_AUTH IKEv2
-- IKE SPI is also called `Cookie`  and is 64 bits and identifies Security Association (SA) in IKE Tunnel (Control Tunnel)
+- SPI is a field in a packet header of IKE, ESP, or AH protocols
+- `There are two types of SPI`: 
+  
+  - `IPSec SPI` negotiated  in Phase 2 IKEv1 or IKE_AUTH IKEv2, used in AH or ESP protocols
+
+**IKE SPI**
+
+- IKE SPI `negotiated in Phase 1 IKEv or IKE_SA_INIT in IKEv2,`
+- `Used in all IKE packets`
+- IKE SPI may also be called a `Cookie`
 - In IKEv1, the values in the ISAKMP header are formally called cookies, but the RFC explicitly defines them as SPIs for the ISAKMP/IKE SA
 - `IKEv2 removed the word cookie entirely`
+- IKE SPI is 64 bits long
+- Identifies Security Association (SA) in IKE Tunnel (Control Tunnel)
+- IKE SA is uniquely identified by `2 SPIs`
+- In an IKE packet SPIs are called:
+- 
+```
+Initiator SPI:  a1b2c3d4e5f60708
+Responder SPI:  0000000000000000
+```
+
+-  in router's logical object: local SPI and remote SPI
+
 - IPSec SPI is 32 bits - identifies a specific Security Association (SA) in IPsec (Data Tunnel)
 - This number is injected into the header of  every ESP/AH/IKE packet, so the remote peer knows which Security Assosiation (SA) `[cryptographic parametres and keys]` to use for decryption and authentication
 - Also these numbers (for both local and remote peer) are stored in router's memory for Phase 1 and Phase 2 Security Assosiations - in IKEv1, and for SAs in IKEv2
@@ -366,10 +327,28 @@ Below is their meaning and description
 
 **Phase 1 and Phase 2 SPIs**
 
-- Phase 1 tunnel SA is uniquely identified by 2 SPIs in router's logical object: local SPI and remote SPI
+
 - Phase 2 tunnel SA is uniquely identified by `1 SPI`, but at the same time there are `2 SAs` in routers memory for each Phase 2 tunnel: `Inbound SA and Outbound SA`
 - The ESP/AH header in data packets uses the Phase 2 SPI as the first field to indicate which SA/key to use
 - For every new Phase 2 tunnel - because of different traffic selectors - new pairs of SPI are generated by both sides
+
+**Phase 1 SPI Logic (Two Routers)**
+
+```
+                 IKE Phase 1 Negotiation
+           (ISAKMP SA establishment)
+
+        Router A (Initiator)            Router B (Responder)
+
+        Generates SPI_A                 Generates SPI_B
+        (Outbound SPI)                  (Outbound SPI)
+
+
+        Logical Phase1 SA object        Logical Phase1 SA object
+        -------------------------       -------------------------
+        Local SPI  = SPI_A              Local SPI  = SPI_B
+        Remote SPI = SPI_B              Remote SPI = SPI_A
+```
 
 ### 2.2 SA
 
@@ -3461,7 +3440,7 @@ IKEv2 Policy
 
 - Use IKEv2 Whenever Possible
 - Avoid IKEv1 Aggressive Mode
-- Use Strong Cryptographyi
+- Use Strong Cryptography
 - Enable Perfect Forward Secrecy
 - Account for IPsec Overhead (MTU Design)i
 - Avoid single-point VPN gateways: Active/Passive firewall clustering, Active/Active VPN gateways, Multiple tunnels with routing failover
