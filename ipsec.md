@@ -1,4 +1,4 @@
-# show IPSec protocol detsils<!-- omit from toc -->
+# show IPSec protocol details<!-- omit from toc -->
 
 ## Table of contents<!-- omit from toc -->
 
