@@ -1,4 +1,8 @@
-A taxonomy of network engineering knowledge 
+```
+vault-27> Welcome to the Network Engineering Taxonomy Lab
+vault-27> System initialized. Protocols, technologies, and vendor configs ready.
+vault-27> Type 'help' for guidance or 'show topology' to start exploring.
+```
 
 - [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
