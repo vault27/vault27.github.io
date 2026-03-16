@@ -98,41 +98,21 @@ body::after {
 .markdown-body h1:first-of-type {
 
   font-family: "PxPlus IBM VGA9", monospace;
-
   font-size: 2.6rem; /* slightly bigger than article H1 */
   letter-spacing: 3px;
-
   color: #4cff88;
-
   display: inline-block;
   position: relative;
-
-  margin: 70px 0 40px 0;
+  margin: 70px 0 40px 0; 
   padding: 22px 0;
-
   text-shadow:
     0 0 6px rgba(76,255,136,0.6),
     0 0 12px rgba(76,255,136,0.25);
 }
 
-/* dashed lines */
-
-.markdown-body h1:first-of-type::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  border-top: 2px dashed rgba(76,255,136,0.6);
-}
-
-.markdown-body h1:first-of-type::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  border-bottom: 2px dashed rgba(76,255,136,0.6);
+.markdown-body h1:first-of-type a {
+  color: #4cff88 !important; /* enforce green for the link */
+  text-decoration: none;      /* optional: remove underline */
 }
 
 /* ==========================================
