@@ -42,7 +42,6 @@ A taxonomy of network engineering knowledge
 - [LDAP](/ldap.html)
 
 <br />
-<br />
 
 ```
 vault-27# cat LICENSE
