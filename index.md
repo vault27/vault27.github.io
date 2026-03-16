@@ -40,9 +40,11 @@ A taxonomy of network engineering knowledge
 ## Directory Service
 
 - [LDAP](/ldap.html)
-  
-    
-      
+
+<br />
+<br />
+<br />
+<br />
         
 ```
 vault-27# cat LICENSE
