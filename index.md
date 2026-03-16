@@ -43,9 +43,7 @@ A taxonomy of network engineering knowledge
 
 <br />
 <br />
-<br />
-<br />
-        
+
 ```
 vault-27# cat LICENSE
 Copyright Vault-27
