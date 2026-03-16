@@ -1,4 +1,6 @@
-A taxonomy of network engineering knowledge  
+A taxonomy of network engineering knowledge 
+
+<p style="text-align: center;">A piece of centered text</p> 
 
 - [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
