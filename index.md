@@ -1,7 +1,5 @@
 A taxonomy of network engineering knowledge 
 
-<p style="text-align: center;">A piece of centered text</p> 
-
 - [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
 - [Layer 2 Technologies](/l2.html)
@@ -26,8 +24,6 @@ A taxonomy of network engineering knowledge
 - [TLS/SSL](/ssl.html)
 - [SSH](/ssh.html)
 
-
-
 ## Authentication Protocols
 
 - [Evolution of Authentication Protocols](/auth.html)
@@ -44,3 +40,11 @@ A taxonomy of network engineering knowledge
 ## Directory Service
 
 - [LDAP](/ldap.html)
+
+```
+vault-27# cat LICENSE
+Copyright Vault-27
+This work is licensed under CC BY-SA 4.0
+https://creativecommons.org/licenses/by-sa/4.0/
+Reuse permitted with attribution and link to source
+```
