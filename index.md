@@ -40,11 +40,14 @@ A taxonomy of network engineering knowledge
 ## Directory Service
 
 - [LDAP](/ldap.html)
-
+  
+    
+      
+        
 ```
 vault-27# cat LICENSE
 Copyright Vault-27
 This work is licensed under CC BY-SA 4.0
 https://creativecommons.org/licenses/by-sa/4.0/
-Reuse permitted with attribution and link to source
+Reuse permitted with attribution and link to sourced
 ```
