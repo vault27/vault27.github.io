@@ -4,6 +4,10 @@ vault-27> System initialized. Protocols, technologies, and vendor configs ready.
 vault-27> Type 'help' for guidance or 'show topology' to start exploring.
 ```
 
+<br />
+
+# Topology
+
 - [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
 - [Layer 2 Technologies](/l2.html)
