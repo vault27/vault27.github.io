@@ -3505,3 +3505,9 @@ DC1   DC2
   - PFS - Yes
   - S2S and RA are the same
 
+<br />
+
+```
+vault-27# cat LICENSE | CC BY-SA 4.0 | Reuse permitted with attribution and link to sourced
+```
+
