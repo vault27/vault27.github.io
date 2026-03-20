@@ -1,15 +1,15 @@
 ```
-establishing secure channel...
-performing integrity check...
-loading archive index...
+██    ██  ██████  ██    ██ ██      ████████        ██████  ███████
+██    ██ ██    ██ ██    ██ ██         ██          ██  ███      ██
+██    ██ ████████ ██    ██ ██         ██             ███     ███
+ ██  ██  ██    ██ ██    ██ ██         ██            ███     ██
+  ████   ██    ██  ██████  ███████    ██          ███████  ██
 
-status: OK
+vault-27> restoring archive terminals...
+vault-27> syncing bunker knowledge index...
+vault-27> all systems nominal.
 
----------------------------------------------------------------
-vault27@login:~$ authenticate --user guest
-password: ********
-
-authentication successful.
+vault-27> welcome to vault-27
 ```
 
 # vault27@node:~$ ls /vault
