@@ -1,49 +1,57 @@
 ```
-vault-27> Welcome to the Network Engineering Taxonomy Lab
-vault-27> System initialized. Protocols, technologies, and vendor configs ready.
-vault-27> Type 'help' for guidance or 'show topology' to start exploring.
+establishing secure channel...
+performing integrity check...
+loading archive index...
+
+status: OK
+
+---------------------------------------------------------------
+vault27@login:~$ authenticate --user guest
+password: ********
+
+authentication successful.
 ```
 
-# Topology
+# vault27@node:~$ ls /vault
+
 
 - [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
 - [Layer 2 Technologies](/l2.html)
 
-## Layer 3
+## /layer3/
 
-- [Routing concepts](/routing.html)
-- [BGP](/bgp.html)
-- [OSPF](/ospf.html)
+- [Routing concepts/](/routing.html)
+- [BGP/](/bgp.html)
+- [OSPF/](/ospf.html)
 - [FHRP (HSRP / VRRP / GLBP)](fhrp.html)
 
-## Data Communication Protocols
+## /data_communication_protocols
 
-- [IP](/ip.html)
-- [IPv6](/ipv6.html)
-- [TCP](/tcp.html)
-- [UDP](/udp.html)
+- [IP/](/ip.html)
+- [IPv6/](/ipv6.html)
+- [TCP/](/tcp.html)
+- [UDP/](/udp.html)
 
-## Secure Transport Protocols
+## /secure_transport_protocols
 
 - [IPSec](/ipsec.html)
 - [TLS/SSL](/ssl.html)
 - [SSH](/ssh.html)
 
-## Authentication Protocols
+## /authentication_protocols
 
 - [Evolution of Authentication Protocols](/auth.html)
 - [EAP](/eap.html)
 - [Kerberos](/kerberos.html)
 - [NTLM](/ntlm.html)
 
-## AAA (Authentication, Authorization, Accounting)
+## /aaa_(Authentication, Authorization, Accounting)
 
 - [RADIUS](/radius.html)
 - [TACACS+](/tacacs.html)
 
-
-## Directory Service
+## /directory_service
 
 - [LDAP](/ldap.html)
 
