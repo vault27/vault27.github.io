@@ -332,14 +332,27 @@ Responder SPI:  a1b2c3d4e5f4a1bb
 
 **IKE SPI flow and terms diagram**
 
-```
-┌──────────────────────────┐  ┌──────────────────────────┐  ┌──────────────────────────┐
-│ INITIATOR NODE           │  │ IKE PACKET               │  │ RESPONDER NODE           │
-│ ─────────                │  │ ──────────               │  │ ─────────                │
-│ IKE SA                   │─▶│ Initiator SPI: A1B2C3D4  │─▶│ IKE SA                   │
-│ Local SPI: A1B2C3D4      │  │ Responder SPI: E5F6A7B8  │  │ Local SPI : E5F6A7B8     │
-│ Remote SPI: E5F6A7B8     │  │                          │  │ Remote SPI: A1B2C3D4     │
-└──────────────────────────┘  └──────────────────────────┘  └──────────────────────────┘
+┌──────────────────────────────┐
+│        INITIATOR NODE        │
+│ ──────────────────────────── │
+│ IKE SA                       │
+│ Local  SPI : A1B2C3D4        │
+│ Remote SPI : E5F6A7B8        │
+└───────────────┬──────────────┘
+                │
+                │   IKE PACKET
+                │   ──────────
+                │   Initiator SPI : A1B2C3D4
+                │   Responder SPI : E5F6A7B8
+                │
+                ▼
+┌──────────────────────────────┐
+│        RESPONDER NODE        │
+│ ──────────────────────────── │
+│ IKE SA                       │
+│ Local  SPI : E5F6A7B8        │
+│ Remote SPI : A1B2C3D4        │
+└──────────────────────────────┘
 
 ```
 
