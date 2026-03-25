@@ -330,33 +330,9 @@ Responder SPI:  a1b2c3d4e5f4a1bb
 - In IKEv1, the values in the ISAKMP header are formally called cookies, but the RFC explicitly defines them as SPIs for the ISAKMP/IKE SA
 - `IKEv2 no longer uses “cookie” as the name for SPI fields; it uses “SPI”, while “cookie” refers to a separate payload`
 
-![IKE SPI Flow](/images/ipsec/ike_spi.svg)
-
 **IKE SPI flow and terms diagram**
 
-```
-┌──────────────────────────────┐
-│        INITIATOR NODE        │
-│ ──────────────────────────── │
-│ IKE SA                       │
-│ Local  SPI : A1B2C3D4        │
-│ Remote SPI : E5F6A7B8        │
-└───────────────┬──────────────┘
-                │
-                │   IKE PACKET
-                │   ──────────
-                │   Initiator SPI : A1B2C3D4
-                │   Responder SPI : E5F6A7B8
-                │
-                ▼
-┌──────────────────────────────┐
-│        RESPONDER NODE        │
-│ ──────────────────────────── │
-│ IKE SA                       │
-│ Local  SPI : E5F6A7B8        │
-│ Remote SPI : A1B2C3D4        │
-└──────────────────────────────┘
-```
+![IKE SPI Flow](/images/ipsec/ike_spi.svg)
 
 **IPSec SPI**
 
