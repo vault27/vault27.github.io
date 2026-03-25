@@ -330,7 +330,7 @@ Responder SPI:  a1b2c3d4e5f4a1bb
 - In IKEv1, the values in the ISAKMP header are formally called cookies, but the RFC explicitly defines them as SPIs for the ISAKMP/IKE SA
 - `IKEv2 no longer uses “cookie” as the name for SPI fields; it uses “SPI”, while “cookie” refers to a separate payload`
 
-![IKE SPI Flow](/images/ipsec/ike_spi.png)
+![IKE SPI Flow](/images/ipsec/ike_spi.svg)
 
 **IKE SPI flow and terms diagram**
 
