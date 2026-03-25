@@ -332,6 +332,7 @@ Responder SPI:  a1b2c3d4e5f4a1bb
 
 **IKE SPI flow and terms diagram**
 
+```
 ┌──────────────────────────────┐
 │        INITIATOR NODE        │
 │ ──────────────────────────── │
@@ -353,7 +354,6 @@ Responder SPI:  a1b2c3d4e5f4a1bb
 │ Local  SPI : E5F6A7B8        │
 │ Remote SPI : A1B2C3D4        │
 └──────────────────────────────┘
-
 ```
 
 **IPSec SPI**
