@@ -6,7 +6,7 @@
 - [2 Terms](#2-terms)
   - [2.1 SPI](#21-spi)
   - [2.2 SA](#22-sa)
-    - [2.3.1 Control tunnel - IKE SA](#231-control-tunnel---ike-sa)
+    - [2.3.1 Control tunnel - IKE SA - ISAKMP SA](#231-control-tunnel---ike-sa---isakmp-sa)
     - [2.3.2 Data tunnel - IPSec SA](#232-data-tunnel---ipsec-sa)
     - [2.3.3 Manual and Dynamic SAs](#233-manual-and-dynamic-sas)
   - [2.3 Transform set](#23-transform-set)
@@ -360,11 +360,11 @@ Responder SPI:  a1b2c3d4e5f4a1bb
 - Each IPSec connection to 1 peer has minimum 3 SAs in router's memory: 1 SA for control  tunnel (bidectional, used for inbound and outbound traffic) and 2 SAs for Data tunnel: one for Inbound traffic and one for Outbound
 - Each IPSec connection to a peer may have more than 2  Data tunnel SAs, it depends on the amount of traffic selectors, for each traffic selector another pair of SAs for Data tunnel is created
 
-#### 2.3.1 Control tunnel - IKE SA
+#### 2.3.1 Control tunnel - IKE SA - ISAKMP SA
 
 **As a set of options**
 
-- SA, used during Phase 1 in IKEv1 and IKE_INIT in IKEv2, is called IKE SA and it is `Bidirectional`: used for protecting control traffic in both directions 
+- SA, used during Phase 1 in IKEv1 and IKE_INIT in IKEv2, is called IKE SA or ISAKMP SA and it is `Bidirectional`: used for protecting control traffic in both directions 
 - IKE SA as a set of cryptographic options consist of `SPIs(initiator and responder) and Proposals` - this is what we see in a packet
 - `Proposal` consists of `Transforms`
 - Transforms maybe be different types: `Encryption, Hash, Authentication Method, DH group, Lifetime`
