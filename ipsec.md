@@ -184,6 +184,10 @@ AH  → Integrity / Authentication
 - IKEv1 Mode Config - No RFC
 - Vendor RA extensions
 
+**Documentation**
+
+- [Cisco IPSec Negotiation/IKE Protocols](https://www.cisco.com/c/en/us/tech/security-vpn/ipsec-negotiation-ike-protocols/index.html)
+
 **Communications**
 
 - Two nodes can build multiple IPsec tunnels using the same physical interfaces and even the same IP addresses
