@@ -3,7 +3,7 @@
 ## Table of contents<!-- omit from toc -->
 
 - [1 Introduction](#1-introduction)
-- [2 Terms](#2-terms)
+- [2 IPSec Terms](#2-ipsec-terms)
   - [2.1 SPI](#21-spi)
   - [2.2 SA](#22-sa)
     - [2.3.1 Control tunnel - IKE SA - ISAKMP SA](#231-control-tunnel---ike-sa---isakmp-sa)
@@ -13,6 +13,11 @@
   - [2.4 Traffic Selectors](#24-traffic-selectors)
   - [2.5 Vendor IDs](#25-vendor-ids)
   - [2.6 IKE identity](#26-ike-identity)
+- [3 IPSec databases](#3-ipsec-databases)
+  - [SPD — Security Policy Database](#spd--security-policy-database)
+  - [SAD — Security Association Database](#sad--security-association-database)
+  - [PAD — Peer Authorization Database](#pad--peer-authorization-database)
+  - [Full Processing Flow](#full-processing-flow)
 - [3 Key management protocols](#3-key-management-protocols)
   - [3.1 IKE v1](#31-ike-v1)
     - [3.1.1 Workflow](#311-workflow)
@@ -281,7 +286,7 @@ IPsec Ecosystem
    └─ IPsec protecting routing protocols
 ```
 
-## 2 Terms
+## 2 IPSec Terms
   
 IPSec has several terms, which are used everywhere in protocol descriptions. These terms are:
 
@@ -778,6 +783,122 @@ Vendor ID
     - certificates
 - EAP is used in addition to, not instead of, PSK or certificates
 - Generic or anonymous client IKE IDs are commonly used
+
+## 3 IPSec databases
+
+- 3 databases in IPSec: `SPD → SAD → PAD`
+- 
+### SPD — Security Policy Database 
+
+- What to do with traffic?
+- SPD exampled in Cisco: crypto ACL
+  
+**SPD example**
+
+```
+src: 10.0.0.0/24
+dst: 10.1.0.0/24
+proto: any
+action: PROTECT (IPsec)
+```
+
+**SPD actions**
+
+- PROTECT → use IPsec
+- BYPASS  → bypass without IPsec
+- DISCARD → DROP
+
+**SPD flow**
+
+```
+Outbound:
+  packet → SPD → (protect?) → yes → SAD lookup
+
+Inbound:
+  After decrypt → SPD check
+```
+
+### SAD — Security Association Database
+
+- SA options: keys, algorithms, SPIs
+- `SAD entry ← indexed by SPI`
+- IKE → creates entries in SAD
+- SAD example in Cisco: `show crypto ipsec sa`
+
+**Example**
+
+```
+SPI: 0xA1B2C3D4
+destination: 203.0.113.1
+protocol: ESP
+
+encryption: AES-256
+integrity: SHA-256
+key: 0xdeadbeef...
+
+mode: tunnel
+lifetime: 3600s
+```
+
+**Flow**
+
+```
+Inbound:
+  SPI → SAD → SA → decrypt
+```
+
+### PAD — Peer Authorization Database
+
+- Who has rights to establish IPSec sessions with us
+- No exactly PAD table in Cisco, but close: `crypto isakmp key MySecretKey address 203.0.113.1 `
+
+**Example**
+
+```
+peer: vpn.example.com
+auth method: certificate
+CA: Example-Root-CA
+
+allowed identities:
+  CN=vpn.example.com
+```
+
+- Used in IKE Phase 1 / IKE_AUTH
+- Checks:
+  - Identity
+  - Certificates
+  - PSK
+
+### Full Processing Flow
+
+```
+OUTBOUND:
+
+[Packet]
+   ↓
+[SPD lookup]
+   ↓
+(PROTECT?)
+   ↓ yes
+[IKE → create SA if needed]
+   ↓
+[SAD lookup]
+   ↓
+[Encrypt → ESP packet]
+
+
+INBOUND:
+
+[ESP packet]
+   ↓
+[SPI lookup in SAD]
+   ↓
+[Decrypt]
+   ↓
+[SPD check]
+   ↓
+[Forward]
+```
 
 ## 3 Key management protocols
 
