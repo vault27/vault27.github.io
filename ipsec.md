@@ -1,4 +1,4 @@
-###### show IPSec protocol details<!-- omit from toc -->
+#### show IPSec protocol details<!-- omit from toc -->
 
 ## Table of contents<!-- omit from toc -->
 
@@ -1387,9 +1387,9 @@ It contains the same as messages 2,4,6 in Main mode
         - The responder is the owner of the claimed identity (IDir)
         - The responder did not modify the exchange
     - If any of these are false → hash verification fails → Phase 1 fails
-    - HASH_R = `HMAC(Key, Data)
+    - HASH_R = HMAC(Key, Data)
         - Key = Derived from PSK, Nonce-Initiator, Nonce-Responder
-        - Data = Responder’s DH public value + Initiator’s DH public value + Responder cookie | Initiator cookie + Initiator’s SA payload + Responder’s identity)`
+        - Data = Responder’s DH public value + Initiator’s DH public value + Responder cookie | Initiator cookie + Initiator’s SA payload + Responder’s identity)
     - It is said that `Responder authenticates itself to the initiator` with HASH_R, so it `proves` that it is legal
 - Vendor IDs
 
@@ -2406,10 +2406,8 @@ IKE_AUTH     <--------------------------
     - DNS servers
     - Split tunnel info
 
---------------------------------------------------
 IKE SA established
 First CHILD_SA established
---------------------------------------------------
 ```
 
 **EAP + PSK Example - Packets 3-10**
@@ -2531,7 +2529,6 @@ Encrypted and Authenticated Payload
 Initiator and Responder SPI from IKE_INIT
 Encrypted
         |-EAP Challenge
-`   
 ```
 
 **Packet itself**
@@ -2731,201 +2728,176 @@ Encrypted and Authenticated Payload
 
 ## 4 Authentication scenarios
 
-```
-===============================================================================
-SITE-TO-SITE (S2S) VPN — AUTHENTICATION FLOWS
-===============================================================================
+**SITE-TO-SITE (S2S) VPN — AUTHENTICATION FLOWS**
 
 Goal:
-  - Authenticate two NETWORK DEVICES
-  - Long-lived tunnels
-  - Static peers
-  - No user authentication
 
-------------------------------------------------
-IKEv1 – Main Mode – PSK
-------------------------------------------------
+- Authenticate two NETWORK DEVICES
+- Long-lived tunnels
+- Static peers
+- No user authentication
+
+**IKEv1 – Main Mode – PSK**
+
 Purpose:
-  - Simple device authentication
-  - Easy to deploy
 
-Popularity: ⭐⭐⭐⭐ (very common historically)
+- Simple device authentication
+- Easy to deploy
 
 Problems:
-  - PSK vulnerable to offline cracking - not only aggressive mode is vulnerable to PSK offline bruteforce - https://www.kb.cert.org/vuls/id/857035/ - IKEv2 is not vulnerable
-  - Poor scalability
-  - Key rotation is painful
 
-Status:
-  ❌ Legacy / discouraged today
+- PSK vulnerable to offline cracking - not only aggressive mode is vulnerable to PSK offline bruteforce - https://www.kb.cert.org/vuls/id/857035/ - IKEv2 is not vulnerable
+- Poor scalability
+- Key rotation is painful
 
-------------------------------------------------
-IKEv1 – Main Mode – Certificates
-------------------------------------------------
+Status: Legacy / discouraged today
+
+**IKEv1 – Main Mode – Certificates**
+
 Purpose:
-  - Strong device authentication
-  - Identity protection
-
-Popularity:
-  ⭐⭐ (used in high-security environments)
+- Strong device authentication
+- Identity protection
 
 Pros:
-  - No offline cracking
-  - Scales well
-  - Strong cryptographic identity
+
+- No offline cracking
+- Scales well
+- Strong cryptographic identity
 
 Cons:
-  - PKI overhead
 
-------------------------------------------------
-IKEv2 – PSK
-------------------------------------------------
+- PKI overhead
+
+**IKEv2 – PSK**
+
 Purpose:
+
   - Simple S2S authentication
 
-Popularity:
-  ⭐⭐⭐⭐⭐ (most common in SMB / cloud)
-
 Problems:
+
   - Weak if PSK reused
 
-Status:
-  ⚠️ Acceptable only with strong random PSKs
+Status: Acceptable only with strong random PSKs
 
-------------------------------------------------
-IKEv2 – Certificates (BEST PRACTICE)
-------------------------------------------------
+**IKEv2 – Certificates (BEST PRACTICE)**
+
 Purpose:
+
   - Strong device-to-device authentication
 
-Popularity:
-  ⭐⭐⭐⭐ (enterprise / cloud / zero-trust)
-
 Why best:
-  ✔ No offline cracking
-  ✔ Scales well
-  ✔ Clean rekey & rotation
-  ✔ Mandatory for high-security environments
 
-BEST CHOICE FOR S2S VPNs
-✔ IKEv2 + Certificates
+- No offline cracking
+- Scales well
+- Clean rekey & rotation
+- Mandatory for high-security environments
 
-===============================================================================
-REMOTE-ACCESS (RA) VPN — AUTHENTICATION FLOWS
-===============================================================================
+`BEST CHOICE FOR S2S VPNs: IKEv2 + Certificates`
+
+**REMOTE-ACCESS (RA) VPN — AUTHENTICATION FLOWS**
 
 Goal:
-  - Authenticate USERS (and sometimes devices)
-  - Dynamic IPs
-  - Per-user authorization
-  - Virtual IP assignment
 
-------------------------------------------------
-IKEv1 – Aggressive Mode – PSK
-------------------------------------------------
+- Authenticate USERS (and sometimes devices)
+- Dynamic IPs
+- Per-user authorization
+- Virtual IP assignment
+
+**IKEv1 – Aggressive Mode – PSK**
+
 Purpose:
-  - Fast RA VPN setup
 
-Popularity:
-  ⭐⭐⭐ (old deployments)
+- Fast RA VPN setup
 
 Problems:
-  - Offline PSK cracking
-  - Identity exposed
-  - Very weak security
 
-Status:
-  ❌ Do not use today
+- Offline PSK cracking
+- Identity exposed
+- Very weak security
 
-------------------------------------------------
+Status: Do not use today
+
 IKEv1 – Aggressive Mode – PSK + XAUTH
-------------------------------------------------
-Purpose:
-  - Device auth (PSK)
-  - User auth (XAUTH)
 
-Popularity:
-  ⭐⭐⭐⭐ (classic Cisco RA VPNs)
+Purpose:
+
+- Device auth (PSK)
+- User auth (XAUTH)
+
+Сlassic Cisco RA VPNs
 
 Problems:
-  - PSK still crackable offline
-  - XAUTH is vendor-specific
-  - Legacy design
 
-Status:
-  ❌ Legacy / replaced by IKEv2
+- PSK still crackable offline
+- XAUTH is vendor-specific
+- Legacy design
 
-------------------------------------------------
-IKEv2 – PSK + EAP
-------------------------------------------------
+Status: Legacy / replaced by IKEv2
+
+**IKEv2 – PSK + EAP**
+
 Purpose:
-  - Device authentication via PSK
-  - User authentication via EAP
 
-Popularity:
-  ⭐⭐⭐⭐⭐ (very common)
-
-Security:
-  ⚠️ PSK crackable offline
-  ✔ User auth strong
+- Device authentication via PSK
+- User authentication via EAP
 
 Used when:
-  - No PKI
-  - Easy onboarding
 
-------------------------------------------------
+- No PKI
+- Easy onboarding
+
 IKEv2 – Certificates (device) + EAP (user)
-------------------------------------------------
-Purpose:
-  - Device authentication
-  - User authentication
-  - Per-user authorization
 
-Popularity:
-  ⭐⭐⭐⭐ (enterprise standard)
+Purpose:
+
+- Device authentication
+- User authentication
+- Per-user authorization
 
 Why best:
-  ✔ No offline cracking
-  ✔ Strong identity binding
-  ✔ Works with MFA
 
-BEST CHOICE FOR RA VPNs
-✔ IKEv2 + Certs + EAP
+- No offline cracking
+- Strong identity binding
+- Works with MFA
 
-===============================================================================
-EAP METHODS — WHAT IS ACTUALLY USED
-===============================================================================
+`BEST CHOICE FOR RA VPNs`
+
+**EAP METHODS — WHAT IS ACTUALLY USED**
 
 Common in IKEv2 RA VPNs:
 
 EAP-MSCHAPv2
-  - Username/password
-  - Very common with Active Directory
-  - ⚠️ Vulnerable if not protected by TLS
+
+- Username/password
+- Very common with Active Directory
+- Vulnerable if not protected by TLS
 
 EAP-TLS (BEST)
-  - Client certificate
-  - Strong mutual authentication
-  - No passwords
-  - Enterprise gold standard
+
+- Client certificate
+- Strong mutual authentication
+- No passwords
+- Enterprise gold standard
 
 EAP-TTLS / PEAP
-  - TLS tunnel + inner auth
-  - Username/password inside TLS
-  - Common in Wi-Fi, less in VPN
+
+- TLS tunnel + inner auth
+- Username/password inside TLS
+- Common in Wi-Fi, less in VPN
 
 EAP-MD5
-  - ❌ Weak
-  - No mutual auth
-  - Should not be used
+
+- Weak
+- No mutual auth
+- Should not be used
 
 Most popular today:
-  ✔ EAP-MSCHAPv2 (legacy environments)
-  ✔ EAP-TLS (modern / secure environments)
 
-===============================================================================
+- EAP-MSCHAPv2 (legacy environments)
+- EAP-TLS (modern / secure environments)
+
 ONE-LINE TAKEAWAYS
-===============================================================================
 
 S2S VPN:
   → Authenticate DEVICES
@@ -2939,7 +2911,6 @@ PSK:
   → Easy
   → Weak
   → Legacy unless carefully managed
-```
 
 ## 6 IKE Security
 
@@ -3136,7 +3107,8 @@ Outer IP | AH Header | Inner IP | TCP/UDP | Data
 +---------------------------+
 |   Application Data        |
 +---------------------------+
-```
+
+``
 
 **Processing Order (Receiver)**
 
@@ -3173,7 +3145,6 @@ Outer IP | AH Header | Inner IP | TCP/UDP | Data
 - So to carry PPP across an IP network, you must Encapsulate PPP inside an IP-based protocol
 - That’s what L2TP does
 - L2TP:
-  - Encapsulates PPP frames
   - Puts them inside UDP (port 1701)
   - Which runs over IP
 - So now PPP becomes transportable over IP

@@ -59,3 +59,8 @@ Early CRT limitations:
 	•	more eye fatigue
 
 👉 monochrome colors were actually better
+
+## Neovim as markdown editor
+
+- Copy text to system clipboard: press 3 keys one by one: "+y
+
