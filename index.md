@@ -1,23 +1,14 @@
 ```
-
- /$$    /$$  /$$$$$$  /$$   /$$ /$$    /$$$$$$$$      /$$$$$$  /$$$$$$$$
-| $$   | $$ /$$__  $$| $$  | $$| $$   |__  $$__/     /$$__  $$|_____ $$/
-| $$   | $$| $$  \ $$| $$  | $$| $$      | $$       |__/  \ $$     /$$/ 
-|  $$ / $$/| $$$$$$$$| $$  | $$| $$      | $$ /$$$$$$ /$$$$$$/    /$$/  
- \  $$ $$/ | $$__  $$| $$  | $$| $$      | $$|______//$$____/    /$$/   
-  \  $$$/  | $$  | $$| $$  | $$| $$      | $$       | $$        /$$/    
-   \  $/   | $$  | $$|  $$$$$$/| $$$$$$$$| $$       | $$$$$$$$ /$$/     
-    \_/    |__/  |__/ \______/ |________/|__/       |________/|__/      
-                                                                                                
 vault-27> restoring archive terminals...
 vault-27> syncing bunker knowledge index...
-vault-27> all systems nominal.
+vault-27> all systems nominal
 
-vault-27> welcome to vault-27
+vault-27> welcome to vault-27 archive
 ```
 
-# vault27@node:~$ ls /vault
+# ls -a /vault
 
+[Complete Network & Security Knowledge Map](/knowledge.md)
 
 - [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
