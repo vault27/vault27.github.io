@@ -1,16 +1,13 @@
 ```
-###############################################################
-#           WELCOME TO VAULT-27 NETWORK ARCHIVE NODE          #
-###############################################################
-#  Authorized personnel access only                          #
-#  All activity is logged and monitored                      #
-#                                                             #
-#  vault-27> initializing network archive...                 #
-#  vault-27> validating protocol database... OK              #
-#  vault-27> loading secure transport modules                #
-#                                                             #
-#  STATUS: OPERATIONAL                                       #
-###############################################################
+WELCOME TO VAULT-27 NETWORK ARCHIVE NODE
+
+Authorized personnel access only
+All activity is logged and monitored
+vault-27> initializing network archive...
+vault-27> validating protocol database... OK
+vault-27> loading secure transport modules
+
+STATUS: OPERATIONAL
 ```
 
 # ls -a /vault
