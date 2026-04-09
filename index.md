@@ -1,9 +1,16 @@
 ```
-vault-27> restoring archive terminals...
-vault-27> syncing bunker knowledge index...
-vault-27> all systems nominal
-
-vault-27> welcome to vault-27 archive
+###############################################################
+#           WELCOME TO VAULT-27 NETWORK ARCHIVE NODE          #
+###############################################################
+#  Authorized personnel access only                          #
+#  All activity is logged and monitored                      #
+#                                                             #
+#  vault-27> initializing network archive...                 #
+#  vault-27> validating protocol database... OK              #
+#  vault-27> loading secure transport modules                #
+#                                                             #
+#  STATUS: OPERATIONAL                                       #
+###############################################################
 ```
 
 # ls -a /vault
@@ -16,7 +23,7 @@ vault-27> welcome to vault-27 archive
 
 ## /layer3/
 
-- [Routing concepts/](/routing.html)
+- [Routing concepts/](/routing.htmlOME
 - [BGP/](/bgp.html)
 - [OSPF/](/ospf.html)
 - [FHRP (HSRP / VRRP / GLBP)](fhrp.html)
