@@ -10,49 +10,15 @@ vault-27> loading secure transport modules
 vault-27> STATUS: OPERATIONAL
 ```
 
-# vault-27> tree /vault --depth 2
+# show index
 
-[Complete Network & Security Knowledge Map](/knowledge.md)
-
+- [Complete Network & Security Knowledge Map](/knowledge.md)
 - [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
-- [Layer 2 Technologies](/l2.html)
-
-## /layer3/
-
-- [Routing concepts/](/routing.htmlOME
-- [BGP/](/bgp.html)
-- [OSPF/](/ospf.html)
-- [FHRP (HSRP / VRRP / GLBP)](fhrp.html)
-
-## /data_communication_protocols/
-
-- [IP/](/ip.html)
-- [IPv6/](/ipv6.html)
-- [TCP/](/tcp.html)
-- [UDP/](/udp.html)
-
-## /secure_transport_protocols/
-
+- [Routing concepts/](/routing.html)
 - [IPSec](/ipsec.html)
-- [TLS/SSL](/ssl.html)
-- [SSH](/ssh.html)
-
-## /authentication_protocols/
-
 - [Evolution of Authentication Protocols](/auth.html)
 - [EAP](/eap.html)
-- [Kerberos](/kerberos.html)
-- [NTLM](/ntlm.html)
-
-## /aaa_(Authentication, Authorization, Accounting)/
-
-- [RADIUS](/radius.html)
-- [TACACS+](/tacacs.html)
-
-## /directory_service/
-
-- [LDAP](/ldap.html)
 
 <br />
 
