@@ -401,3 +401,9 @@ EAP
 ```
 
 In EAP-TLS, the authentication is completed by the certificates during the TLS handshake
+
+## Packet capture
+
+```
+sudo tcpdump -i en0 ether proto 0x888e -vv -w wifi_handshake.pcap
+```
