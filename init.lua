@@ -14,60 +14,145 @@ vim.opt.termguicolors = true
 -- <leader> is a special prefix key you define to create your own shortcuts
 vim.g.mapleader = " "
 
--- Custom colorscheme
--- Vault27-style retro amber theme for terminal Markdown writing
+-- Vault27 Markdown Theme
+-- Warm retro terminal style for Markdown-heavy work
+
+vim.opt.termguicolors = true
+
 vim.cmd([[
-  " Main editor background and text
-  highlight Normal       guifg=#e6d6b8 guibg=#1a120d
-  highlight NormalNC     guifg=#e6d6b8 guibg=#1a120d
-  highlight EndOfBuffer  guifg=#1a120d guibg=#1a120d
-  highlight SignColumn   guibg=#1a120d
-  highlight FoldColumn   guibg=#1a120d
-  highlight LineNr       guifg=#8c6f4d guibg=#1a120d
-  highlight CursorLineNr guifg=#cfa96a guibg=#1a120d gui=bold
+  highlight clear
+  syntax reset
 
-  " Selection and search
-  highlight Visual       guifg=NONE    guibg=#3a2a1f
-  highlight Search       guifg=#1a120d guibg=#cfa96a
-  highlight IncSearch    guifg=#1a120d guibg=#ffcc66 gui=bold
+  let g:colors_name = "vault27_markdown"
 
-  " Status and split
-  highlight StatusLine   guifg=#e6d6b8 guibg=#2a1b14
-  highlight StatusLineNC guifg=#8c6f4d guibg=#2a1b14
-  highlight VertSplit    guifg=#3a2a1f guibg=#1a120d
-  highlight WinSeparator guifg=#3a2a1f guibg=#1a120d
+  " ============================================================
+  " Base UI
+  " ============================================================
+  highlight Normal        guifg=#e8dcc3 guibg=#16110d
+  highlight NormalNC      guifg=#e0d2b4 guibg=#16110d
+  highlight EndOfBuffer   guifg=#16110d guibg=#16110d
+  highlight SignColumn    guibg=#16110d
+  highlight FoldColumn    guifg=#8d7355 guibg=#16110d
+  highlight CursorLine    guibg=#1f1813
+  highlight CursorLineNr  guifg=#d9b36c guibg=#1f1813 gui=bold
+  highlight LineNr        guifg=#7c6346 guibg=#16110d
+  highlight ColorColumn   guibg=#211912
+  highlight Conceal       guifg=#8d7355 guibg=#16110d
 
-  " Popup/menu
-  highlight Pmenu        guifg=#e6d6b8 guibg=#241811
-  highlight PmenuSel     guifg=#1a120d guibg=#cfa96a
-  highlight PmenuSbar    guibg=#241811
-  highlight PmenuThumb   guibg=#8c6f4d
+  " ============================================================
+  " Selection / Search
+  " ============================================================
+  highlight Visual        guifg=NONE    guibg=#3a2b20
+  highlight Search        guifg=#16110d guibg=#d9b36c gui=bold
+  highlight IncSearch     guifg=#16110d guibg=#f0c674 gui=bold
 
-  " Markdown headings - amber/gold, no ugly boxes
-  highlight markdownH1   guifg=#d8b25f guibg=NONE gui=bold
-  highlight markdownH2   guifg=#cfa96a guibg=NONE gui=bold
-  highlight markdownH3   guifg=#c59a52 guibg=NONE gui=bold
-  highlight markdownH4   guifg=#b98b49 guibg=NONE gui=bold
-  highlight markdownH5   guifg=#a97b3d guibg=NONE gui=bold
-  highlight markdownH6   guifg=#8f6731 guibg=NONE gui=bold
+  " ============================================================
+  " Statusline / Split / Popup
+  " ============================================================
+  highlight StatusLine    guifg=#eadfc7 guibg=#241b14
+  highlight StatusLineNC  guifg=#8d7355 guibg=#1d1611
+  highlight VertSplit     guifg=#30241b guibg=#16110d
+  highlight WinSeparator  guifg=#30241b guibg=#16110d
 
-  " Markdown text styles
-  highlight markdownBold       guifg=#f0dfb0 guibg=NONE gui=bold
-  highlight markdownItalic     guifg=#d9c89e guibg=NONE gui=italic
-  highlight markdownCode       guifg=#9fef00 guibg=#0f2a1c
-  highlight markdownCodeBlock  guifg=#9fef00 guibg=#0f2a1c
-  highlight markdownUrl        guifg=#7fbf7f guibg=NONE gui=underline
-  highlight markdownLinkText   guifg=#cfa96a guibg=NONE gui=underline
-  highlight markdownListMarker guifg=#ff5f4a guibg=NONE gui=bold
+  highlight Pmenu         guifg=#e8dcc3 guibg=#211913
+  highlight PmenuSel      guifg=#16110d guibg=#d9b36c gui=bold
+  highlight PmenuSbar     guibg=#211913
+  highlight PmenuThumb    guibg=#8d7355
 
-  " Generic syntax groups
-  highlight Comment      guifg=#7d6a58 gui=italic
-  highlight String       guifg=#9fef00
-  highlight Identifier   guifg=#e6d6b8
-  highlight Function     guifg=#d8b25f
-  highlight Statement    guifg=#cfa96a
-  highlight Keyword      guifg=#cfa96a gui=bold
-  highlight Type         guifg=#b7a06d
+  " ============================================================
+  " Generic Syntax
+  " ============================================================
+  highlight Comment       guifg=#7c6a58 gui=italic
+  highlight String        guifg=#9fef88
+  highlight Character     guifg=#9fef88
+  highlight Number        guifg=#e6a86a
+  highlight Boolean       guifg=#e6a86a gui=bold
+  highlight Float         guifg=#e6a86a
+  highlight Identifier    guifg=#eadfc7
+  highlight Function      guifg=#d8b25f
+  highlight Statement     guifg=#cf9f63
+  highlight Conditional   guifg=#cf9f63 gui=bold
+  highlight Repeat        guifg=#cf9f63 gui=bold
+  highlight Keyword       guifg=#cf9f63 gui=bold
+  highlight Operator      guifg=#d6c3a0
+  highlight PreProc       guifg=#c7a46a
+  highlight Type          guifg=#bda06e
+  highlight Special       guifg=#dfb77d
+  highlight Delimiter     guifg=#a28663
+  highlight Title         guifg=#e0b96d gui=bold
+
+  " ============================================================
+  " Diagnostics
+  " ============================================================
+  highlight DiagnosticError guifg=#ff7b72
+  highlight DiagnosticWarn  guifg=#e0af68
+  highlight DiagnosticInfo  guifg=#7fbfdf
+  highlight DiagnosticHint  guifg=#8fbf8f
+
+  " ============================================================
+  " Markdown headings
+  " ============================================================
+  highlight markdownH1 guifg=#f0c674 guibg=NONE gui=bold
+  highlight markdownH2 guifg=#e5b567 guibg=NONE gui=bold
+  highlight markdownH3 guifg=#d9a95f guibg=NONE gui=bold
+  highlight markdownH4 guifg=#c99657 guibg=NONE gui=bold
+  highlight markdownH5 guifg=#b8844d guibg=NONE gui=bold
+  highlight markdownH6 guifg=#9f6f42 guibg=NONE gui=bold
+
+  " Header markers (#)
+  highlight markdownHeadingDelimiter guifg=#7a5f43 gui=bold
+  highlight markdownRule guifg=#6b5643
+
+  " ============================================================
+  " Markdown emphasis
+  " ============================================================
+  highlight markdownBold       guifg=#ffe4a3 guibg=NONE gui=bold
+  highlight markdownItalic     guifg=#d9c8a3 guibg=NONE gui=italic
+  highlight markdownBoldItalic guifg=#fff0b8 guibg=NONE gui=bold,italic
+
+  " ============================================================
+  " Markdown links / lists / quotes
+  " ============================================================
+  highlight markdownUrl        guifg=#7fcf9f guibg=NONE gui=underline
+  highlight markdownLinkText   guifg=#d8b25f guibg=NONE gui=underline
+  highlight markdownListMarker guifg=#ff8f5a guibg=NONE gui=bold
+  highlight markdownBlockquote guifg=#9e8563 guibg=NONE gui=italic
+
+  " ============================================================
+  " Inline code and fenced code blocks
+  " ============================================================
+  highlight markdownCode      guifg=#b8ff9f guibg=#112017
+  highlight markdownCodeBlock guifg=#b8ff9f guibg=#112017
+  highlight markdownCodeDelimiter guifg=#6ccf8a guibg=#112017 gui=bold
+
+  " ============================================================
+  " Treesitter Markdown groups (important in modern Neovim)
+  " ============================================================
+  highlight @markup.heading.1.markdown guifg=#f0c674 gui=bold
+  highlight @markup.heading.2.markdown guifg=#e5b567 gui=bold
+  highlight @markup.heading.3.markdown guifg=#d9a95f gui=bold
+  highlight @markup.heading.4.markdown guifg=#c99657 gui=bold
+  highlight @markup.heading.5.markdown guifg=#b8844d gui=bold
+  highlight @markup.heading.6.markdown guifg=#9f6f42 gui=bold
+
+  highlight @markup.strong.markdown guifg=#ffe4a3 gui=bold
+  highlight @markup.italic.markdown guifg=#d9c8a3 gui=italic
+  highlight @markup.strikethrough.markdown guifg=#7c6a58 gui=strikethrough
+
+  highlight @markup.link.label.markdown guifg=#d8b25f gui=underline
+  highlight @markup.link.url.markdown guifg=#7fcf9f gui=underline
+
+  highlight @markup.list.markdown guifg=#ff8f5a gui=bold
+  highlight @markup.quote.markdown guifg=#9e8563 gui=italic
+
+  highlight @markup.raw.markdown guifg=#b8ff9f guibg=#112017
+  highlight @markup.raw.block.markdown guifg=#b8ff9f guibg=#112017
+
+  " ============================================================
+  " Markdown borders feeling via floating windows
+  " ============================================================
+  highlight FloatBorder   guifg=#5e4a38 guibg=#16110d
+  highlight NormalFloat   guifg=#e8dcc3 guibg=#1a140f
 ]])
 
 -- vim.fn.stdpath("data") - returns a directory where Neovim stores data
