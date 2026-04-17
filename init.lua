@@ -1,21 +1,20 @@
 -- A Lua script that runs every time Neovim starts
--- Lua is a programming language, like python:
+-- Lua is a programming language, like python
 
--- Включает поддержку мыши во всех режимах Neovim.
--- Можно кликать, выделять, скроллить.
+-- Enable mouse
+-- Click, mark, scroll
 vim.opt.mouse = "a"
 
--- Говорит Neovim использовать системный clipboard macOS.
--- "unnamedplus" = регистр +, то есть общий clipboard системы.
--- После этого "+y и "+p работают с системным буфером.
+-- Use system clipboard
 vim.opt.clipboard = "unnamedplus"
 
--- Включает true color в терминале.
--- Нужен для нормальных современных цветов и тем.
+-- Enable true color
 vim.opt.termguicolors = true
 
+-- <leader> is a special prefix key you define to create your own shortcuts
 vim.g.mapleader = " "
 
+-- Custom colorscheme
 -- Vault27-style retro amber theme for terminal Markdown writing
 vim.cmd([[
   " Main editor background and text
@@ -115,14 +114,6 @@ require("lazy").setup({
     end,
   },
 })
-vim.opt.clipboard = "unnamedplus"
-
--- $VIMRUNTIME/example_init.lua
-
--- Set <space> as the leader key
--- See `:h mapleader`
--- NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
-vim.g.mapleader = ' '
 
 -- OPTIONS
 --
