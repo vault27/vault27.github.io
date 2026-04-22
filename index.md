@@ -12,10 +12,10 @@ vault-27> STATUS: OPERATIONAL
 
 # show index
 
-- [Complete Network & Security Knowledge Map](/knowledge.md)
+- [Complete Network Engineer Knowledge Map](/knowledge.md)
 - [OSI model](/osi.html) 
 - [Packet Forwarding](/forwarding.html)
-- [Routing concepts/](/routing.html)
+- [Routing concepts](/routing.html)
 - [IPSec](/ipsec.html)
 - [Evolution of Authentication Protocols](/auth.html)
 - [EAP](/eap.html)
