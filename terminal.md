@@ -64,3 +64,34 @@ Early CRT limitations:
 
 - Copy text to system clipboard: press 3 keys one by one: "+y
 
+
+## Midnight Commander
+
+- Configure file assosiations the same as in finder
+- `/Users/Philipp.Philippov/.config/mc`
+- Delete eveything
+- Add the following:
+
+```
+[Default]
+Open=(open %f &)
+```
+
+## Launch neovim from midnight commander on Mac OS
+
+- Launch Automator app
+- Create a new app - Run Shell Script
+
+```
+for f in "$@"; do
+  osascript -e "
+  tell application \"iTerm2\"
+    activate
+    tell current window
+      create tab with default profile command \"/opt/homebrew/bin/nvim \\\"$f\\\"\"
+    end tell
+  end tell"
+done
+```
+
+- When you press enter on .md file in mc file will be opened `in a new tab` in iTerm in Neovim
