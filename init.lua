@@ -180,14 +180,14 @@ require("lazy").setup({
     require("transparent").setup()
   end,
   },
-  
+  -- Table of contents generateor, command :Mtoc will generate TOC, it will be updated after each save
   {
     "hedyhli/markdown-toc.nvim",
-    ft = "markdown", -- Загружать только для markdown файлов
+    ft = "markdown", -- Use only for markdown files
     opts = {
-      -- Настройки (можно оставить пустыми {})
-      unidiff = false, -- Показывать изменения в отдельном окне (false = сразу в файле)
-      cycle_max_level = 3, -- До какого уровня заголовков сканировать (по умолчанию до конца)
+      -- Options (We can leave blank {})
+      unidiff = false, -- Show changes in separate window (false = in file)
+      cycle_max_level = 6, -- Level to scan (till the end by default)
     },
   },
 
