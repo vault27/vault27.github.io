@@ -94,4 +94,6 @@ for f in "$@"; do
 done
 ```
 
-- When you press enter on .md file in mc file will be opened `in a new tab` in iTerm in Neovim
+- Save it as a new application
+- Assosiate this new app with .md files
+- When you press enter on .md file in mc, file will be opened `in a new tab` in iTerm in Neovim
