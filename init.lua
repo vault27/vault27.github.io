@@ -180,6 +180,16 @@ require("lazy").setup({
     require("transparent").setup()
   end,
   },
+  
+  {
+    "hedyhli/markdown-toc.nvim",
+    ft = "markdown", -- Загружать только для markdown файлов
+    opts = {
+      -- Настройки (можно оставить пустыми {})
+      unidiff = false, -- Показывать изменения в отдельном окне (false = сразу в файле)
+      cycle_max_level = 3, -- До какого уровня заголовков сканировать (по умолчанию до конца)
+    },
+  },
 
   {
     -- Treesitter для современной подсветки синтаксиса

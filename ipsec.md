@@ -1,56 +1,52 @@
-#### show IPSec protocol details<!-- omit from toc -->
+#### show IPSec protocol details<!-- omit in toc -->
 
-## Table of contents<!-- omit from toc -->
+3 Key management protocols
 
-- [1 Introduction](#1-introduction)
-- [2 IPSec Terms](#2-ipsec-terms)
-  - [2.1 SPI](#21-spi)
-  - [2.2 SA](#22-sa)
-    - [2.3.1 Control tunnel - IKE SA - ISAKMP SA](#231-control-tunnel---ike-sa---isakmp-sa)
-    - [2.3.2 Data tunnel - IPSec SA](#232-data-tunnel---ipsec-sa)
-    - [2.3.3 Manual and Dynamic SAs](#233-manual-and-dynamic-sas)
-  - [2.3 Transform set](#23-transform-set)
-  - [2.4 Traffic Selectors](#24-traffic-selectors)
-  - [2.5 Vendor IDs](#25-vendor-ids)
-  - [2.6 IKE identity](#26-ike-identity)
-- [3 IPSec databases](#3-ipsec-databases)
-  - [SPD — Security Policy Database](#spd--security-policy-database)
-  - [SAD — Security Association Database](#sad--security-association-database)
-  - [PAD — Peer Authorization Database](#pad--peer-authorization-database)
-  - [Full Processing Flow](#full-processing-flow)
-- [3 Key management protocols](#3-key-management-protocols)
-  - [3.1 IKE v1](#31-ike-v1)
-    - [3.1.1 Workflow](#311-workflow)
-    - [3.1.2 Phase 1](#312-phase-1)
-    - [3.1.3 Main Mode](#313-main-mode)
-    - [3.1.4 Aggressive Mode](#314-aggressive-mode)
-    - [3.1.5 Phase 2](#315-phase-2)
-    - [3.1.6 Xauth](#316-xauth)
-    - [3.1.7 Mode-Config Phase](#317-mode-config-phase)
-    - [3.1.8 Keepalives](#318-keepalives)
-    - [3.1.9 DPD](#319-dpd)
-    - [3.1.10 NAT-T](#3110-nat-t)
-  - [3.2 IKEv2](#32-ikev2)
-    - [3.2.1 IKEv2 PSK](#321-ikev2-psk)
-    - [3.2.2 IKEv2 Certificates](#322-ikev2-certificates)
-    - [3.2.3 EAP](#323-eap)
-- [4 Authentication scenarios](#4-authentication-scenarios)
-- [6 IKE Security](#6-ike-security)
-- [7 IPSec protocols](#7-ipsec-protocols)
-  - [7.1 ESP](#71-esp)
-    - [7.1.1 Transport Mode](#711-transport-mode)
-    - [7.1.2 Tunnel mode](#712-tunnel-mode)
-  - [7.2 AH](#72-ah)
-- [8 L2TP over IPSec](#8-l2tp-over-ipsec)
-- [9 GRE over IPSec](#9-gre-over-ipsec)
-- [10 IPSec tunnels and MTU](#10-ipsec-tunnels-and-mtu)
-- [10 Configuration - Cisco](#10-configuration---cisco)
-  - [10.1 IPSec + VTI + IKEv2 example](#101-ipsec--vti--ikev2-example)
-  - [10.2 IPSec with GRE via Crypto Map](#102-ipsec-with-gre-via-crypto-map)
-  - [10.3 IPSec with Crypto Map](#103-ipsec-with-crypto-map)
-  - [10.4 IPSec + GRE - IPSec profile](#104-ipsec--gre---ipsec-profile)
-- [12 Design](#12-design)
+## Table of contents<!-- omit in toc -->
 
+<!-- mtoc-start -->
+
+* [1 Introduction](#1-introduction)
+* [2 IPSec Terms](#2-ipsec-terms)
+  * [2.1 SPI](#21-spi)
+  * [2.2 SA](#22-sa)
+    * [2.3.1 Control tunnel - IKE SA - ISAKMP SA](#231-control-tunnel---ike-sa---isakmp-sa)
+    * [2.3.2 Data tunnel - IPSec SA ](#232-data-tunnel---ipsec-sa-)
+    * [2.3.3 Manual and Dynamic SAs](#233-manual-and-dynamic-sas)
+  * [2.3 Transform set](#23-transform-set)
+  * [2.4 Traffic Selectors](#24-traffic-selectors)
+  * [2.5 Vendor IDs](#25-vendor-ids)
+  * [2.6 IKE identity](#26-ike-identity)
+* [3 IPSec databases](#3-ipsec-databases)
+  * [SPD — Security Policy Database ](#spd--security-policy-database-)
+  * [SAD — Security Association Database](#sad--security-association-database)
+  * [PAD — Peer Authorization Database](#pad--peer-authorization-database)
+  * [Full Processing Flow](#full-processing-flow)
+* [3 Key management protocols](#3-key-management-protocols)
+  * [3.1 IKE v1](#31-ike-v1)
+    * [3.1.1 Workflow](#311-workflow)
+    * [3.1.2 Phase 1](#312-phase-1)
+    * [3.1.3 Main Mode](#313-main-mode)
+    * [3.1.4 Aggressive Mode](#314-aggressive-mode)
+    * [3.1.5 Phase 2](#315-phase-2)
+    * [3.1.6 Xauth](#316-xauth)
+    * [3.1.7 Mode-Config Phase](#317-mode-config-phase)
+    * [3.1.8 Keepalives](#318-keepalives)
+    * [3.1.9 DPD](#319-dpd)
+    * [3.1.10 NAT-T](#3110-nat-t)
+  * [3.2 IKEv2](#32-ikev2)
+    * [3.2.1 IKEv2 PSK](#321-ikev2-psk)
+    * [3.2.2 IKEv2 Certificates](#322-ikev2-certificates)
+    * [3.2.3 EAP](#323-eap)
+* [4 Authentication scenarios](#4-authentication-scenarios)
+* [6 IKE Security](#6-ike-security)
+* [7 IPSec protocols](#7-ipsec-protocols)
+  * [7.1 ESP](#71-esp)
+    * [7.1.1 Transport Mode](#711-transport-mode)
+    * [7.1.2 Tunnel mode](#712-tunnel-mode)
+  * [7.2 AH](#72-ah)
+
+<!-- mtoc-end -->
 
 ## 1 Introduction
 
@@ -440,37 +436,38 @@ IKE SA
 └── State
 ```
 
-- Phase 1 SA as a logical object on router includes the following: 
-    - Peer identification
-        - Remote peer IP address (or FQDN)
-        - Local interface / local IP used
-        - Negotiated IKE identity (IP, FQDN, DN, etc.)
-    - Negotiated cryptographic parameters - Result of the accepted proposal + transforms
-        - Encryption algorithm (e.g. AES-CBC)
-        - Hash / integrity algorithm (e.g. SHA-1 / SHA-256)
-        - Authentication method (PSK, RSA signatures, etc.)
-        - Diffie-Hellman group
-    - SA lifetime (time and/or rekey margin)
-    - `These parameters are fixed for the lifetime of the IKE SA`
-    - Keying material (derived, not negotiated) - Derived encryption & integrity keys for IKE messages
-    - `Keys are never sent, only derived via DH + nonces`
-    - SPI values
-        - Initiator SPI
-        - Responder SPI
-    - `These uniquely identify the IKE SA in both directions`
-    - State information
-        - IKE state (MM_ACTIVE, QM_IDLE, ESTABLISHED, etc.)
-        - Mode used (Main Mode / Aggressive Mode)
-        - Exchange progress markers
-    - Timers and counters
-        - SA creation time
-        - Remaining lifetime
-        - Rekey timers
-        - Message counters / retransmission state
-    - Authentication data (cached result)
-        - Peer authenticated successfully (yes/no)
-        - Identity matched PSK or certificate
-    - Relationship to Phase 2
+**Phase 1 SA as a logical object on router includes the following:**
+
+- Peer identification
+    - Remote peer IP address (or FQDN)
+    - Local interface / local IP used
+    - Negotiated IKE identity (IP, FQDN, DN, etc.)
+- Negotiated cryptographic parameters - Result of the accepted proposal + transforms
+    - Encryption algorithm (e.g. AES-CBC)
+    - Hash / integrity algorithm (e.g. SHA-1 / SHA-256)
+    - Authentication method (PSK, RSA signatures, etc.)
+    - Diffie-Hellman group
+- SA lifetime (time and/or rekey margin)
+- `These parameters are fixed for the lifetime of the IKE SA`
+- Keying material (derived, not negotiated) - Derived encryption & integrity keys for IKE messages
+- `Keys are never sent, only derived via DH + nonces`
+- SPI values
+    - Initiator SPI
+    - Responder SPI
+- `These uniquely identify the IKE SA in both directions`
+- State information
+    - IKE state (MM_ACTIVE, QM_IDLE, ESTABLISHED, etc.)
+    - Mode used (Main Mode / Aggressive Mode)
+    - Exchange progress markers
+- Timers and counters
+    - SA creation time
+    - Remaining lifetime
+    - Rekey timers
+    - Message counters / retransmission state
+- Authentication data (cached result)
+    - Peer authenticated successfully (yes/no)
+    - Identity matched PSK or certificate
+- Relationship to Phase 2
 
 **Example of SA phase 1 IKEv1 as a logical object**  
 
@@ -743,7 +740,7 @@ Vendor ID
 
 - When the responder receives the initiator’s ID, it verifies that the ID matches the configuration
 - Using this ID, the responder selects the correct authentication data (PSK or certificate) and applies the appropriate authorization policy
-- In both IKEv1 and IKEv2, cryptographic proposals `are not` selected based on the IKE ID
+- In both IKEv1 and IKEv2, cryptographic proposals `are not` selected based on the IKE ID - IP address is used to choose SA
 - In IKEv2 IP address is not used for PSK selection
 - In IKEv1 main mode with PSK IP address is used for selecting PSK, because the responder does not know the peer ID early, ID is sent after PSK
 - In IKEv1 aggressive mode with PSK ID is sent early and in cleartext, Responder can choose PSK based on ID
@@ -754,7 +751,7 @@ Vendor ID
 **IKE Identity in Site-to-Site VPNs**
 
 - IKE identity is configured manually on both Peers for Site-to-Site VPNs if PSK is used, and if Certificate-based → identity derived from cert
-- We configure local Identity-what to send to remote Peer, and remote Idenity-what to expect from remote peer
+- We configure local Identity - what to send to remote Peer, and remote Idenity - what to expect from remote peer
 - If Identity mismatch - `Authentication and Phase 1 will fail` 
 - It must match the peer’s expectations
 
@@ -786,8 +783,8 @@ Vendor ID
 
 ## 3 IPSec databases
 
-- 3 databases in IPSec: `SPD → SAD → PAD`
-- 
+3 databases in IPSec: `SPD → SAD → PAD`
+
 ### SPD — Security Policy Database 
 
 - What to do with traffic?
