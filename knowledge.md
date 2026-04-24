@@ -21,23 +21,17 @@ Transceivers, patch panels, cabling
 Ethernet (802.3)
 MAC addressing
 ARP / Gratuitous ARP
-
 VLAN (802.1Q)
 Q-in-Q (802.1ad)
 Private VLAN (PVLAN)
-
 STP (802.1D)
 RSTP (802.1w)
 MSTP (802.1s)
-
 LACP (802.1AX)
 EtherChannel
-
 LLDP / CDP
-
 Bridging / Switching (CAM tables)
 Port Security
-
 FHRP:
   HSRP
   VRRP
@@ -50,10 +44,8 @@ FHRP:
 VXLAN
 EVPN (BGP EVPN)
 VTEP
-
 Cisco ACI (concepts)
 Spine-Leaf architecture
-
 vPC / MLAG
 
 ---------------------------------------------------------------------
@@ -62,29 +54,23 @@ vPC / MLAG
 ---------------------------------------------------------------------
 IPv4
 IPv6
-
 ICMP / ICMPv6
 ARP / ND (Neighbor Discovery)
-
 Routing fundamentals:
   Static Routing
   Policy-Based Routing (PBR)
-
 IGP:
   OSPF
   IS-IS
   EIGRP
-
 EGP:
   BGP (iBGP / eBGP)
   Route Reflectors
   Confederations
-
 Multicast:
   IGMP
   PIM (SM/DM/SSM)
   RP (Rendezvous Point)
-
 NAT:
   SNAT / DNAT
   PAT
@@ -99,18 +85,14 @@ MPLS:
   RSVP-TE
   Segment Routing (SR-MPLS)
   SRv6
-
 VPN:
   L2VPN (VPWS, VPLS)
   L3VPN (MPLS VPN, VRF)
-
 Traffic Engineering
-
 QoS:
   Classification / Marking (DSCP, CoS)
   Policing / Shaping
   Queuing (CBWFQ, LLQ)
-
 Carrier-grade NAT (CGNAT)
 
 ---------------------------------------------------------------------
