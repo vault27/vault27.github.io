@@ -9,6 +9,9 @@
 - IBM Plex Mono
 - White Rabbit
 - Terminus
+- Fira Code
+- Manifold Extended CF - from Severance
+- Input Sans - from Severance
 
 ## Color Schemes
 
