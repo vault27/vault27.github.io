@@ -18,33 +18,42 @@
   * [2.5 Vendor IDs](#25-vendor-ids)
   * [2.6 IKE identity](#26-ike-identity)
 * [3 IPSec databases](#3-ipsec-databases)
-  * [SPD — Security Policy Database ](#spd--security-policy-database-)
-  * [SAD — Security Association Database](#sad--security-association-database)
-  * [PAD — Peer Authorization Database](#pad--peer-authorization-database)
-  * [Full Processing Flow](#full-processing-flow)
-* [3 Key management protocols](#3-key-management-protocols)
-  * [3.1 IKE v1](#31-ike-v1)
-    * [3.1.1 Workflow](#311-workflow)
-    * [3.1.2 Phase 1](#312-phase-1)
-    * [3.1.3 Main Mode](#313-main-mode)
-    * [3.1.4 Aggressive Mode](#314-aggressive-mode)
-    * [3.1.5 Phase 2](#315-phase-2)
-    * [3.1.6 Xauth](#316-xauth)
-    * [3.1.7 Mode-Config Phase](#317-mode-config-phase)
-    * [3.1.8 Keepalives](#318-keepalives)
-    * [3.1.9 DPD](#319-dpd)
-    * [3.1.10 NAT-T](#3110-nat-t)
-  * [3.2 IKEv2](#32-ikev2)
-    * [3.2.1 IKEv2 PSK](#321-ikev2-psk)
-    * [3.2.2 IKEv2 Certificates](#322-ikev2-certificates)
-    * [3.2.3 EAP](#323-eap)
-* [4 Authentication scenarios](#4-authentication-scenarios)
+  * [3.1 SPD — Security Policy Database ](#31-spd--security-policy-database-)
+  * [3.2 SAD — Security Association Database](#32-sad--security-association-database)
+  * [3.3 PAD — Peer Authorization Database](#33-pad--peer-authorization-database)
+  * [3.4 Full Processing Flow](#34-full-processing-flow)
+* [4 Key management protocols](#4-key-management-protocols)
+  * [4.1 IKE v1](#41-ike-v1)
+    * [4.1.1 Workflow](#411-workflow)
+    * [4.1.2 Phase 1](#412-phase-1)
+    * [4.1.3 Main Mode](#413-main-mode)
+    * [4.1.4 Aggressive Mode](#414-aggressive-mode)
+    * [4.1.5 Phase 2](#415-phase-2)
+    * [4.1.6 Xauth](#416-xauth)
+    * [4.1.7 Mode-Config Phase](#417-mode-config-phase)
+    * [4.1.8 Keepalives](#418-keepalives)
+    * [4.1.9 DPD](#419-dpd)
+    * [4.1.10 NAT-T](#4110-nat-t)
+  * [4.2 IKEv2](#42-ikev2)
+    * [4.2.1 IKEv2 PSK](#421-ikev2-psk)
+    * [4.2.2 IKEv2 Certificates](#422-ikev2-certificates)
+    * [4.2.3 EAP](#423-eap)
+* [5 Authentication scenarios](#5-authentication-scenarios)
 * [6 IKE Security](#6-ike-security)
 * [7 IPSec protocols](#7-ipsec-protocols)
   * [7.1 ESP](#71-esp)
     * [7.1.1 Transport Mode](#711-transport-mode)
     * [7.1.2 Tunnel mode](#712-tunnel-mode)
   * [7.2 AH](#72-ah)
+* [8 L2TP over IPSec](#8-l2tp-over-ipsec)
+* [9 GRE over IPSec](#9-gre-over-ipsec)
+* [10 IPSec tunnels and MTU](#10-ipsec-tunnels-and-mtu)
+* [11 Configuration - Cisco](#11-configuration---cisco)
+  * [11.1 IPSec + VTI + IKEv2 example](#111-ipsec--vti--ikev2-example)
+  * [11.2 IPSec with GRE via Crypto Map](#112-ipsec-with-gre-via-crypto-map)
+  * [11.3 IPSec with Crypto Map](#113-ipsec-with-crypto-map)
+  * [11.4 IPSec + GRE - IPSec profile](#114-ipsec--gre---ipsec-profile)
+* [12 Design](#12-design)
 
 <!-- mtoc-end -->
 
@@ -283,7 +292,7 @@ IPsec Ecosystem
 ```
 
 ## 2 IPSec Terms
-  
+
 IPSec has several terms, which are used everywhere in protocol descriptions. These terms are:
 
 - SPI
@@ -785,7 +794,7 @@ Vendor ID
 
 3 databases in IPSec: `SPD → SAD → PAD`
 
-### SPD — Security Policy Database 
+### 3.1 SPD — Security Policy Database 
 
 - What to do with traffic?
 - SPD exampled in Cisco: crypto ACL
@@ -815,7 +824,7 @@ Inbound:
   After decrypt → SPD check
 ```
 
-### SAD — Security Association Database
+### 3.2 SAD — Security Association Database
 
 - SA options: keys, algorithms, SPIs
 - `SAD entry ← indexed by SPI`
@@ -844,7 +853,7 @@ Inbound:
   SPI → SAD → SA → decrypt
 ```
 
-### PAD — Peer Authorization Database
+### 3.3 PAD — Peer Authorization Database
 
 - Who has rights to establish IPSec sessions with us
 - No exactly PAD table in Cisco, but close: `crypto isakmp key MySecretKey address 203.0.113.1 `
@@ -866,7 +875,7 @@ allowed identities:
   - Certificates
   - PSK
 
-### Full Processing Flow
+### 3.4 Full Processing Flow
 
 ```
 OUTBOUND:
@@ -897,9 +906,9 @@ INBOUND:
 [Forward]
 ```
 
-## 3 Key management protocols
+## 4 Key management protocols
 
-### 3.1 IKE v1
+### 4.1 IKE v1
 
 - IKEv1 was designed by the IETF IPsec work group in the mid-1990s and standardized in 1998 as RFC 2409
 - First appeared in Research & open-source Unix IPsec stacks, then in Cisco IOS, Checkpoint, Juniper
@@ -927,7 +936,7 @@ INBOUND:
 - The responder replies. This role is independent of who sends actual data over ESP later
 - PFS in IKEv1 = `Perform a new DH exchange during Phase 2`. It does not mean “ephemeral DH” in the modern TLS sense
 
-#### 3.1.1 Workflow
+#### 4.1.1 Workflow
 
 - IKE Phase 1 — Establish a secure channel (IKE SA) - starts with UDP/500, may switch to UDP/4500
     - `Main mode` - 6 messages
@@ -950,7 +959,7 @@ INBOUND:
     - Transform sets - negotiate crypto parametres
 - ESP/AH encapsulation — Actual data traffic encryption/authentication using the negotiated keys - IP/50(ESP) or UDP/4500 or IP/51(AH) - Destination SPI is in header
 
-#### 3.1.2 Phase 1
+#### 4.1.2 Phase 1
 
 **Concepts**
 
@@ -979,7 +988,7 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - main mode(6 messages)  
 - aggressive mode(3 messages) 
 
-#### 3.1.3 Main Mode
+#### 4.1.3 Main Mode
 
 - `6 messages`
 - IKE Identities and Authentication Hash are protected and sent encrypted only > no one can see it
@@ -1266,7 +1275,7 @@ Responder logic:
 6. Accept peer
 ```
 
-#### 3.1.4 Aggressive Mode
+#### 4.1.4 Aggressive Mode
 
 - `3 messages instead of 6 in Main Mode`
 - Aggressive mode was created to reduce load on links and CPU
@@ -1550,7 +1559,7 @@ After PSK compromise, attacker can:
   - Credential harvesting
   - MFA fatigue (later setups)
 
-#### 3.1.5 Phase 2
+#### 4.1.5 Phase 2
 
 - There is only one mode - `quick` in Phase 2, `3 packets`
 - It’s called Quick Mode because IKEv1 Phase 2 is deliberately short, lightweight, and fast compared to Phase 1 — both in message count and in cryptographic work: no identity, no DH exchange, only 3 messages
@@ -1659,7 +1668,7 @@ Encrypted Payloads (inside IKE SA):
 - ESP traffic starting immediately after them
 - UDP/500 or 4500
 
-#### 3.1.6 Xauth
+#### 4.1.6 Xauth
 
 - XAuth (Extended Authentication) is an optional extra authentication step used only with IKEv1, mainly to authenticate individual users (not just devices)
 - XAuth is an extension to IKEv1 Phase 1, and it happens `after Phase 1 but before Phase 2`
@@ -1673,14 +1682,14 @@ Encrypted Payloads (inside IKE SA):
 - If successful → proceed to Phase 2 (Quick Mode) to negotiate IPsec SAs
 - `IKEv2 replaced XAuth with EAP` (Extensible Authentication Protocol) for user-level auth
 
-#### 3.1.7 Mode-Config Phase
+#### 4.1.7 Mode-Config Phase
 
 - Assign IP, DNS, WINS, Split tunnel
 - `Happens after XAuth`
 - Not used in IKEv2
 - In IKEv2 it is called Configuration Payloads (CP) inside the IKE_AUTH exchange
 
-#### 3.1.8 Keepalives
+#### 4.1.8 Keepalives
 
 - There is no single, clean, mandatory mechanism
 - Two kinds of “keepalives” in IKEv1
@@ -1688,7 +1697,7 @@ Encrypted Payloads (inside IKE SA):
   - DPD / liveness checks (often incorrectly called keepalives)
 - No automatic keepalives at all in pure IKEv1 without NAT-T and without DPD
 
-#### 3.1.9 DPD
+#### 4.1.9 DPD
 
 - Dead Peer Detection
 - Detect dead peers
@@ -1729,7 +1738,7 @@ ISAKMP: INFORMATIONAL, DPD Reply
     Payloads: NONE
 ```
 
-#### 3.1.10 NAT-T
+#### 4.1.10 NAT-T
 
 ```
 +----------------+-----------+-------------+------------+------------------------+---------+-------------+----------+
@@ -1787,7 +1796,7 @@ If only ONE peer supports NAT-T
 - Traffic stays UDP/500 + ESP
 - Tunnel will fail if a real NAT is present
 
-### 3.2 IKEv2
+### 4.2 IKEv2
 
 - `IKEv2 achieves Main-Mode-level security with Aggressive-Mode-level efficiency`
 - `4 messages instead of 6 or 9 in IKEv1`
@@ -1862,7 +1871,7 @@ Initiator > CREATE_CHILD_SA > Responder - Optional
 Responder > CREATE_CHILD_SA > Initiator - Optional
 ```
 
-#### 3.2.1 IKEv2 PSK
+#### 4.2.1 IKEv2 PSK
 
 **Packet 1 - INIT_SA**  
 
@@ -2140,7 +2149,7 @@ Encrypted and Authenticated
   Integrity Checksum: verified
 ```
 
-#### 3.2.2 IKEv2 Certificates
+#### 4.2.2 IKEv2 Certificates
 
 - Certs auth is more secure then PSK
 - Certs completely kill offline cracking
@@ -2300,7 +2309,7 @@ Exactly the same data for PSK and certs:
 
 `None of that appears in packets`
 
-#### 3.2.3 EAP
+#### 4.2.3 EAP
 
 - EAP allows to use additional authentication in addition to PSK or Certs: username/password or additional cert
 - Used for RA VPN
@@ -2723,7 +2732,7 @@ Encrypted and Authenticated Payload
   Integrity Checksum: verified 
 ```
 
-## 4 Authentication scenarios
+## 5 Authentication scenarios
 
 **SITE-TO-SITE (S2S) VPN — AUTHENTICATION FLOWS**
 
@@ -3105,7 +3114,7 @@ Outer IP | AH Header | Inner IP | TCP/UDP | Data
 |   Application Data        |
 +---------------------------+
 
-``
+```
 
 **Processing Order (Receiver)**
 
@@ -3343,7 +3352,7 @@ What this does:
 - Client sees the smaller MSS, and all future TCP segments are small enough to fit inside the IPsec tunnel without fragmentation
 - Works even if clients don’t know the real MTU of the tunnel
 
-## 10 Configuration - Cisco
+## 11 Configuration - Cisco
 
 Three possible ways to configure IPSec tunnel on Cisco Routers:
 
@@ -3380,7 +3389,7 @@ Three possible ways to configure IPSec tunnel on Cisco Routers:
 - They are commonly misconfigured
 - Consume excessive amount of TCAM
 
-### 10.1 IPSec + VTI + IKEv2 example
+### 11.1 IPSec + VTI + IKEv2 example
 
 `Tunnel` (vrf, bandwidth, ip, mss, mtu, load interval, bfd, source, mode, path mtu discovery, destination, **ipsec profile**) > `ipsec profile` (idle, **transform-set**, pfs group, **ike-v2-profile**) > `ike-v2-profile` (identity, authentication, **keyring**, lifetime, dpd), `transform set`(encryption, hash, mode) > `keyring` (address, key)  
   
@@ -3486,7 +3495,7 @@ crypto ikev2 proposal CorpIPSEC-ikev2-proposal
  group 19 14 5 2
 ```
 
-### 10.2 IPSec with GRE via Crypto Map
+### 11.2 IPSec with GRE via Crypto Map
 
 IKEv1 - Can be IKEv2
 
@@ -3500,7 +3509,7 @@ GRE Tunnel
             └─ Keyring / PSK
 ```
 
-### 10.3 IPSec with Crypto Map
+### 11.3 IPSec with Crypto Map
 
 IKEv1 - Can be IKEv2
 
@@ -3514,7 +3523,7 @@ Interface
             └─ Keyring / PSK
 ```
 
-### 10.4 IPSec + GRE - IPSec profile
+### 11.4 IPSec + GRE - IPSec profile
 
 IKEv2 - can be IKEv1
 
