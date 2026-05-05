@@ -108,6 +108,100 @@ Key exchange algorithms:
 
 ### DH algorithm
 
+```
+┌──────────────────────────────────────────────┐
+│         DIFFIE–HELLMAN KEY EXCHANGE          │
+├──────────────────────────────────────────────┤
+│                                              │
+│ [1] Negotiate DH method                      │
+│                                              │
+│  MODP = Modular Exponentiation over          │
+│         finite field                         │
+│  ECDH = Elliptic Curve Diffie–Hellman        │
+│                                              │
+├──────────────────────────────────────────────┤
+│                                              │
+│ [2] Agree on DH group (math parameters)      │
+│                                              │
+│  MODP:                                       │
+│    p = large prime modulus                   │
+│    g = generator (base value)                │
+│                                              │
+│  ECDH:                                       │
+│    curve = predefined elliptic curve         │
+│    G     = base point on curve               │
+│                                              │
+├──────────────────────────────────────────────┤
+│                                              │
+│ [3] Generate private values                  │
+│                                              │
+│    Initiator: x                              │
+│    Responder: y                              │
+│                                              │
+├──────────────────────────────────────────────┤
+│                                              │
+│ [4] Compute public values                    │
+│                                              │
+│  MODP:                                       │
+│    Initiator: g^x mod p                      │
+│    Responder: g^y mod p                      │
+│                                              │
+│  ECDH:                                       │
+│    Initiator: x·G (scalar multiplication)    │
+│    Responder: y·G                            │
+│                                              │
+├──────────────────────────────────────────────┤
+│                                              │
+│ [5] Exchange public values (KE payload)      │
+│                                              │
+│    KEi = initiator public value              │
+│    KEr = responder public value              │
+│                                              │
+│    KEi ───────────────▶                      │
+│    KEr ◀───────────────                      │
+│                                              │
+├──────────────────────────────────────────────┤
+│                                              │
+│ [6] Compute shared secret                    │
+│                                              │
+│  MODP:                                       │
+│    Initiator: (g^y)^x mod p                  │
+│    Responder: (g^x)^y mod p                  │
+│                                              │
+│    both sides compute: g^(x·y) mod p         │
+│                                              │
+│  ECDH:                                       │
+│    Initiator: x·(y·G)                        │
+│    Responder: y·(x·G)                        │
+│                                              │
+│    both sides compute same EC point          │
+│                                              │
+├──────────────────────────────────────────────┤
+│                                              │
+│ [7] Key Derivation Function (KDF)            │
+│                                              │
+│  Input material:                             │
+│    shared secret                             │
+│    + nonces (Ni, Nr = random values          │
+│                from both peers)              │
+│    + context (SPI, identities, protocol data)│
+│                                              │
+│  KDF types used in IKE:                      │
+│    PRF-based (HMAC-SHA1 / SHA256)            │
+│    IKEv2 PRF+ expansion                      │
+│                                              │
+│              ↓                               │
+│                                              │
+│  Output:                                     │
+│    encryption keys                           │
+│    integrity keys                            │
+│    authentication keys                       │
+│                                              │
+└──────────────────────────────────────────────┘
+```
+
+
+
 - 1976 - first key exchange algorithm invented
 - RFC 3526: Predefined Groups (Modular Arithmetic) - old
 - Finite-Field Diffie-Hellman (FFDHE) is essentially a modular-based Diffie-Hellman method, but with a slight difference in terminology to emphasize that the arithmetic is performed within a finite field
