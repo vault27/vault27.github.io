@@ -126,10 +126,12 @@ Order of operations:
 - Compute Public Keys
 - Exchnage public keys
 - Compute shared secret: Alice uses Bob's public key and her own private key to calculate a shared secret
+- Shared secret - just a big number - the same on both nodes
+- `Shared secret /= shared key`
 - Symmetric Key Derivation: The calculated shared secret is then used to derive a new, symmetric key, often using a key derivation function (KDF). This derived key is then used for symmetric encryption and decryption of subsequent communications
 - The same order for ECDH, but different math
 
-Why we need Symmetric Key Derivation?
+**Why we need Symmetric Key Derivation?**
 
 - Shared secret is not enough
 - Not uniformly random
