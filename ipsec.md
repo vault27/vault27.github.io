@@ -26,9 +26,9 @@
   * [4.1 IKE v1](#41-ike-v1)
     * [4.1.1 Workflow](#411-workflow)
     * [4.1.2 Phase 1](#412-phase-1)
-    * [4.1.3 Main Mode](#413-main-mode)
-    * [4.1.4 Aggressive Mode](#414-aggressive-mode)
-    * [4.1.5 Phase 2](#415-phase-2)
+    * [4.1.2.1 Main Mode](#4121-main-mode)
+    * [4.1.2.2 Aggressive Mode](#4122-aggressive-mode)
+    * [4.1.3 Phase 2](#413-phase-2)
     * [4.1.6 Xauth](#416-xauth)
     * [4.1.7 Mode-Config Phase](#417-mode-config-phase)
     * [4.1.8 Keepalives](#418-keepalives)
@@ -910,9 +910,15 @@ INBOUND:
 
 ### 4.1 IKE v1
 
+**Terms**
+
+- g^xi and g^xr are the Diffie-Hellman ([DH]) public values of the initiator and responder respectively
+- g^xy is the Diffie-Hellman shared secret
+- KE is the key exchange payload which contains the public information exchanged in a Diffie-Hellman exchange: 
+
 - IKEv1 was designed by the IETF IPsec work group in the mid-1990s and standardized in 1998 as RFC 2409
 - First appeared in Research & open-source Unix IPsec stacks, then in Cisco IOS, Checkpoint, Juniper
-- IKE v1 goals: 
+- IKE v1 goals:
     - Authenticate peers
     - Negotiate cryptographic parameters
     - Establish shared secret keys
@@ -947,8 +953,8 @@ INBOUND:
     - NAT-T negotiation
     - DPD negotiation
     - IKE SA - one for inbound and outbound - IKE SA is bidirectional
-    - Local SPI → The SPI that your router uses when sending ISAKMP messages
-    - Remote SPI → The SPI your router expects in incoming ISAKMP messages from the peer
+    - Local SPI - The SPI that your router uses when sending ISAKMP messages
+    - Remote SPI - The SPI your router expects in incoming ISAKMP messages from the peer
 - XAuth
 - Config mode
 - IKE Phase 2 — Negotiate IPsec SAs (ESP or AH) - `Quick mode` - UDP/500 or UDP4500
@@ -979,28 +985,27 @@ INBOUND:
 - Authentication - Preshared Keys or certificates
 - Group - Diffie Helman group - algorithm which is used to establish shared secret keys
 - Encryption
-- Lifetime - 24 hours default - don't have to match  
-   
+- Lifetime - 24 hours default - don't have to match
+
 To easy remember this we can use first letters of these parametres: `HAGEL`
 
 **IKE Phase 1 can be established via**
 
-- main mode(6 messages)  
-- aggressive mode(3 messages) 
+- main mode(6 messages)
+- aggressive mode(3 messages)
 
-#### 4.1.3 Main Mode
+#### 4.1.2.1 Main Mode
 
 - `6 messages`
 - IKE Identities and Authentication Hash are protected and sent encrypted only > no one can see it
 - `This makes it imposiible to Brute Force Authentication Hash`
 - All Phase 1 Main Mode packets must include IKE SPIs(Cookies)
 - No ESP/AH SPIs yet — Phase 2 Quick Mode creates those
-- `Nothing in the RFC forbids Main Mode + Initiator dynamic IP`
-- `Implementation-wise` it will not work
-- Main Mode + certs + dynamic IP = totally fine - so with certificates instead of PSK Main Mode works OK
-- `Main Mode with PSK will not work for RA VPNs or S2S VPNs with dynamic IP`
-- PSK is used to derive SKEYID > SKEYID is used to verify HASH_I / HASH_R > The responder must already know which PSK to use when it receives message 5 with ID and Auth Hash > And it knows it based on IP, which should be static
+- `Main mode + PSK will not work with dynamic IPs for S2S tunnels or RA VPN`
+- Why? IKE packet with authentication hash arrives in message 5 of Main mode, to verify this hash node needs to know which PSK to use in order to calculate the same hash, to choose PSK node may use ID or IP address, if IP address is dynamic - it is impossible to use it, and ID is encrypted - and in the same same message - then why we cannot just decrypt ID and use it?
+- Static IPs on both sides are required
 - To choose PSK Main Mode needs correct IP of Initiator
+- Main Mode + certs + dynamic IP = totally fine - so with certificates instead of PSK Main Mode works OK
 
 **Main mode in a Nutshell**
 
@@ -1275,7 +1280,7 @@ Responder logic:
 6. Accept peer
 ```
 
-#### 4.1.4 Aggressive Mode
+#### 4.1.2.2 Aggressive Mode
 
 - `3 messages instead of 6 in Main Mode`
 - Aggressive mode was created to reduce load on links and CPU
@@ -1284,9 +1289,6 @@ Responder logic:
 - ID is sent early, responder may `select PSK based on ID, not IP`
 - Several Initiators may work behind one IP and NAT
 - It is critical for remote-access VPNs
-- `Nothing in the RFC forbids Main Mode + dynamic IP`
-- `Implementation-wise` it will not work
-- Main Mode + certs + dynamic IP = totally fine - so with certificates instead of PSK Main Mode works OK
 - Most classic IKEv1 Remote Access VPNs used:
   - Aggressive Mode
   - PSK
@@ -1376,7 +1378,7 @@ Internet Key Exchange
 
 First message — The initiator proposes the security association (SA), initiates a DH exchange, and sends a pseudorandom number and its IKE identity. When configuring aggressive mode with multiple proposals for Phase 1 negotiations, use the same DH group in all proposals because the DH group cannot be negotiated. Up to four proposals can be configured. Message one contains everything that was in messages 1,3,5 in Main mode
 
-**Message 2: Responder > Initiator**  
+**Message 2: Responder > Initiator**
 
 It contains the same as messages 2,4,6 in Main mode
 
@@ -1559,7 +1561,7 @@ After PSK compromise, attacker can:
   - Credential harvesting
   - MFA fatigue (later setups)
 
-#### 4.1.5 Phase 2
+#### 4.1.3 Phase 2
 
 - There is only one mode - `quick` in Phase 2, `3 packets`
 - It’s called Quick Mode because IKEv1 Phase 2 is deliberately short, lightweight, and fast compared to Phase 1 — both in message count and in cryptographic work: no identity, no DH exchange, only 3 messages
