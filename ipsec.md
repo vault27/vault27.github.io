@@ -965,78 +965,77 @@ INBOUND:
 For Phase 1
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│            IKEv1 PHASE 1 (ISAKMP SA) CRYPTO SET              │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│ [ENCRYPTION (confidentiality)]                               │
-│                                                              │
-│  DES        → 56-bit key        (obsolete)                   │
-│  3DES       → 168-bit key       (3×56, effective ~112)       │
-│  AES-CBC    → 128 / 192 / 256-bit ← recommended              │
-│                                                              │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│ [INTEGRITY + PRF (combined in IKEv1)]                        │
-│                                                              │
-│  MD5        → 128-bit output    (obsolete)                   │
-│  SHA-1      → 160-bit output    (legacy)                     │
-│  SHA-256    → 256-bit output    ← recommended                │
-│  SHA-384    → 384-bit output                                 │
-│  SHA-512    → 512-bit output                                 │
-│                                                              │
-│  PRF = HMAC(hash)                                            │
-│  Example: SHA-256 → PRF = HMAC-SHA256                        │
-│                                                              │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│ [AUTHENTICATION METHODS]                                     │
-│                                                              │
-│  PSK        → Pre-Shared Key                                 │
-│  RSA-SIG    → Certificates (public key signatures)           │
-│  DSS-SIG    → DSA (legacy / rare)                            │
-│                                                              │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│ [DIFFIE–HELLMAN (KEY EXCHANGE)]                              │
-│                                                              │
-│  MODP (Finite Field DH):                                     │
-│    Group 1   → 768-bit     (obsolete)                        │
-│    Group 2   → 1024-bit    (obsolete)                        │
-│    Group 5   → 1536-bit    (legacy)                          │
-│    Group 14  → 2048-bit    ← baseline modern                 │
-│    Group 15  → 3072-bit                                      │
-│    Group 16  → 4096-bit                                      │
-│                                                              │
-│  ECDH (Elliptic Curve DH, limited in IKEv1):                 │
-│    Group 19  → 256-bit (P-256)                               │
-│    Group 20  → 384-bit (P-384)                               │
-│    Group 21  → 521-bit (P-521)                               │
-│                                                              │
-│  Ephemeral DH (DHE / ECDHE):                                 │
-│    ✔ New private/public values per session                   │
-│    ✔ Provides Forward Secrecy (PFS)                          │
-│    ✔ ALWAYS used in IKE Phase 1                              │
-│                                                              │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│ [KEY DERIVATION (implicit in IKEv1)]                         │
-│                                                              │
-│  Inputs:                                                     │
-│    DH shared secret (g^xy)                                   │
-│    + nonces (Ni, Nr = random values from both peers)         │
-│    + cookies (CKY-I, CKY-R = session identifiers)            │
-│    + PSK (if used)                                           │
-│                                                              │
-│  PRF (HMAC) used to derive:                                  │
-│    SKEYID                                                    │
-│    SKEYID_d  → keying material                               │
-│    SKEYID_a  → integrity                                     │
-│    SKEYID_e  → encryption                                    │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
-```
+--------------------------------------------------------------
+   IKEv1 PHASE 1 (ISAKMP SA) CRYPTO SET
+--------------------------------------------------------------
 
+ [ENCRYPTION (confidentiality)]
+
+   DES        → 56-bit key        (obsolete)
+   3DES       → 168-bit key       (3×56, effective ~112)
+   AES-CBC    → 128 / 192 / 256-bit ← recommended
+
+--------------------------------------------------------------
+
+ [INTEGRITY + PRF (combined in IKEv1)]
+
+   MD5        → 128-bit output    (obsolete)
+   SHA-1      → 160-bit output    (legacy)
+   SHA-256    → 256-bit output    ← recommended
+   SHA-384    → 384-bit output
+   SHA-512    → 512-bit output
+
+   PRF = HMAC(hash)
+   Example: SHA-256 → PRF = HMAC-SHA256
+
+--------------------------------------------------------------
+
+ [AUTHENTICATION METHODS]
+
+   PSK        → Pre-Shared Key
+   RSA-SIG    → Certificates (public key signatures)
+   DSS-SIG    → DSA (legacy / rare)
+
+--------------------------------------------------------------
+
+ [DIFFIE–HELLMAN (KEY EXCHANGE)]
+
+   MODP (Finite Field DH):
+     Group 1   → 768-bit     (obsolete)
+     Group 2   → 1024-bit    (obsolete)
+     Group 5   → 1536-bit    (legacy)
+     Group 14  → 2048-bit    ← baseline modern
+     Group 15  → 3072-bit
+     Group 16  → 4096-bit
+
+   ECDH (Elliptic Curve DH, limited in IKEv1):
+     Group 19  → 256-bit (P-256)
+     Group 20  → 384-bit (P-384)
+     Group 21  → 521-bit (P-521)
+
+   Ephemeral DH (DHE / ECDHE):
+     ✔ New private/public values per session
+     ✔ Provides Forward Secrecy (PFS)
+     ✔ ALWAYS used in IKE Phase 1
+
+--------------------------------------------------------------
+
+ [KEY DERIVATION (implicit in IKEv1)]
+
+   Inputs:
+     DH shared secret (g^xy)
+     + nonces (Ni, Nr = random values from both peers)
+     + cookies (CKY-I, CKY-R = session identifiers)
+     + PSK (if used)
+
+   PRF (HMAC) used to derive:
+     SKEYID
+     SKEYID_d  → keying material
+     SKEYID_a  → integrity
+     SKEYID_e  → encryption
+
+--------------------------------------------------------------
+```
 #### 4.1.1 Workflow
 
 - IKE Phase 1 — Establish a secure channel (IKE SA) - starts with UDP/500, may switch to UDP/4500
