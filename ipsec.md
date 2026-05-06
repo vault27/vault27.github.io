@@ -916,31 +916,126 @@ INBOUND:
 - g^xy is the Diffie-Hellman shared secret
 - KE is the key exchange payload which contains the public information exchanged in a Diffie-Hellman exchange: 
 
+**History**
+
 - IKEv1 was designed by the IETF IPsec work group in the mid-1990s and standardized in 1998 as RFC 2409
 - First appeared in Research & open-source Unix IPsec stacks, then in Cisco IOS, Checkpoint, Juniper
-- IKE v1 goals:
-    - Authenticate peers
-    - Negotiate cryptographic parameters
-    - Establish shared secret keys
-    - Create and manage IPsec Security Associations (SAs) + IKE SA
-    - Provide Perfect Forward Secrecy (PFS)
-    - Detect peer liveness
-    - Provides identity protection (in main mode)
+- IKEv1 was developed, combining ideas from three earlier protocols:
+    - ISAKMP – framework for messages and SA management, how packets are formatted (headers, payload types), a generic state machine for SA negotiation, but not how keys are exchanged
+    - Oakley – Diffie-Hellman key exchange and math, key derivation techniques, DH groups
+    - SKEME – identity protection, rekeying, multiple SAs, negotiate algorithms, separation of key exchange from authentication, multiple authentication styles
+
+**IKEv1 goals**
+
+- Authenticate peers
+- Negotiate cryptographic parameters
+- Establish shared secret keys
+- Create and manage IPsec Security Associations (SAs) + IKE SA
+- Provide Perfect Forward Secrecy (PFS)
+- Detect peer liveness
+- Provides identity protection (in main mode)
+- Provide NAT-T support
+- Provide  X-AUTH support
+
+**Communications**
+
 - IKE v1 uses UDP port 500 or UDP port 4500 in case of NAT-T technology
+- There is IKE traffic, when everything is established and data flows normally - keepalives via port UDP/500, if NAT-T is enabled then UDP/4500 is used
+
+**Phases and modes**
+
 - IKEv1 uses two phases to authenticate peers `once` and securely negotiate traffic protection many times
 - Phase 1 — Build a secure control channel
 - Phase 2 - Negotiate parametres for Data traffic encryption via secure Control Channel
 - Phase 1 can work in 2 modes: main and aggressive
     - 9 messages in total if main mode is used in Phase 1
     - 6 messages in total if aggressive mode is used in Phase 1
-- IKEv1 was developed, combining ideas from three earlier protocols:
-    - ISAKMP – framework for messages and SA management, how packets are formatted (headers, payload types), a generic state machine for SA negotiation, but not how keys are exchanged
-    - Oakley – Diffie-Hellman key exchange and math, key derivation techniques, DH groups
-    - SKEME – identity protection, rekeying, multiple SAs, negotiate algorithms, separation of key exchange from authentication, multiple authentication styles
-- There is IKE traffic, when everything is established and data flows normally - keepalives via port UDP/500, if NAT-T is enabled then UDP/4500 is used
+
+**Initiator and responder**
+
 - In the IPsec/IKE world, the “initiator” is the peer that first sends an IKE packet to start the negotiation
-- The responder replies. This role is independent of who sends actual data over ESP later
+- The responder replies. This role is independent of who sends actual data over data channel later
+
+**Perfect forward secrecy**
+
 - PFS in IKEv1 = `Perform a new DH exchange during Phase 2`. It does not mean “ephemeral DH” in the modern TLS sense
+
+**Supported crypto algorithms**
+
+For Phase 1
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│            IKEv1 PHASE 1 (ISAKMP SA) CRYPTO SET              │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│ [ENCRYPTION (confidentiality)]                               │
+│                                                              │
+│  DES        → 56-bit key        (obsolete)                   │
+│  3DES       → 168-bit key       (3×56, effective ~112)       │
+│  AES-CBC    → 128 / 192 / 256-bit ← recommended              │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│ [INTEGRITY + PRF (combined in IKEv1)]                        │
+│                                                              │
+│  MD5        → 128-bit output    (obsolete)                   │
+│  SHA-1      → 160-bit output    (legacy)                     │
+│  SHA-256    → 256-bit output    ← recommended                │
+│  SHA-384    → 384-bit output                                 │
+│  SHA-512    → 512-bit output                                 │
+│                                                              │
+│  PRF = HMAC(hash)                                            │
+│  Example: SHA-256 → PRF = HMAC-SHA256                        │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│ [AUTHENTICATION METHODS]                                     │
+│                                                              │
+│  PSK        → Pre-Shared Key                                 │
+│  RSA-SIG    → Certificates (public key signatures)           │
+│  DSS-SIG    → DSA (legacy / rare)                            │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│ [DIFFIE–HELLMAN (KEY EXCHANGE)]                              │
+│                                                              │
+│  MODP (Finite Field DH):                                     │
+│    Group 1   → 768-bit     (obsolete)                        │
+│    Group 2   → 1024-bit    (obsolete)                        │
+│    Group 5   → 1536-bit    (legacy)                          │
+│    Group 14  → 2048-bit    ← baseline modern                 │
+│    Group 15  → 3072-bit                                      │
+│    Group 16  → 4096-bit                                      │
+│                                                              │
+│  ECDH (Elliptic Curve DH, limited in IKEv1):                 │
+│    Group 19  → 256-bit (P-256)                               │
+│    Group 20  → 384-bit (P-384)                               │
+│    Group 21  → 521-bit (P-521)                               │
+│                                                              │
+│  Ephemeral DH (DHE / ECDHE):                                 │
+│    ✔ New private/public values per session                   │
+│    ✔ Provides Forward Secrecy (PFS)                          │
+│    ✔ ALWAYS used in IKE Phase 1                              │
+│                                                              │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│ [KEY DERIVATION (implicit in IKEv1)]                         │
+│                                                              │
+│  Inputs:                                                     │
+│    DH shared secret (g^xy)                                   │
+│    + nonces (Ni, Nr = random values from both peers)         │
+│    + cookies (CKY-I, CKY-R = session identifiers)            │
+│    + PSK (if used)                                           │
+│                                                              │
+│  PRF (HMAC) used to derive:                                  │
+│    SKEYID                                                    │
+│    SKEYID_d  → keying material                               │
+│    SKEYID_a  → integrity                                     │
+│    SKEYID_e  → encryption                                    │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
 
 #### 4.1.1 Workflow
 
@@ -1006,6 +1101,13 @@ To easy remember this we can use first letters of these parametres: `HAGEL`
 - Static IPs on both sides are required
 - To choose PSK Main Mode needs correct IP of Initiator
 - Main Mode + certs + dynamic IP = totally fine - so with certificates instead of PSK Main Mode works OK
+
+**High level stages**
+
+- Negotiate SA parametres: messages 1 and 2
+- Exchange keys with Diffie-Hellman and get Shared Secret
+- Based on Shared Secret derive Shared Keys for Encryption, Authentication, Integrity
+- Exchange IDs and authentication hash
 
 **Main mode in a Nutshell**
 
