@@ -1036,6 +1036,67 @@ For Phase 1
 
 --------------------------------------------------------------
 ```
+
+For phase 2
+
+```
+--------------------------------------------------------------
+   IKEv1 PHASE 2 (QUICK MODE / IPSEC SA) CRYPTO SET
+--------------------------------------------------------------
+
+ [ENCRYPTION (ESP only)]
+
+   DES        → 56-bit key        (obsolete)
+   3DES       → 168-bit key       (legacy)
+   AES-CBC    → 128 / 192 / 256-bit ← recommended
+
+--------------------------------------------------------------
+
+ [INTEGRITY / AUTHENTICATION]
+
+   (for ESP without AEAD and for AH)
+
+   MD5        → 128-bit output    (obsolete)
+   SHA-1      → 160-bit output    (legacy)
+   SHA-256    → 256-bit output    ← recommended
+   SHA-384    → 384-bit output
+   SHA-512    → 512-bit output
+
+--------------------------------------------------------------
+
+ [PFS (PERFECT FORWARD SECRECY)]
+
+   Optional in Phase 2
+
+   If enabled:
+     → new DH exchange performed
+     → new shared secret per CHILD SA
+
+   Uses same DH groups as Phase 1:
+     Group 14 → 2048-bit (recommended baseline)
+     Group 19 → ECP 256
+     etc.
+
+   If NOT enabled:
+     → keys derived from Phase 1 only
+
+--------------------------------------------------------------
+
+ [KEY DERIVATION]
+
+   Inputs:
+     Phase 1 keying material (SKEYID_d)
+     + nonces (Ni, Nr = new random values for Phase 2)
+     + SPI values (Security Parameter Index)
+     + PFS DH shared secret (if enabled)
+
+   PRF (HMAC) used to derive:
+     encryption keys
+     integrity keys
+     inbound / outbound SA keys
+
+--------------------------------------------------------------
+```
 #### 4.1.1 Workflow
 
 - IKE Phase 1 — Establish a secure channel (IKE SA) - starts with UDP/500, may switch to UDP/4500
