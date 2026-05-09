@@ -11,3 +11,6 @@ kramdown:
     css_class: highlight
     block:
       line_numbers: false
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
