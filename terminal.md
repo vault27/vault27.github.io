@@ -13,6 +13,17 @@
 - Manifold Extended CF - from Severance
 - Input Sans - from Severance
 
+Fallout
+
+- Gothic 821 Condensed
+- JH Fallout - dialogs
+- Futura - inventory
+- Brush Script - logo of Pip boy
+- Gill Sans Extra Condensed Bold - perk names
+- Microgramma - Skill index
+- Univers 59 Condensed - Fallout Logo
+- OCR-A 
+
 ## Color Schemes
 
 (simulating old cathode-ray tube monitors).
@@ -63,6 +74,29 @@ Early CRT limitations:
 
 👉 monochrome colors were actually better
 
+## Color in Severance
+
+- White
+- Light blue - #4CB4E7
+- Blue - #235BA8
+- White and blue on light blue background
+- White and light blue on blue background
+
+## Color in Fallout
+
+- Pip-Boy Green: #00ff00
+- Wasteland Brown: #8b4513
+- Steel Grey: #808080
+- Nuka Cola Red: #ff0000
+- Rad-X Yellow: #ffff00
+- Mutant Purple: #800080 
+- Classic Pip-Boy Green (Text & Lines): #1BFF80 
+- Classic Amber/Gold (Highlights & Toggle): #FFB641 or #FFE242
+- Alternate Pip-Boy Blue: #2ECFFF
+- Vault Blue: #003399 or #325886
+- Vault Yellow / Gold: #FFFF00 or #FEF265
+- Base Red (Idle Button): #A52A2A or #9C1010
+
 ## Neovim as markdown editor
 
 - Copy text to system clipboard: press 3 keys one by one: "+y
@@ -71,7 +105,7 @@ Early CRT limitations:
 ## Midnight Commander
 
 - Configure file assosiations the same as in finder
-- `/Users/Philipp.Philippov/.config/mc`
+- `/Users/User/.config/mc`
 - Delete eveything
 - Add the following:
 
