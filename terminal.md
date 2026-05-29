@@ -105,13 +105,22 @@ Early CRT limitations:
 ## Midnight Commander
 
 - Configure file assosiations the same as in finder
-- `/Users/User/.config/mc`
+- But open md files in neovim
+- `/Users/User/.config/mc/mc.ext.ini`
 - Delete eveything
 - Add the following:
 
 ```
+[mc.ext.ini]
+Version=4.0
+
+[markdown]
+Regex=\\.(md|markdown)$
+Open=nvim %f
+
 [Default]
 Open=(open %f &)
+
 ```
 
 ## Launch neovim from midnight commander on Mac OS
