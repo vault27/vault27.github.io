@@ -1,5 +1,25 @@
 # Terminal
 
+## Editor requirements
+
+- Markdown outline support as a side bar
+- Markdown highlight
+- Themes
+- Transparent
+- Markdown TOC generation
+- Mouse support
+- Clipboard support
+- Terminal based
+
+## Terminal requirements
+
+- Transparency
+- Themes
+- Tabs
+- Background control - image, color, gradient
+- Fonts control
+- Font color control
+
 ## Terminal fonts
 
 - Glass TTY VT220
@@ -12,6 +32,9 @@
 - Fira Code
 - Manifold Extended CF - from Severance
 - Input Sans - from Severance
+- Source Code Pro 
+- JetBrains Mono
+- IBM Plex Mono
 
 Fallout
 
