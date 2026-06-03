@@ -185,6 +185,13 @@ require("lazy").setup({
 
       -- Открыть outline через Space + o
       vim.keymap.set("n", "<leader>o", "<cmd>Outline<CR>")
+
+      vim.api.nvim_create_autocmd("FileType", {
+      pattern = { "markdown" },
+      callback = function()
+        vim.cmd("OutlineOpen")
+	end,
+})
     end,
   },
 })
