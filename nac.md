@@ -1,5 +1,42 @@
 # NAC
 
+## What is NAC?
+
+- Crucial question: Who or what is attempting to connect, and what level of network access should they be granted?
+- Old principle: trust everyone inside, and distrust everyone outside
+- Modern zero trust security model: Never trust, always verify. A zero-trust approach considers all resources to be external
+- NAC should ontinuously verify trust even after initial access is granted
+- As the networks have become far more interconnected, with clouds and remote hybrid work, the notion of a single network perimeter or control point no longer exists
+
+NAC controls all types of access to network:
+    - Wired
+    - Wireless
+    - VPN
+- Criteria set
+    - Who: employee, guest, contractor - different roles and levels of access
+    - What: device are they using (corporate laptop, personal smartphone, and so on)
+    - Where: are they located (office, home, hotel, and so on)
+    - When
+    - How: Wired, Wireless, VPN
+
+```
+User or device tries to connect
+NAC collects context: wo, what, where, when, how)
+Policy evaluates situation
+Access is granted, limited, or restricted
+Context and results are shared with other tools
+```
+
+- Cisco ACS lacked awareness of device health or posture
+
+NAC should control access from:
+
+- Internal wired and wireless devices
+- Cloud services - to them
+- IoT systems
+- VPNs
+- Personal devices
+
 ## Certificate renewal
 
 - Certs are used in: Radius for EAP methods where SSL is used, Radius DTLS, Admin SSL Gui

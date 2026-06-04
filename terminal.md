@@ -19,22 +19,34 @@
 - Background control - image, color, gradient
 - Fonts control
 - Font color control
+- GUI
+
+## Font types
+
+- Sans serif translates from French to mean "without serif". Serifs are the small decorative lines or "feet" at the ends of the strokes in letters. Therefore, a sans serif font has clean, straight-edged ends
+- Serif: The opposite of sans serif. These are the classic, traditional fonts with little decorative "tails" or flares at the end of each stroke (like Times New Roman or Garamond)
+- TrueType (commonly seen as the .ttf file extension) is a digital font standard developed by Apple and Microsoft in the late 1980s. It was a massive breakthrough because it allowed a single font file to handle both how letters look on your screen and how they look when printed, all while being perfectly scalable to any size without becoming blurry or pixelated
+- Not all fonts support Cyrillic. In fact, the vast majority of fonts created by Western designers only include the Latin alphabet
 
 ## Terminal fonts
 
 - Glass TTY VT220
-- VT323
+- VT323 - cyrilic support
 - IBM VGA 8x16 / 9x16
 - Fixedsys Excelsior
 - IBM Plex Mono
 - White Rabbit
-- Terminus
-- Fira Code
-- Manifold Extended CF - from Severance
+- Terminus - cyrilic support
+- Fira Code - cyrillic support
+- Manifold Extended CF - from Severance - commercial - cyrilic support
 - Input Sans - from Severance
 - Source Code Pro 
-- JetBrains Mono
-- IBM Plex Mono
+- JetBrains Mono - cyrilic support
+- IBM Plex Mono - cyrilic support
+- Courier New - cyrilic support
+- Archive Matrix - commercial - cyrilic support
+- PT Mono - cyrilic support
+- GOST type A and type B - cyrilic support
 
 Fallout
 

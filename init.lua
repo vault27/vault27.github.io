@@ -32,7 +32,7 @@ vim.cmd([[
   " ============================================================
   " Base UI
   " ============================================================
-  highlight Normal        guifg=#7ee787 guibg=#081008
+  highlight Normal        guifg=#00ffb2 guibg=#081008
   highlight NormalNC      guifg=#6fdc78 guibg=#081008
   highlight EndOfBuffer   guifg=#081008 guibg=#081008
   highlight SignColumn    guibg=#081008
