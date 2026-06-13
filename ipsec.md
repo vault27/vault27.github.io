@@ -1,7 +1,5 @@
 # IPSec<!-- omit in toc -->
 
-3 Key management protocols
-
 ## Table of contents<!-- omit in toc -->
 
 <!-- mtoc-start -->
@@ -136,8 +134,7 @@ IKE  → Key Management / Control Plane
 │   ├── Xauth (IKEv1)
 │   └── EAP (IKEv2)
 │
-│── Transport
-│   ├── UDP 500       (IKE)
+│── │   ├── UDP 500       (IKE)
 │   └── UDP 4500      (IKE NAT-T)
 │
 ──────────────────────────────────────────────
@@ -914,7 +911,7 @@ INBOUND:
 
 - g^xi and g^xr are the Diffie-Hellman ([DH]) public values of the initiator and responder respectively
 - g^xy is the Diffie-Hellman shared secret
-- KE is the key exchange payload which contains the public information exchanged in a Diffie-Hellman exchange: 
+- KE is the key exchange payload which contains the public information exchanged in a Diffie-Hellman exchange
 
 **History**
 
@@ -922,7 +919,7 @@ INBOUND:
 - First appeared in Research & open-source Unix IPsec stacks, then in Cisco IOS, Checkpoint, Juniper
 - IKEv1 was developed, combining ideas from three earlier protocols:
     - ISAKMP – framework for messages and SA management, how packets are formatted (headers, payload types), a generic state machine for SA negotiation, but not how keys are exchanged
-    - Oakley – Diffie-Hellman key exchange and math, key derivation techniques, DH groups
+    - Oakley – Diffie-Hellman key exchange and math, `key derivation techniques`, DH groups
     - SKEME – identity protection, rekeying, multiple SAs, negotiate algorithms, separation of key exchange from authentication, multiple authentication styles
 
 **IKEv1 goals**
@@ -3305,8 +3302,8 @@ Outer IP | AH Header | Inner IP | TCP/UDP | Data
 - L2TP provides encapsulation of PPP to UDP
 - L2TP over IPsec was built into the native Windows VPN client for many years
 - So you had two layers of authentication:
-- Machine-level (IPsec)
-- User-level (PPP)
+    - Machine-level (IPsec)
+    - User-level (PPP)
 - It worked with Active Directory
 - It worked with RADIUS
 - It required no client install
