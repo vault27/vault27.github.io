@@ -20,6 +20,8 @@ vim.opt.guicursor = "n-v-c-i:block-Cursor-blinkwait175-blinkoff150-blinkon175"
 -- :block - block
 vim.api.nvim_set_hl(0, 'Cursor', { fg = '#000000', bg = '#00FF00' })
 
+-- Enbale syntax highlight
+vim.cmd("syntax enable")
 
 -- Vault27 Markdown Theme
 -- Warm retro terminal style for Markdown-heavy work
@@ -129,30 +131,11 @@ vim.cmd([[
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 vim.opt.rtp:prepend(lazypath)
 
+
+----------------------Lazy plugins------------------------
 require("lazy").setup({
+
   {
-  "folke/tokyonight.nvim",
-  config = function()
-    require("tokyonight").setup({
-      transparent = true
-    })
-    end,
-  },
-
-{
-    "scottmckendry/cyberdream.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-        require("cyberdream").setup({
-            -- Optional configuration options here
-            transparent = true,
-            italic_comments = true,
-        })
-    end,
-},
-
-{
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
@@ -171,49 +154,52 @@ require("lazy").setup({
     end,
   },
 
-  { 
-  "xiyaowong/transparent.nvim", 
-  lazy = false,
-  config = function()
-    require("transparent").setup()
-  end,
+  {
+    "xiyaowong/transparent.nvim",
+    lazy = false,
+    config = function()
+      require("transparent").setup()
+    end,
   },
-  -- Table of contents generateor, command :Mtoc will generate TOC, it will be updated after each save
+
+  -- Table of contents generator
+  -- :Mtoc will generate TOC and update it on save
   {
     "hedyhli/markdown-toc.nvim",
-    ft = "markdown", -- Use only for markdown files
+    ft = "markdown",
     opts = {
-      -- Options (We can leave blank {})
-      unidiff = false, -- Show changes in separate window (false = in file)
-      cycle_max_level = 6, -- Level to scan (till the end by default)
+      unidiff = false,
+      cycle_max_level = 6,
     },
   },
 
-  {
-    -- Treesitter для современной подсветки синтаксиса
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
-  },
-
-  {
+{
     -- Sidebar outline
     "hedyhli/outline.nvim",
     config = function()
-      -- Инициализация outlin
-      require("outline").setup()
+      require("outline").setup({
+        keymaps = {
+          -- Делаем разделы кликабельными (левая кнопка мыши совершает переход)
+          goto_location = { "<CR>", "<LeftMouse>" },
+        },
+      })
 
-      -- Открыть outline через Space + o
+      -- Open outline with Space + o
       vim.keymap.set("n", "<leader>o", "<cmd>Outline<CR>")
 
       vim.api.nvim_create_autocmd("FileType", {
-      pattern = { "markdown" },
-      callback = function()
-        vim.cmd("OutlineOpen")
-	end,
-})
+        pattern = { "markdown" },
+        callback = function()
+          vim.cmd("OutlineOpen")
+        end,
+      })
     end,
   },
+
+
 })
+
+-----------------------------------------------------------
 
 -- OPTIONS
 --

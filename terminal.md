@@ -31,6 +31,7 @@
 ## Terminal fonts
 
 - Glass TTY VT220
+- IBM 3270 - Cyrillic support
 - VT323 - cyrilic support
 - IBM VGA 8x16 / 9x16
 - Fixedsys Excelsior
